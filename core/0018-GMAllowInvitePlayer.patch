@@ -1,0 +1,107 @@
+From 4bbb5f2535702e2dd4fec226e89db408c2a131bd Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Tue, 25 Oct 2011 23:54:13 +0200
+Subject: [PATCH] GMAllowInvitePlayer
+
+---
+ src/server/game/Chat/Commands/Level1.cpp           |    6 +++---
+ .../game/Server/Protocol/Handlers/GroupHandler.cpp |   10 +++++++++-
+ src/server/game/World/World.cpp                    |    1 +
+ src/server/game/World/World.h                      |    1 +
+ src/server/worldserver/worldserver.conf.dist       |    8 ++++++++
+ 5 files changed, 22 insertions(+), 4 deletions(-)
+
+diff --git a/src/server/game/Chat/Commands/Level1.cpp b/src/server/game/Chat/Commands/Level1.cpp
+index c737e2b..6914a16 100755
+--- a/src/server/game/Chat/Commands/Level1.cpp
++++ b/src/server/game/Chat/Commands/Level1.cpp
+@@ -177,7 +177,7 @@ bool ChatHandler::HandleSummonCommand(const char* args)
+         }
+         else if (map->IsDungeon())
+         {
+-            Map* cMap = target->GetMap();
++            /*Map* cMap = target->GetMap();
+ 
+             if (cMap->Instanceable() && cMap->GetInstanceId() != map->GetInstanceId())
+                 target->UnbindInstance(map->GetInstanceId(), target->GetDungeonDifficulty(), true);
+@@ -187,11 +187,11 @@ bool ChatHandler::HandleSummonCommand(const char* args)
+                 (target->GetGroup()->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) ||
+                 (m_session->GetPlayer()->GetGroup()->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()))
+                 // the last check is a bit excessive, but let it be, just in case
+-            {
++            {*/
+                 PSendSysMessage(LANG_CANNOT_SUMMON_TO_INST, nameLink.c_str());
+                 SetSentErrorMessage(true);
+                 return false;
+-            }
++            //}
+         }
+ 
+         PSendSysMessage(LANG_SUMMONING, nameLink.c_str(), "");
+diff --git a/src/server/game/Server/Protocol/Handlers/GroupHandler.cpp b/src/server/game/Server/Protocol/Handlers/GroupHandler.cpp
+index 404a949..4469aab 100755
+--- a/src/server/game/Server/Protocol/Handlers/GroupHandler.cpp
++++ b/src/server/game/Server/Protocol/Handlers/GroupHandler.cpp
+@@ -83,7 +83,15 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
+     }
+ 
+     // restrict invite to GMs
+-    if (!sWorld->getBoolConfig(CONFIG_ALLOW_GM_GROUP) && !GetPlayer()->isGameMaster() && player->isGameMaster())
++    // Esto deberia estar programado como AccountMgr::IsGMAccount(player->GetSession()->GetSecurity()) 
++    // pero para eso habria que hacer #include AccountMgr.h y no se que consecuencias de desoptimizacion puede tener.
++    if (!sWorld->getBoolConfig(CONFIG_ALLOW_GM_GROUP) && !GetPlayer()->isGameMaster() && player->GetSession()->GetSecurity() > 0) 
++        return;
++
++    // Restrict gm invite players
++    // Esto deberia estar programado como AccountMgr::IsGMAccount(GetPlayer()->GetSession()->GetSecurity()) 
++    // pero para eso habria que hacer #include AccountMgr.h y no se que consecuencias de desoptimizacion puede tener.
++    if (!sWorld->getBoolConfig(CONFIG_ALLOW_GM_INVITE_PLAYER) && GetPlayer()->GetSession()->GetSecurity() > 0 && !player->isGameMaster())
+         return;
+ 
+     // can't group with
+diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
+index 28657fa..439191e 100755
+--- a/src/server/game/World/World.cpp
++++ b/src/server/game/World/World.cpp
+@@ -870,6 +870,7 @@ void World::LoadConfigSettings(bool reload)
+         m_int_configs[CONFIG_START_GM_LEVEL] = MAX_LEVEL;
+     }
+     m_bool_configs[CONFIG_ALLOW_GM_GROUP]       = ConfigMgr::GetBoolDefault("GM.AllowInvite", false);
++    m_bool_configs[CONFIG_ALLOW_GM_INVITE_PLAYER]  = ConfigMgr::GetBoolDefault("GM.AllowInvitePlayer", false);
+     m_bool_configs[CONFIG_ALLOW_GM_FRIEND]      = ConfigMgr::GetBoolDefault("GM.AllowFriend", false);
+     m_bool_configs[CONFIG_GM_LOWER_SECURITY] = ConfigMgr::GetBoolDefault("GM.LowerSecurity", false);
+     m_float_configs[CONFIG_CHANCE_OF_GM_SURVEY] = ConfigMgr::GetFloatDefault("GM.TicketSystem.ChanceOfGMSurvey", 50.0f);
+diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
+index 06dc006..9c645e8 100755
+--- a/src/server/game/World/World.h
++++ b/src/server/game/World/World.h
+@@ -106,6 +106,7 @@ enum WorldBoolConfigs
+     CONFIG_CAST_UNSTUCK,
+     CONFIG_GM_LOG_TRADE,
+     CONFIG_ALLOW_GM_GROUP,
++    CONFIG_ALLOW_GM_INVITE_PLAYER,
+     CONFIG_ALLOW_GM_FRIEND,
+     CONFIG_GM_LOWER_SECURITY,
+     CONFIG_SKILL_PROSPECTING,
+diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
+index a8c0d91..69305ea 100644
+--- a/src/server/worldserver/worldserver.conf.dist
++++ b/src/server/worldserver/worldserver.conf.dist
+@@ -1885,6 +1885,14 @@ GM.StartLevel = 1
+ GM.AllowInvite = 0
+ 
+ #
++#    GM.AllowInvitePlayer
++#        Description: Allow GMs to invite player characters.
++#        Default:     0 - (Disabled)
++#                     1 - (Enabled)
++
++GM.AllowInvitePlayer = 0
++
++#
+ #    GM.AllowFriend
+ #        Description: Allow players to add GM characters to their friends list.
+ #        Default:     0 - (Disabled)
+-- 
+1.7.5.4
+

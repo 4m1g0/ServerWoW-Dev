@@ -1,0 +1,255 @@
+From 2fc0a942e7dc81481b4bffe4c23585f6e3deecee Mon Sep 17 00:00:00 2001
+From: tuamigo <tuamigo@tuamigo-System-Product-Name.(none)>
+Date: Tue, 20 Sep 2011 06:09:17 +0200
+Subject: [PATCH] MuteLog
+
+---
+ sql/own/auth_mutehistory.sql                       |   12 +++++
+ sql/own/world_mutehistory.sql                      |    3 +
+ src/server/authserver/Server/AuthSocket.cpp        |    2 +
+ src/server/game/Chat/Commands/Level2.cpp           |    5 ++
+ src/server/game/Chat/Commands/Level3.cpp           |   49 ++++++++++++++------
+ src/server/game/Miscellaneous/Language.h           |    3 +
+ src/server/game/World/World.cpp                    |   30 ++++++++++++-
+ src/server/game/World/World.h                      |    2 +
+ .../Database/Implementation/LoginDatabase.cpp      |    3 +
+ .../shared/Database/Implementation/LoginDatabase.h |    3 +
+ 10 files changed, 96 insertions(+), 16 deletions(-)
+ create mode 100644 sql/own/auth_mutehistory.sql
+ create mode 100644 sql/own/world_mutehistory.sql
+
+diff --git a/sql/own/auth_mutehistory.sql b/sql/own/auth_mutehistory.sql
+new file mode 100644
+index 0000000..d787be5
+--- /dev/null
++++ b/sql/own/auth_mutehistory.sql
+@@ -0,0 +1,12 @@
++DROP TABLE IF EXISTS `account_muted`;
++
++CREATE TABLE `account_muted` (
++  `id` int(11) NOT NULL DEFAULT '0' COMMENT 'Account id',
++  `mutedate` bigint(40) NOT NULL DEFAULT '0',
++  `unmutedate` bigint(40) NOT NULL DEFAULT '0',
++  `mutedby` varchar(50) NOT NULL,
++  `mutereason` varchar(255) NOT NULL,
++  `active` tinyint(4) NOT NULL DEFAULT '1',
++  PRIMARY KEY (`id`,`mutedate`)
++) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Mute List';
++
+diff --git a/sql/own/world_mutehistory.sql b/sql/own/world_mutehistory.sql
+new file mode 100644
+index 0000000..3e3d720
+--- /dev/null
++++ b/sql/own/world_mutehistory.sql
+@@ -0,0 +1,3 @@
++INSERT INTO trinity_string (entry, content_default, content_loc6) VALUES(90001, 'Account %s has never been muted', 'La cuenta %s nunca ha sido muteada');
++INSERT INTO trinity_string (entry, content_default, content_loc6) VALUES(90002, 'Mute history for account %s:', 'Historial de mute para la cuenta %s:');
++INSERT INTO trinity_string (entry, content_default, content_loc6) VALUES(90003, 'Mute Date: %s Mutetime: %s Still active: %s  Reason: %s Set by: %s', 'Fecha de muteo: %s Tiempo: %s AÃºn activo: %s  Motivo: %s Puesto por: %s');
+diff --git a/src/server/authserver/Server/AuthSocket.cpp b/src/server/authserver/Server/AuthSocket.cpp
+index bffe406..3b13674 100755
+--- a/src/server/authserver/Server/AuthSocket.cpp
++++ b/src/server/authserver/Server/AuthSocket.cpp
+@@ -393,6 +393,8 @@ bool AuthSocket::_HandleLogonChallenge()
+             {
+                 //set expired bans to inactive
+                 LoginDatabase.Execute(LoginDatabase.GetPreparedStatement(LOGIN_SET_EXPIREDACCBANS));
++                //set expired mutes to inactive
++                LoginDatabase.Execute(LoginDatabase.GetPreparedStatement(LOGIN_SET_EXPIREDACCMUTES));
+ 
+                 // If the account is banned, reject the logon attempt
+                 stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_ACCBANNED);
+diff --git a/src/server/game/Chat/Commands/Level2.cpp b/src/server/game/Chat/Commands/Level2.cpp
+index fa2d020..27003d2 100755
+--- a/src/server/game/Chat/Commands/Level2.cpp
++++ b/src/server/game/Chat/Commands/Level2.cpp
+@@ -76,6 +76,8 @@ bool ChatHandler::HandleMuteCommand(const char* args)
+     if (HasLowerSecurity (target, target_guid, true))
+         return false;
+ 
++    sWorld->MuteAccount(account_id, notspeaktime*60, mutereasonstr.c_str(), m_session ? m_session->GetPlayerName() : "");
++
+     if (target)
+     {
+         //! Target is online, mute will be in effect right away.
+@@ -132,6 +134,9 @@ bool ChatHandler::HandleUnmuteCommand(const char* args)
+ 
+     LoginDatabase.PExecute("UPDATE account SET mutetime = '0' WHERE id = '%u'", account_id);
+ 
++
++    sWorld->RemoveMuteAccount(account_id);
++
+     if (target)
+         ChatHandler(target).PSendSysMessage(LANG_YOUR_CHAT_ENABLED);
+ 
+diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
+index 7e62890..b0e8bd0 100755
+--- a/src/server/game/Chat/Commands/Level3.cpp
++++ b/src/server/game/Chat/Commands/Level3.cpp
+@@ -3131,26 +3131,45 @@ bool ChatHandler::HandleBanInfoCharacterCommand(const char *args)
+ bool ChatHandler::HandleBanInfoHelper(uint32 accountid, char const* accountname)
+ {
+     QueryResult result = LoginDatabase.PQuery("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '%u' ORDER BY bandate ASC", accountid);
+-    if (!result)
++    if (result)
+     {
+-        PSendSysMessage(LANG_BANINFO_NOACCOUNTBAN, accountname);
+-        return true;
++        PSendSysMessage(LANG_BANINFO_BANHISTORY, accountname);
++        do
++        {
++            Field* fields = result->Fetch();
++
++            time_t unbandate = time_t(fields[3].GetUInt64());
++            bool active = false;
++            if (fields[2].GetBool() && (fields[1].GetUInt64() == (uint64)0 ||unbandate >= time(NULL)))
++                active = true;
++            bool permanent = (fields[1].GetUInt64() == (uint64)0);
++            std::string bantime = permanent ? GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[1].GetUInt64(), true);
++            PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
++                fields[0].GetCString(), bantime.c_str(), active ? GetTrinityString(LANG_BANINFO_YES) : GetTrinityString(LANG_BANINFO_NO), fields[4].GetCString(), fields[5].GetCString());
++        } while (result->NextRow());
+     }
++    else
++        PSendSysMessage(LANG_BANINFO_NOACCOUNTBAN, accountname);
+ 
+-    PSendSysMessage(LANG_BANINFO_BANHISTORY, accountname);
+-    do
++    QueryResult result2 = LoginDatabase.PQuery("SELECT FROM_UNIXTIME(mutedate), unmutedate-mutedate, active, unmutedate, mutereason, mutedby FROM account_muted WHERE id = '%u' ORDER BY mutedate ASC", accountid);
++    if (result2)
+     {
+-        Field* fields = result->Fetch();
++        PSendSysMessage(LANG_BANINFO_MUTEHISTORY, accountname);
++        do
++        {
++            Field* fields = result2->Fetch();
+ 
+-        time_t unbandate = time_t(fields[3].GetUInt64());
+-        bool active = false;
+-        if (fields[2].GetBool() && (fields[1].GetUInt64() == (uint64)0 ||unbandate >= time(NULL)))
+-            active = true;
+-        bool permanent = (fields[1].GetUInt64() == (uint64)0);
+-        std::string bantime = permanent ? GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[1].GetUInt64(), true);
+-        PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
+-            fields[0].GetCString(), bantime.c_str(), active ? GetTrinityString(LANG_BANINFO_YES) : GetTrinityString(LANG_BANINFO_NO), fields[4].GetCString(), fields[5].GetCString());
+-    } while (result->NextRow());
++            time_t unmutedate = time_t(fields[3].GetUInt64());
++            bool active = false;
++            if (fields[2].GetBool() && (fields[1].GetUInt64() == (uint64)0 ||unmutedate >= time(NULL)))
++                active = true;
++            std::string mutetime = secsToTimeString(fields[1].GetUInt64(), true);
++            PSendSysMessage(LANG_BANINFO_MUTEHISTORYENTRY,
++                fields[0].GetCString(), mutetime.c_str(), active ? GetTrinityString(LANG_BANINFO_YES) : GetTrinityString(LANG_BANINFO_NO), fields[4].GetCString(), fields[5].GetCString());
++        } while (result2->NextRow());
++    }
++    else
++        PSendSysMessage(LANG_BANINFO_NOACCOUNTMUTE, accountname);
+ 
+     return true;
+ }
+diff --git a/src/server/game/Miscellaneous/Language.h b/src/server/game/Miscellaneous/Language.h
+index e376812..d6aad42 100755
+--- a/src/server/game/Miscellaneous/Language.h
++++ b/src/server/game/Miscellaneous/Language.h
+@@ -363,6 +363,9 @@ enum TrinityStrings
+     LANG_BANINFO_NOACCOUNTBAN           = 416,
+     LANG_BANINFO_BANHISTORY             = 417,
+     LANG_BANINFO_HISTORYENTRY           = 418,
++    LANG_BANINFO_NOACCOUNTMUTE          = 90001, //custom
++    LANG_BANINFO_MUTEHISTORY            = 90002,
++    LANG_BANINFO_MUTEHISTORYENTRY       = 90003,
+     LANG_BANINFO_INFINITE               = 419,
+     LANG_BANINFO_NEVER                  = 420,
+     LANG_BANINFO_YES                    = 421,
+diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
+index 3814820..238ca5e 100755
+--- a/src/server/game/World/World.cpp
++++ b/src/server/game/World/World.cpp
+@@ -2293,10 +2293,11 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
+ 
+         if (mode != BAN_IP)
+         {
++            /* Esto evita que los gms puedan eliminar bans baneando 1s
+             // make sure there is only one active ban
+             stmt = LoginDatabase.GetPreparedStatement(LOGIN_SET_ACCOUNT_NOT_BANNED);
+             stmt->setUInt32(0, account);
+-            trans->Append(stmt);
++            trans->Append(stmt);*/
+             // No SQL injection with prepared statements
+             stmt = LoginDatabase.GetPreparedStatement(LOGIN_SET_ACCOUNT_BANNED);
+             stmt->setUInt32(0, account);
+@@ -2416,6 +2417,33 @@ bool World::RemoveBanCharacter(std::string name)
+     return true;
+ }
+ 
++/// mute account
++bool World::MuteAccount(uint32 account_id, time_t duration, std::string reason, std::string author)
++{
++    PreparedStatement* stmt = NULL;
++
++    stmt = LoginDatabase.GetPreparedStatement(LOGIN_SET_ACCOUNT_MUTED);
++    stmt->setUInt32(0, account_id);
++    stmt->setUInt32(1, duration);
++    stmt->setString(2, author);
++    stmt->setString(3, reason);
++
++    LoginDatabase.Execute(stmt);
++
++    return true;
++}
++
++/// unmute account
++bool World::RemoveMuteAccount(uint32 account_id)
++{
++    PreparedStatement* stmt = NULL;
++
++    stmt = LoginDatabase.GetPreparedStatement(LOGIN_SET_ACCOUNT_NOT_MUTED);
++    stmt->setUInt32(0, account_id);
++    LoginDatabase.Execute(stmt);
++    return true;
++}
++
+ /// Update the game time
+ void World::_UpdateGameTime()
+ {
+diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
+index 6e68f34..1a5eadc 100755
+--- a/src/server/game/World/World.h
++++ b/src/server/game/World/World.h
+@@ -696,6 +696,8 @@ class World
+         bool RemoveBanAccount(BanMode mode, std::string nameOrIP);
+         BanReturn BanCharacter(std::string name, std::string duration, std::string reason, std::string author);
+         bool RemoveBanCharacter(std::string name);
++        bool MuteAccount(uint32 account_id, time_t duration, std::string reason, std::string author);
++        bool RemoveMuteAccount(uint32 account_id);
+ 
+         // for max speed access
+         static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
+diff --git a/src/server/shared/Database/Implementation/LoginDatabase.cpp b/src/server/shared/Database/Implementation/LoginDatabase.cpp
+index 13cfe09..4658ea2 100755
+--- a/src/server/shared/Database/Implementation/LoginDatabase.cpp
++++ b/src/server/shared/Database/Implementation/LoginDatabase.cpp
+@@ -45,4 +45,7 @@ void LoginDatabaseConnection::DoPrepareStatements()
+     PREPARE_STATEMENT(LOGIN_DEL_REALMCHARACTERS, "DELETE FROM realmcharacters WHERE acctid = ? AND realmid = ?", CONNECTION_ASYNC)
+     PREPARE_STATEMENT(LOGIN_ADD_REALMCHARACTERS, "INSERT INTO realmcharacters (numchars, acctid, realmid) VALUES (?, ?, ?)", CONNECTION_ASYNC)
+     PREPARE_STATEMENT(LOGIN_GET_SUM_REALMCHARS, "SELECT SUM(numchars) FROM realmcharacters WHERE acctid = ?", CONNECTION_ASYNC);
++    PREPARE_STATEMENT(LOGIN_SET_ACCOUNT_MUTED, "INSERT INTO account_muted VALUES (?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, ?, ?, 1)", CONNECTION_ASYNC)
++    PREPARE_STATEMENT(LOGIN_SET_ACCOUNT_NOT_MUTED, "UPDATE account_muted SET active = 0 WHERE id = ? AND active != 0", CONNECTION_ASYNC)
++    PREPARE_STATEMENT(LOGIN_SET_EXPIREDACCMUTES, "UPDATE account_muted SET active = 0 WHERE active = 1 AND unmutedate<>mutedate AND unmutedate<=UNIX_TIMESTAMP()", CONNECTION_ASYNC)
+ }
+diff --git a/src/server/shared/Database/Implementation/LoginDatabase.h b/src/server/shared/Database/Implementation/LoginDatabase.h
+index b5f927f..e29b2d0 100755
+--- a/src/server/shared/Database/Implementation/LoginDatabase.h
++++ b/src/server/shared/Database/Implementation/LoginDatabase.h
+@@ -65,6 +65,9 @@ enum LoginDatabaseStatements
+     LOGIN_DEL_REALMCHARACTERS,
+     LOGIN_ADD_REALMCHARACTERS,
+     LOGIN_GET_SUM_REALMCHARS,
++    LOGIN_SET_ACCOUNT_MUTED,
++    LOGIN_SET_ACCOUNT_NOT_MUTED,
++    LOGIN_SET_EXPIREDACCMUTES,
+ 
+     MAX_LOGINDATABASE_STATEMENTS,
+ };
+-- 
+1.7.4.1
+

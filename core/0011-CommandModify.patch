@@ -1,0 +1,123 @@
+From 871a4c43c8dd4d313ea75e26c15961f159718543 Mon Sep 17 00:00:00 2001
+From: tuamigo <tuamigo@tuamigo-System-Product-Name.(none)>
+Date: Tue, 20 Sep 2011 05:57:42 +0200
+Subject: [PATCH] CommandModify
+
+---
+ src/server/scripts/Commands/cs_gm.cpp     |    4 +-
+ src/server/scripts/Commands/cs_modify.cpp |   50 +++--------------------------
+ 2 files changed, 7 insertions(+), 47 deletions(-)
+
+diff --git a/src/server/scripts/Commands/cs_gm.cpp b/src/server/scripts/Commands/cs_gm.cpp
+index ce6baa2..426288a 100644
+--- a/src/server/scripts/Commands/cs_gm.cpp
++++ b/src/server/scripts/Commands/cs_gm.cpp
+@@ -91,9 +91,9 @@ public:
+         if (!*args)
+             return false;
+ 
+-        Player* target =  handler->getSelectedPlayer();
++        Player* target = handler->GetSession()->GetPlayer();
+         if (!target)
+-            target = handler->GetSession()->GetPlayer();
++            return false;
+ 
+         WorldPacket data(12);
+         if (strncmp(args, "on", 3) == 0)
+diff --git a/src/server/scripts/Commands/cs_modify.cpp b/src/server/scripts/Commands/cs_modify.cpp
+index 1951b6c..2833de6 100644
+--- a/src/server/scripts/Commands/cs_modify.cpp
++++ b/src/server/scripts/Commands/cs_modify.cpp
+@@ -472,16 +472,8 @@ public:
+             return false;
+         }
+ 
+-        Player* target = handler->getSelectedPlayer();
++        Player* target = handler->GetSession()->GetPlayer();
+         if (!target)
+-        {
+-            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+-            handler->SetSentErrorMessage(true);
+-            return false;
+-        }
+-
+-        // check online security
+-        if (handler->HasLowerSecurity(target, 0))
+             return false;
+ 
+         std::string targetNameLink = handler->GetNameLink(target);
+@@ -520,16 +512,8 @@ public:
+             return false;
+         }
+ 
+-        Player* target = handler->getSelectedPlayer();
++        Player* target = handler->GetSession()->GetPlayer();
+         if (!target)
+-        {
+-            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+-            handler->SetSentErrorMessage(true);
+-            return false;
+-        }
+-
+-        // check online security
+-        if (handler->HasLowerSecurity(target, 0))
+             return false;
+ 
+         std::string targetNameLink = handler->GetNameLink(target);
+@@ -565,16 +549,8 @@ public:
+             return false;
+         }
+ 
+-        Player* target = handler->getSelectedPlayer();
++        Player* target = handler->GetSession()->GetPlayer();
+         if (!target)
+-        {
+-            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+-            handler->SetSentErrorMessage(true);
+-            return false;
+-        }
+-
+-        // check online security
+-        if (handler->HasLowerSecurity(target, 0))
+             return false;
+ 
+         std::string targetNameLink = handler->GetNameLink(target);
+@@ -610,16 +586,8 @@ public:
+             return false;
+         }
+ 
+-        Player* target = handler->getSelectedPlayer();
++        Player* target = handler->GetSession()->GetPlayer();
+         if (!target)
+-        {
+-            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+-            handler->SetSentErrorMessage(true);
+-            return false;
+-        }
+-
+-        // check online security
+-        if (handler->HasLowerSecurity(target, 0))
+             return false;
+ 
+         std::string targetNameLink = handler->GetNameLink(target);
+@@ -655,16 +623,8 @@ public:
+             return false;
+         }
+ 
+-        Player* target = handler->getSelectedPlayer();
++        Player* target = handler->GetSession()->GetPlayer();
+         if (!target)
+-        {
+-            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+-            handler->SetSentErrorMessage(true);
+-            return false;
+-        }
+-
+-        // check online security
+-        if (handler->HasLowerSecurity(target, 0))
+             return false;
+ 
+         handler->PSendSysMessage(LANG_YOU_CHANGE_FLY_SPEED, FSpeed, handler->GetNameLink(target).c_str());
+-- 
+1.7.4.1
+

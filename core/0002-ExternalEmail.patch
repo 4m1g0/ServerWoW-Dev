@@ -1,0 +1,207 @@
+From 68548bb3f0f1bb2f8887bd3f5671653382d22214 Mon Sep 17 00:00:00 2001
+From: tuamigo <tuamigo@tuamigo-System-Product-Name.(none)>
+Date: Fri, 30 Sep 2011 02:00:34 +0200
+Subject: [PATCH] externalmail
+
+---
+ sql/own/0002-ExternalMail.sql                |   12 +++++
+ src/server/game/Mails/Mail.cpp               |   64 ++++++++++++++++++++++++++
+ src/server/game/Server/WorldSession.h        |    2 +
+ src/server/game/World/World.cpp              |   15 ++++++
+ src/server/game/World/World.h                |    3 +
+ src/server/worldserver/worldserver.conf.dist |   14 ++++++
+ 6 files changed, 110 insertions(+), 0 deletions(-)
+ create mode 100644 sql/own/0002-ExternalMail.sql
+
+diff --git a/sql/own/0002-ExternalMail.sql b/sql/own/0002-ExternalMail.sql
+new file mode 100644
+index 0000000..cb7ef27
+--- /dev/null
++++ b/sql/own/0002-ExternalMail.sql
+@@ -0,0 +1,12 @@
++CREATE TABLE `mail_external` (
++  `id` INT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
++  `receiver` BIGINT(20) UNSIGNED DEFAULT NULL,
++  `subject` VARCHAR(200) DEFAULT 'Mensaje de Soporte',
++  `message` VARCHAR(500) DEFAULT 'Mensaje de Soporte',
++  `money` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
++  `item` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
++  `item_count` BIGINT(20) UNSIGNED NOT NULL DEFAULT '1',
++  `date` DATE DEFAULT '0000-00-00',
++  `sent` TINYINT(4) NOT NULL DEFAULT '0',
++  PRIMARY KEY (`id`)
++) ENGINE=MYISAM AUTO_INCREMENT=79316 DEFAULT CHARSET=utf8;
+diff --git a/src/server/game/Mails/Mail.cpp b/src/server/game/Mails/Mail.cpp
+index 6d54aac..602e786 100755
+--- a/src/server/game/Mails/Mail.cpp
++++ b/src/server/game/Mails/Mail.cpp
+@@ -273,3 +273,67 @@ void MailDraft::SendMailTo(SQLTransaction& trans, MailReceiver const& receiver,
+         deleteIncludedItems(temp);
+     }
+ }
++
++void WorldSession::SendExternalMails()
++{
++    SQLTransaction trans = CharacterDatabase.BeginTransaction();
++    CharacterDatabase.BeginTransaction();
++    sLog->outString("EXTERNAL MAIL> Send Mails from Queue...");
++    QueryResult result = CharacterDatabase.Query("SELECT id,receiver,subject,message,money,item,item_count FROM mail_external WHERE sent=0");
++    if(!result)
++    {
++        sLog->outString("EXTERNAL MAIL> No Mails in Queue.");
++        return;
++    }
++    else
++    {
++    MailDraft* mail = NULL;
++
++    do
++    {
++        Field *fields = result->Fetch();
++        uint32 id = fields[0].GetUInt32();
++        uint64 receiver_guid = fields[1].GetUInt64();
++        std::string subject = fields[2].GetString();
++        std::string message = fields[3].GetString();
++        uint32 money = fields[4].GetUInt32();
++        uint32 ItemID = fields[5].GetUInt32();
++        uint32 ItemCount = fields[6].GetUInt32();
++
++        if (Player* receiver = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(receiver_guid, 0, HIGHGUID_PLAYER)))
++        {
++            sLog->outString("EXTERNAL MAIL> Sending mail to %u, Item: %u", receiver_guid, ItemID);
++
++            mail = new MailDraft(subject, message);
++
++            if (ItemID && ItemCount < 1)
++            {
++                sLog->outString("EXTERNAL MAIL> Warning: invalid ItemCount of %u, setting to 1", ItemCount);
++                ItemCount = 1;
++            }
++            Item* ToMailItem = ItemID ? Item::CreateItem(ItemID, ItemCount, receiver) : NULL;
++
++            if (ToMailItem)
++            {
++                ToMailItem->SaveToDB(trans);
++
++                MailDraft(subject, message)
++                    .AddItem(ToMailItem)
++                    .AddMoney(money)
++                    .SendMailTo(trans, MailReceiver(receiver), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED, NULL);
++            }
++            else
++            {
++                MailDraft(subject, message)
++                    .AddMoney(money)
++                    .SendMailTo(trans, MailReceiver(receiver), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED, NULL);
++            }
++            CharacterDatabase.PExecute("UPDATE mail_external SET sent=1 WHERE id=%u", id);
++        }
++        else
++            sLog->outString("EXTERNAL MAIL> Player %u not in game, skip mail!", receiver_guid);
++        } while(result->NextRow());
++    }
++        CharacterDatabase.CommitTransaction(trans);
++    sLog->outString("EXTERNAL MAIL> All Mails Sent.");
++}
+diff --git a/src/server/game/Server/WorldSession.h b/src/server/game/Server/WorldSession.h
+index bd74ad7..908dd88 100755
+--- a/src/server/game/Server/WorldSession.h
++++ b/src/server/game/Server/WorldSession.h
+@@ -329,6 +329,8 @@ class WorldSession
+         }
+         //used with item_page table
+         bool SendItemInfo(uint32 itemid, WorldPacket data);
++	// External Mail
++	static void SendExternalMails();
+         //auction
+         void SendAuctionHello(uint64 guid, Creature* unit);
+         void SendAuctionCommandResult(uint32 auctionId, uint32 Action, uint32 ErrorCode, uint32 bidError = 0);
+diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
+index 9420ad6..c54bc50 100755
+--- a/src/server/game/World/World.cpp
++++ b/src/server/game/World/World.cpp
+@@ -882,6 +882,9 @@ void World::LoadConfigSettings(bool reload)
+ 
+     m_int_configs[CONFIG_MAIL_DELIVERY_DELAY] = ConfigMgr::GetIntDefault("MailDeliveryDelay", HOUR);
+ 
++    m_int_configs[CONFIG_EXTERNAL_MAIL] = ConfigMgr::GetIntDefault("ExternalMail", 0);
++    m_int_configs[CONFIG_EXTERNAL_MAIL_INTERVAL] = ConfigMgr::GetIntDefault("ExternalMailInterval", 1);
++
+     m_int_configs[CONFIG_UPTIME_UPDATE] = ConfigMgr::GetIntDefault("UpdateUptimeInterval", 10);
+     if (int32(m_int_configs[CONFIG_UPTIME_UPDATE]) <= 0)
+     {
+@@ -1665,6 +1668,8 @@ void World::SetInitialWorldSettings()
+ 
+     m_timers[WUPDATE_PINGDB].SetInterval(getIntConfig(CONFIG_DB_PING_INTERVAL)*MINUTE*IN_MILLISECONDS);    // Mysql ping time in minutes
+ 
++    m_timers[WUPDATE_MAILEXTERNAL].SetInterval(m_int_configs[CONFIG_EXTERNAL_MAIL_INTERVAL]*MINUTE*IN_MILLISECONDS); // handle timer for external mail
++
+     //to set mailtimer to return mails every day between 4 and 5 am
+     //mailtimer is increased when updating auctions
+     //one second is 1000 -(tested on win system)
+@@ -1886,6 +1891,16 @@ void World::Update(uint32 diff)
+         m_NextDailyQuestReset += DAY;
+     }
+ 
++    /// Handle external mail
++    if (m_int_configs[CONFIG_EXTERNAL_MAIL] != 0)
++    {
++	if (m_timers[WUPDATE_MAILEXTERNAL].Passed())
++	{
++		WorldSession::SendExternalMails();
++		m_timers[WUPDATE_MAILEXTERNAL].Reset();
++	}
++    }
++
+     if (m_gameTime > m_NextWeeklyQuestReset)
+         ResetWeeklyQuests();
+ 
+diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
+index f1f7920..619ce24 100755
+--- a/src/server/game/World/World.h
++++ b/src/server/game/World/World.h
+@@ -77,6 +77,7 @@ enum WorldTimers
+     WUPDATE_MAILBOXQUEUE,
+     WUPDATE_DELETECHARS,
+     WUPDATE_PINGDB,
++    WUPDATE_MAILEXTERNAL,
+     WUPDATE_COUNT
+ };
+ 
+@@ -229,6 +230,8 @@ enum WorldIntConfigs
+     CONFIG_START_GM_LEVEL,
+     CONFIG_GROUP_VISIBILITY,
+     CONFIG_MAIL_DELIVERY_DELAY,
++    CONFIG_EXTERNAL_MAIL,
++    CONFIG_EXTERNAL_MAIL_INTERVAL,
+     CONFIG_UPTIME_UPDATE,
+     CONFIG_SKILL_CHANCE_ORANGE,
+     CONFIG_SKILL_CHANCE_YELLOW,
+diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
+index 75020b7..354f895 100644
+--- a/src/server/worldserver/worldserver.conf.dist
++++ b/src/server/worldserver/worldserver.conf.dist
+@@ -1307,6 +1307,20 @@ MaxRecruitAFriendBonusDistance = 100
+ MailDeliveryDelay = 3600
+ 
+ #
++#    ExternalMail
++#        Enable external mail delivery from mail_external table.
++#        Default: 1 (enabled)
++#                 0 (disabled)
++
++ExternalMail = 1
++
++#    ExternalMailInterval
++#        Mail delivery delay time for item sending from mail_external table, in minutes.
++#        Default: 10 minutes
++#
++
++ExternalMailInterval = 10
++
+ #    SkillChance.Prospecting
+ #        Description: Allow skill increase from prospecting.
+ #        Default:     0 - (Disabled)
+-- 
+1.7.4.1
+

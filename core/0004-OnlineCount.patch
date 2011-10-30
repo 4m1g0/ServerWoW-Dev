@@ -1,0 +1,25 @@
+From 54e162f098c5b7bfece50e5021ecb102cc0c871a Mon Sep 17 00:00:00 2001
+From: tuamigo <tuamigo@tuamigo-System-Product-Name.(none)>
+Date: Tue, 20 Sep 2011 05:32:35 +0200
+Subject: [PATCH] onlinecount
+
+---
+ .../game/Server/Protocol/Handlers/MiscHandler.cpp  |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/game/Server/Protocol/Handlers/MiscHandler.cpp b/src/server/game/Server/Protocol/Handlers/MiscHandler.cpp
+index f8752d9..4e4ba7b 100755
+--- a/src/server/game/Server/Protocol/Handlers/MiscHandler.cpp
++++ b/src/server/game/Server/Protocol/Handlers/MiscHandler.cpp
+@@ -351,7 +351,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
+     }
+ 
+     data.put(0, displaycount);                            // insert right count, count displayed
+-    data.put(4, matchcount);                              // insert right count, count of matches
++    data.put(4, displaycount);                            // insert right count, count of matches
+ 
+     SendPacket(&data);
+     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Send SMSG_WHO Message");
+-- 
+1.7.4.1
+

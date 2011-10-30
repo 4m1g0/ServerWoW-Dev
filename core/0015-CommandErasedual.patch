@@ -1,0 +1,58 @@
+diff --git a/src/server/game/Chat/Chat.cpp b/src/server/game/Chat/Chat.cpp
+index 91a9382..ebc46ce 100755
+--- a/src/server/game/Chat/Chat.cpp
++++ b/src/server/game/Chat/Chat.cpp
+@@ -366,6 +366,7 @@ ChatCommand* ChatHandler::getCommandTable()
+         { "itemmove",       SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleItemMoveCommand>,            "", NULL },
+         { "cooldown",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleCooldownCommand>,            "", NULL },
+         { "unlearn",        SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleUnLearnCommand>,             "", NULL },
++        { "erasedual",      SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleEraseDualCommand>,           "", NULL },
+         { "distance",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleGetDistanceCommand>,         "", NULL },
+         { "recall",         SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleRecallCommand>,              "", NULL },
+         { "save",           SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleSaveCommand>,                "", NULL },
+diff --git a/src/server/game/Chat/Chat.h b/src/server/game/Chat/Chat.h
+index b33a494..b2b5cef 100755
+--- a/src/server/game/Chat/Chat.h
++++ b/src/server/game/Chat/Chat.h
+@@ -275,6 +275,7 @@ class ChatHandler
+ 
+         bool HandleCooldownCommand(const char* args);
+         bool HandleUnLearnCommand(const char* args);
++        bool HandleEraseDualCommand(const char* /*args*/);
+         bool HandleGetDistanceCommand(const char* args);
+         bool HandleDieCommand(const char* args);
+         bool HandleDamageCommand(const char *args);
+diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
+index f24077e..c663fc6 100755
+--- a/src/server/game/Chat/Commands/Level3.cpp
++++ b/src/server/game/Chat/Commands/Level3.cpp
+@@ -173,6 +173,29 @@ bool ChatHandler::HandleUnLearnCommand(const char *args)
+ 
+     return true;
+ }
++ 
++bool ChatHandler::HandleEraseDualCommand(const char* /*args*/)
++{ 
++    Player* target = getSelectedPlayer();
++
++    if (!target)
++    {
++        SendSysMessage(LANG_NO_CHAR_SELECTED);
++        SetSentErrorMessage(true);
++        return false;
++    }
++
++    if (target->HasSpell(63645))
++        target->removeSpell(63645, false, false);
++
++    if (target->HasSpell(63644))
++        target->removeSpell(63644, false, false);
++    
++    target->GetSession()->GetPlayer()->ActivateSpec(0);
++    target->GetSession()->GetPlayer()->UpdateSpecCount(1);
++
++    return true;
++}
+ 
+ bool ChatHandler::HandleCooldownCommand(const char *args)
+ {

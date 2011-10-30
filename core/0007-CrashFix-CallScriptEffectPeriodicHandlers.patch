@@ -1,0 +1,26 @@
+From 89e7ebbb815b033f395190def8aacc79ed7bef53 Mon Sep 17 00:00:00 2001
+From: tuamigo <tuamigo@tuamigo-System-Product-Name.(none)>
+Date: Tue, 20 Sep 2011 05:49:24 +0200
+Subject: [PATCH] CrashFix-CallScriptEffectPeriodicHandlers
+
+---
+ src/server/game/Spells/Auras/SpellAuraEffects.cpp |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Spells/Auras/SpellAuraEffects.cpp b/src/server/game/Spells/Auras/SpellAuraEffects.cpp
+index b34d4f7..7d16a57 100755
+--- a/src/server/game/Spells/Auras/SpellAuraEffects.cpp
++++ b/src/server/game/Spells/Auras/SpellAuraEffects.cpp
+@@ -1286,6 +1286,9 @@ void AuraEffect::SendTickImmune(Unit* target, Unit* caster) const
+ 
+ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit* caster) const
+ {
++    if (!GetBase())
++	return;
++
+     bool prevented = GetBase()->CallScriptEffectPeriodicHandlers(this, aurApp);
+     if (prevented)
+         return;
+-- 
+1.7.4.1
+

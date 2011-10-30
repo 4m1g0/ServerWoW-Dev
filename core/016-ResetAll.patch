@@ -1,0 +1,13 @@
+diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
+index c663fc6..83729fb 100755
+--- a/src/server/game/Chat/Commands/Level3.cpp
++++ b/src/server/game/Chat/Commands/Level3.cpp
+@@ -2663,6 +2663,8 @@ bool ChatHandler::HandleResetTalentsCommand(const char * args)
+ 
+ bool ChatHandler::HandleResetAllCommand(const char * args)
+ {
++    return false; // Comando demasiado peligroso DESHABILITADO
++
+     if (!*args)
+         return false;
+ 

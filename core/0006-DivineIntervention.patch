@@ -1,0 +1,27 @@
+From fbe7c78af9aa4641a3fa0731f0c58e3ade97268e Mon Sep 17 00:00:00 2001
+From: tuamigo <tuamigo@tuamigo-System-Product-Name.(none)>
+Date: Tue, 20 Sep 2011 05:48:21 +0200
+Subject: [PATCH] DivineIntervention
+
+---
+ src/server/game/Spells/SpellEffects.cpp |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Spells/SpellEffects.cpp b/src/server/game/Spells/SpellEffects.cpp
+index 8f7bdc1..baf7803 100755
+--- a/src/server/game/Spells/SpellEffects.cpp
++++ b/src/server/game/Spells/SpellEffects.cpp
+@@ -1761,6 +1761,10 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
+         // Coldflame
+         case 33801:
+             return; // just make the core stfu
++        // Divine Intervention
++        case 19753:
++		if (unitTarget->GetEntry() == 28781)
++		return;
+     }
+ 
+     // normal case
+-- 
+1.7.4.1
+

@@ -1,0 +1,67 @@
+diff --git a/src/server/game/Chat/Commands/Level1.cpp b/src/server/game/Chat/Commands/Level1.cpp
+index 07b5cad..f7af535 100755
+--- a/src/server/game/Chat/Commands/Level1.cpp
++++ b/src/server/game/Chat/Commands/Level1.cpp
+@@ -74,9 +74,33 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
+     if (!*args)
+         return false;
+ 
+-    char buff[2048];
+-    sprintf(buff, GetTrinityString(LANG_SYSTEMMESSAGE), args);
+-    sWorld->SendServerMessage(SERVER_MSG_STRING, buff);
++     char* secLevel;
++
++     switch(m_session->GetSecurity()) {
++       case SEC_MODERATOR:
++         secLevel = "Mod";
++         break;
++       case SEC_GAMEMASTER:
++         secLevel = "GM";
++         break;
++       case SEC_DIRGM:
++         secLevel = "Dir. GM";
++         break;
++       case SEC_SUBADMIN:
++         secLevel = "Sub. Admin";
++         break;
++       case SEC_COADMIN:
++         secLevel = "Administrador";
++         break;
++       case SEC_ADMINISTRATOR:
++         secLevel = "Administrador";
++         break;
++       default:
++         return false;
++     }
++
++     sWorld->SendWorldText(LANG_SYSTEMMESSAGE, secLevel, m_session->GetPlayerName(), args);
++
+     return true;
+ }
+ 
+diff --git a/src/server/shared/Common.h b/src/server/shared/Common.h
+index 004a013..22127e4 100755
+--- a/src/server/shared/Common.h
++++ b/src/server/shared/Common.h
+@@ -160,8 +160,11 @@ enum AccountTypes
+     SEC_PLAYER         = 0,
+     SEC_MODERATOR      = 1,
+     SEC_GAMEMASTER     = 2,
+-    SEC_ADMINISTRATOR  = 3,
+-    SEC_CONSOLE        = 4                                  // must be always last in list, accounts must have less security level always also
++    SEC_DIRGM	       = 3,
++    SEC_SUBADMIN       = 4,
++    SEC_COADMIN        = 5,
++    SEC_ADMINISTRATOR  = 6,
++    SEC_CONSOLE        = 7     // must be always last in list
+ };
+ 
+ enum LocaleConstant
+
+diff -r 5efce03a11a4 -r 30850d871d14 sql/own/0001-Announce.sql
+--- /dev/null   Thu Jan 01 00:00:00 1970 +0000
++++ b/sql/own/0001-Announce.sql Sun Dec 26 07:48:57 2010 -0600
+@@ -0,0 +1,3 @@
++DELETE FROM `trinity_string` WHERE entry = 3;
++INSERT INTO `trinity_string` VALUES
++(3,'|cffff0000<%s>|c1f40af20 %s|cffffff00: %s|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);

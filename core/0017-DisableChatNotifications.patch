@@ -1,0 +1,36 @@
+From 001fbee6b26406c8ffdd540a6047ff15ecb5f826 Mon Sep 17 00:00:00 2001
+From: Odyssey <odysseyhyd@gmail.com>
+Date: Sun, 9 Oct 2011 13:48:38 +0200
+Subject: [PATCH] HD 161. Disable notifications when a player joins/leaves channels
+
+---
+ src/server/game/Chat/Channels/Channel.cpp |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/server/game/Chat/Channels/Channel.cpp b/src/server/game/Chat/Channels/Channel.cpp
+index 413070c..c543665 100755
+--- a/src/server/game/Chat/Channels/Channel.cpp
++++ b/src/server/game/Chat/Channels/Channel.cpp
+@@ -799,15 +799,15 @@ void Channel::MakeNotifyPacket(WorldPacket* data, uint8 notify_type)
+ // done 0x00
+ void Channel::MakeJoined(WorldPacket* data, uint64 guid)
+ {
+-    MakeNotifyPacket(data, CHAT_JOINED_NOTICE);
+-    *data << uint64(guid);
++    /*MakeNotifyPacket(data, CHAT_JOINED_NOTICE);
++    *data << uint64(guid);*/
+ }
+ 
+ // done 0x01
+ void Channel::MakeLeft(WorldPacket* data, uint64 guid)
+ {
+-    MakeNotifyPacket(data, CHAT_LEFT_NOTICE);
+-    *data << uint64(guid);
++    /*MakeNotifyPacket(data, CHAT_LEFT_NOTICE);
++    *data << uint64(guid);*/
+ }
+ 
+ // done 0x02
+-- 
+1.7.4.1
+

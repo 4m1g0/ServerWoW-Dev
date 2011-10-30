@@ -1,0 +1,4 @@
+LAST GUID OR ID USED
+trinity_string=90006
+creature_guid=203080
+gameobject_guid=150001
