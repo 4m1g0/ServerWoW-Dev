@@ -1,0 +1,14 @@
+diff --git a/src/server/shared/SystemConfig.h b/src/server/shared/SystemConfig.h
+index 18acc73..1c46119 100755
+--- a/src/server/shared/SystemConfig.h
++++ b/src/server/shared/SystemConfig.h
+@@ -24,7 +24,7 @@
+ #include "Define.h"
+ #include "revision.h"
+ 
+-#define _PACKAGENAME "TrinityCore"
++#define _PACKAGENAME "ServerWoW Core"
+ 
+ #if TRINITY_ENDIAN == TRINITY_BIGENDIAN
+ # define _ENDIAN_STRING "big-endian"
+
