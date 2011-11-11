@@ -1,0 +1,28 @@
+From bbbdf89841fcc7456878401df8851f01638569c6 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Fri, 11 Nov 2011 01:00:00 +0100
+Subject: [PATCH] [HACK] Superhack para evitar que sister salana lance la
+ lanza
+
+---
+ .../Northrend/IcecrownCitadel/icecrown_citadel.cpp |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
+index ab30468..25992e7 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
+@@ -763,8 +763,8 @@ class boss_sister_svalna : public CreatureScript
+                 if (Creature* crok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CROK_SCOURGEBANE)))
+                     crok->AI()->Talk(SAY_CROK_COMBAT_SVALNA);
+                 events.ScheduleEvent(EVENT_SVALNA_COMBAT, 9000);
+-                events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(40000, 50000));
+-                events.ScheduleEvent(EVENT_AETHER_SHIELD, urand(100000, 110000));
++                //events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(40000, 50000));
++                //events.ScheduleEvent(EVENT_AETHER_SHIELD, urand(100000, 110000));
+             }
+ 
+             void KilledUnit(Unit* victim)
+-- 
+1.7.5.4
+
