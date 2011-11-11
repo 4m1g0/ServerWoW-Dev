@@ -1,44 +1,44 @@
-From 7b824a4c28fe5d2343216b4151515f27b200ff6d Mon Sep 17 00:00:00 2001
-From: tuamigo <tuamigo@tuamigo-System-Product-Name.(none)>
-Date: Thu, 13 Oct 2011 00:13:40 +0200
-Subject: [PATCH] antibugmejorado
+From e8b084f071120cc9f02bd13f3bb96b0116696237 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Fri, 11 Nov 2011 01:29:45 +0100
+Subject: [PATCH] Antihack_LOS
 
 ---
- src/server/game/Entities/Creature/Creature.cpp |   13 +++++++++++++
+ src/server/game/Entities/Creature/Creature.cpp |   15 +++++++++++++++
  src/server/game/Entities/Creature/Creature.h   |    1 +
- src/server/game/Scripting/ScriptMgr.cpp        |    7 +++++++
- src/server/game/Scripting/ScriptMgr.h          |    3 +++
- 4 files changed, 24 insertions(+), 0 deletions(-)
+ 2 files changed, 16 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/game/Entities/Creature/Creature.cpp b/src/server/game/Entities/Creature/Creature.cpp
-index d1f8f55..07313a0 100755
+index 922db88..3661843 100755
 --- a/src/server/game/Entities/Creature/Creature.cpp
 +++ b/src/server/game/Entities/Creature/Creature.cpp
-@@ -522,6 +522,19 @@ void Creature::Update(uint32 diff)
+@@ -521,6 +521,21 @@ void Creature::Update(uint32 diff)
+                 i_AI->UpdateAI(diff);
                  m_AI_locked = false;
              }
- 
-+            // [HACK] Evita que los bosses esten mas de 10 segundos en combate
-+            if (GetCreatureInfo()->rank != CREATURE_ELITE_NORMAL)
-+            {
-+                if (LOS_timer >= 10000)
-+                {
-+                    LOS_timer = 0;
-+                    if (isInCombat() && !IsWithinLOSInMap(getVictim()) && sScriptMgr->OnAntibugCheck(this, diff)) // ojo aqui ¿que pasa si la criatura no tiene script? debe devolver TRUE por defecto!!!
++            
++            // [HACK] Evita que los bosses esten mas de 13 segundos en combate
++             if (GetCreatureInfo()->rank != CREATURE_ELITE_NORMAL)
++             {
++                 if (LOS_timer >= 13000)
++                 {
++                     LOS_timer = 0;
++                     // Debe estar en combate con algun player, contra npcs da igual (esto evita que se bugeen evento donde pelean npc entre ellos)
++                     if (isInCombat() && getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself() && !IsWithinLOSInMap(getVictim()) && 
++                     GetEntry() != 36678 && GetEntry() != 38431 && GetEntry() != 38585 && GetEntry() != 38586) // Hack profesor putricio
 +                        SetHealth(GetMaxHealth());
-+                }
-+                else
-+                    LOS_timer += diff;
-+            }
-+
++                 }
++                 else
++                 LOS_timer += diff;
++             }
+ 
              // creature can be dead after UpdateAI call
              // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
-             if (!isAlive())
 diff --git a/src/server/game/Entities/Creature/Creature.h b/src/server/game/Entities/Creature/Creature.h
-index 19938b4..7b736e1 100755
+index 665942e..ba62bb1 100755
 --- a/src/server/game/Entities/Creature/Creature.h
 +++ b/src/server/game/Entities/Creature/Creature.h
-@@ -694,6 +694,7 @@ class Creature : public Unit, public GridObject<Creature>
+@@ -722,6 +722,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
          /// Timers
          time_t m_corpseRemoveTime;                          // (msecs)timer for death or corpse disappearance
          time_t m_respawnTime;                               // (secs) time of next respawn
@@ -46,45 +46,6 @@ index 19938b4..7b736e1 100755
          uint32 m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
          uint32 m_corpseDelay;                               // (secs) delay between death and corpse disappearance
          float m_respawnradius;
-diff --git a/src/server/game/Scripting/ScriptMgr.cpp b/src/server/game/Scripting/ScriptMgr.cpp
-index d37938e..534b8df 100755
---- a/src/server/game/Scripting/ScriptMgr.cpp
-+++ b/src/server/game/Scripting/ScriptMgr.cpp
-@@ -1171,6 +1171,13 @@ bool ScriptMgr::OnCriteriaCheck(AchievementCriteriaData const* data, Player* sou
-     GET_SCRIPT_RET(AchievementCriteriaScript, data->ScriptId, tmpscript, false);
-     return tmpscript->OnCheck(source, target);
- }
-+bool ScriptMgr::OnAntibugCheck(Creature* creature, uint32 diff)
-+{
-+    ASSERT(creature);
-+
-+    GET_SCRIPT_RET(CreatureScript, creature->GetScriptId(), tmpscript, true);
-+    return tmpscript->OnAntibugCheck(creature, diff);
-+}
- 
- // Player
- void ScriptMgr::OnPVPKill(Player* killer, Player* killed)
-diff --git a/src/server/game/Scripting/ScriptMgr.h b/src/server/game/Scripting/ScriptMgr.h
-index 5925992..8d680e7 100755
---- a/src/server/game/Scripting/ScriptMgr.h
-+++ b/src/server/game/Scripting/ScriptMgr.h
-@@ -432,6 +432,8 @@ class CreatureScript : public ScriptObject, public UpdatableScript<Creature>
- 
-         // Called when a CreatureAI object is needed for the creature.
-         virtual CreatureAI* GetAI(Creature* /*creature*/) const { return NULL; }
-+
-+        virtual bool OnAntibugCheck(Creature* /*creature*/, uint32 /*diff*/) { return true; }
- };
- 
- class GameObjectScript : public ScriptObject, public UpdatableScript<GameObject>
-@@ -894,6 +896,7 @@ class ScriptMgr
-         uint32 GetDialogStatus(Player* player, Creature* creature);
-         CreatureAI* GetCreatureAI(Creature* creature);
-         void OnCreatureUpdate(Creature* creature, uint32 diff);
-+        bool OnAntibugCheck(Creature* creature, uint32 diff);
- 
-     public: /* GameObjectScript */
- 
 -- 
-1.7.4.1
+1.7.5.4
 
