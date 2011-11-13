@@ -35,3 +35,6 @@ UPDATE creature_template SET dmg_multiplier=23 WHERE entry = 36805;
 UPDATE creature_template SET baseattacktime=1000, rangeattacktime=1000 WHERE entry IN (36808, 38075, 36805, 38076, 36811, 38072, 36807, 38073, 37890, 38393, 38628, 38629, 38009, 38398, 38630, 38631, 38135, 38395, 38634, 38635, 38136, 38396, 38632, 38633, 38009, 38398, 38630, 38631, 38135, 38395, 38634, 38635, 38136, 38396, 38632, 38633) AND baseattacktime =2000;
 UPDATE creature_template SET dmg_multiplier=dmg_multiplier*2 WHERE entry IN (38075, 38076, 38072, 38073, 38393, 38398, 38395, 38396, 38398, 38395, 38396);
 
+-- Inmunemask para las babas de profesor putricio, canalizan mucho daño y no deben ser cortadas
+update creature_template set mechanic_immune_mask = 617299839 where entry in (37697, 38604, 38758, 38759); 
+update creature_template set mechanic_immune_mask = 617299839 where entry in (37562, 38602, 38760, 38761);
