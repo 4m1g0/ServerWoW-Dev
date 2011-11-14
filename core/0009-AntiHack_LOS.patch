@@ -1,15 +1,17 @@
-From e8b084f071120cc9f02bd13f3bb96b0116696237 Mon Sep 17 00:00:00 2001
+From ccd8f68721297fa2903dc1839d66507deb5b15c9 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Fri, 11 Nov 2011 01:29:45 +0100
-Subject: [PATCH] Antihack_LOS
+Date: Mon, 14 Nov 2011 14:22:01 +0100
+Subject: [PATCH] antibug_LOS
 
 ---
- src/server/game/Entities/Creature/Creature.cpp |   15 +++++++++++++++
+ sql/updates/all.sql                            |  298 ++++++++++++++++++++++++
+ src/server/game/Entities/Creature/Creature.cpp |   15 ++
  src/server/game/Entities/Creature/Creature.h   |    1 +
- 2 files changed, 16 insertions(+), 0 deletions(-)
+ src/server/shared/SystemConfig.h               |    2 +-
+ 4 files changed, 315 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/game/Entities/Creature/Creature.cpp b/src/server/game/Entities/Creature/Creature.cpp
-index 922db88..3661843 100755
+index 922db88..429bc13 100755
 --- a/src/server/game/Entities/Creature/Creature.cpp
 +++ b/src/server/game/Entities/Creature/Creature.cpp
 @@ -521,6 +521,21 @@ void Creature::Update(uint32 diff)
@@ -24,7 +26,7 @@ index 922db88..3661843 100755
 +                 {
 +                     LOS_timer = 0;
 +                     // Debe estar en combate con algun player, contra npcs da igual (esto evita que se bugeen evento donde pelean npc entre ellos)
-+                     if (isInCombat() && getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself() && !IsWithinLOSInMap(getVictim()) && 
++                     if (isInCombat() && getVictim() && getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself() && !IsWithinLOSInMap(getVictim()) && 
 +                     GetEntry() != 36678 && GetEntry() != 38431 && GetEntry() != 38585 && GetEntry() != 38586) // Hack profesor putricio
 +                        SetHealth(GetMaxHealth());
 +                 }
