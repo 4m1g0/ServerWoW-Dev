@@ -1,0 +1,29 @@
+From b59a02ee3723ee642804632458bde09f61175463 Mon Sep 17 00:00:00 2001
+From: Aios <aioslike@gmail.com>
+Date: Mon, 14 Nov 2011 07:32:45 +0100
+Subject: [PATCH 35/75] Minor fixes for UNIT_FLAG_DISARMED and weapon change
+ closes #3532
+
+---
+ src/server/game/Entities/Player/Player.cpp |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
+index 3c8b2d9..4e870ee 100755
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -11396,9 +11396,8 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
+             if (not_loading)
+             {
+                 //don't allow warrior and rogue class 100% ARP 100% crit chance exploit
+-                if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED) && (getClass() == CLASS_ROGUE || getClass() == CLASS_WARRIOR))
+-            	    if (pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR)
+-            		return EQUIP_ERR_CANT_DO_RIGHT_NOW;
++                if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED) && (pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR))
++            	    return EQUIP_ERR_CANT_DO_RIGHT_NOW;
+             		            	    
+                 // May be here should be more stronger checks; STUNNED checked
+                 // ROOT, CONFUSED, DISTRACTED, FLEEING this needs to be checked.
+-- 
+1.7.5.4
+
