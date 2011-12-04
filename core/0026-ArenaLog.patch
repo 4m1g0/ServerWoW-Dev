@@ -1,0 +1,27 @@
+From eeb29707806b4eb5cdf1481213bae56f82c747b4 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Sun, 4 Dec 2011 23:37:13 +0100
+Subject: [PATCH] ArenaLog
+
+---
+ src/server/game/Battlegrounds/Battleground.cpp |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/src/server/game/Battlegrounds/Battleground.cpp b/src/server/game/Battlegrounds/Battleground.cpp
+index af350ac..3a04946 100755
+--- a/src/server/game/Battlegrounds/Battleground.cpp
++++ b/src/server/game/Battlegrounds/Battleground.cpp
+@@ -754,6 +754,10 @@ void Battleground::EndBattleground(uint32 winner)
+                     for (Battleground::BattlegroundScoreMap::const_iterator itr = GetPlayerScoresBegin(); itr != GetPlayerScoresEnd(); ++itr)
+                         if (Player* player = ObjectAccessor::FindPlayer(itr->first))
+                             sLog->outArena("Statistics for %s (GUID: " UI64FMTD ", Team: %d, IP: %s): %u damage, %u healing, %u killing blows", player->GetName(), itr->first, player->GetArenaTeamId(m_ArenaType == 5 ? 2 : m_ArenaType == 3), player->GetSession()->GetRemoteAddress().c_str(), itr->second->DamageDone, itr->second->HealingDone, itr->second->KillingBlows);
++                
++                // Guardamos los de arena en tabla logs
++                CharacterDatabase.PExecute("INSERT INTO `logs` (type, param1, param2, param3, param4, param5, param6) VALUES (2, %u, %d, %d, %d, %d, %d)", m_ArenaType, winner_arena_team->GetId(), loser_arena_team->GetId(), winner_team_rating, loser_team_rating, GetStartTime());
++                
+             }
+             // Deduct 16 points from each teams arena-rating if there are no winners after 45+2 minutes
+             else
+-- 
+1.7.5.4
+
