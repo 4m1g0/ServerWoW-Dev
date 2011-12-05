@@ -1,0 +1,96 @@
+From 873728aa226d773e14ef9115ec37e02a4e6035bd Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Mon, 5 Dec 2011 15:38:08 +0100
+Subject: [PATCH] commandSetgmlevel
+
+---
+ src/server/scripts/Commands/cs_account.cpp |   35 +++++++--------------------
+ 1 files changed, 9 insertions(+), 26 deletions(-)
+
+diff --git a/src/server/scripts/Commands/cs_account.cpp b/src/server/scripts/Commands/cs_account.cpp
+index ae3250a..f169ad0 100644
+--- a/src/server/scripts/Commands/cs_account.cpp
++++ b/src/server/scripts/Commands/cs_account.cpp
+@@ -392,10 +392,9 @@ public:
+         uint32 gm = 0;
+         char* arg1 = strtok((char*)args, " ");
+         char* arg2 = strtok(NULL, " ");
+-        char* arg3 = strtok(NULL, " ");
+         bool isAccountNameGiven = true;
+ 
+-        if (arg1 && !arg3)
++        if (arg1 && !arg2)
+         {
+             if (!handler->getSelectedPlayer())
+                 return false;
+@@ -420,7 +419,7 @@ public:
+ 
+         // Check for invalid specified GM level.
+         gm = (isAccountNameGiven) ? atoi(arg2) : atoi(arg1);
+-        if (gm > SEC_CONSOLE)
++        if (gm >=  handler->GetSession()->GetSecurity() || gm < 0)
+         {
+             handler->SendSysMessage(LANG_BAD_VALUE);
+             handler->SetSentErrorMessage(true);
+@@ -429,16 +428,16 @@ public:
+ 
+         // handler->getSession() == NULL only for console
+         targetAccountId = (isAccountNameGiven) ? AccountMgr::GetId(targetAccountName) : handler->getSelectedPlayer()->GetSession()->GetAccountId();
+-        int32 gmRealmID = (isAccountNameGiven) ? atoi(arg3) : atoi(arg2);
++        extern uint32 realmID;
+         uint32 playerSecurity;
+         if (handler->GetSession())
+-            playerSecurity = AccountMgr::GetSecurity(handler->GetSession()->GetAccountId(), gmRealmID);
++            playerSecurity = AccountMgr::GetSecurity(handler->GetSession()->GetAccountId(), realmID);
+         else
+             playerSecurity = SEC_CONSOLE;
+ 
+         // can set security level only for target with less security and to less security that we have
+         // This is also reject self apply in fact
+-        targetSecurity = AccountMgr::GetSecurity(targetAccountId, gmRealmID);
++        targetSecurity = AccountMgr::GetSecurity(targetAccountId, realmID);
+         if (targetSecurity >= playerSecurity || gm >= playerSecurity)
+         {
+             handler->SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
+@@ -446,34 +445,18 @@ public:
+             return false;
+         }
+ 
+-        // Check and abort if the target gm has a higher rank on one of the realms and the new realm is -1
+-        if (gmRealmID == -1 && !AccountMgr::IsConsoleAccount(playerSecurity))
+-        {
+-            QueryResult result = LoginDatabase.PQuery("SELECT * FROM account_access WHERE id = '%u' AND gmlevel > '%d'", targetAccountId, gm);
+-            if (result)
+-            {
+-                handler->SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
+-                handler->SetSentErrorMessage(true);
+-                return false;
+-            }
+-        }
+-
+-        // Check if provided realmID has a negative value other than -1
+-        if (gmRealmID < -1)
++        // Check if provided realmID has a negative value
++        if (realmID < 1)
+         {
+             handler->SendSysMessage(LANG_INVALID_REALMID);
+             handler->SetSentErrorMessage(true);
+             return false;
+         }
+ 
+-        // If gmRealmID is -1, delete all values for the account id, else, insert values for the specific realmID
+-        if (gmRealmID == -1)
+-            LoginDatabase.PExecute("DELETE FROM account_access WHERE id = '%u'", targetAccountId);
+-        else
+-            LoginDatabase.PExecute("DELETE FROM account_access WHERE id = '%u' AND (RealmID = '%d' OR RealmID = '-1')", targetAccountId, realmID);
++        LoginDatabase.PExecute("DELETE FROM account_access WHERE id = '%u' AND RealmID = '%d'", targetAccountId, realmID);
+ 
+         if (gm != 0)
+-            LoginDatabase.PExecute("INSERT INTO account_access VALUES ('%u', '%d', '%d')", targetAccountId, gm, gmRealmID);
++            LoginDatabase.PExecute("INSERT INTO account_access VALUES ('%u', '%d', '%d')", targetAccountId, gm, realmID);
+ 
+         handler->PSendSysMessage(LANG_YOU_CHANGE_SECURITY, targetAccountName.c_str(), gm);
+         return true;
+-- 
+1.7.5.4
+
