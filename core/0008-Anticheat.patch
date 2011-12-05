@@ -1503,7 +1503,7 @@ index a8c0d91..8c41264 100644
 +#        Description: How many reports the player must have to notify to GameMasters ingame when he generates a new report.
 +#        Default:     70
 +
-+Anticheat.ReportsForIngameWarnings = 70
++Anticheat.ReportsForIngameWarnings = 7
 +
 +#     Anticheat.AnnDiff
 +#        Description: Time between every chat report of the same player.
@@ -1525,7 +1525,7 @@ index a8c0d91..8c41264 100644
 +#
 +#        Default:     31
 +
-+Anticheat.DetectionsEnabled = 31
++Anticheat.DetectionsEnabled = 127
 +
  ###################################################################################################
 -- 
