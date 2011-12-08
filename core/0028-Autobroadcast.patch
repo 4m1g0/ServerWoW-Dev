@@ -1,0 +1,130 @@
+From 548a97bd7f1ea68447c49d7f61664f42061eb61e Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Thu, 8 Dec 2011 04:21:05 +0100
+Subject: [PATCH] Autobroadcast
+
+---
+ src/server/game/World/World.cpp |   61 +++++++++++++++++++++++++++++++++++----
+ src/server/game/World/World.h   |    1 +
+ 2 files changed, 56 insertions(+), 6 deletions(-)
+
+diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
+index 8aca456..06bed18 100755
+--- a/src/server/game/World/World.cpp
++++ b/src/server/game/World/World.cpp
+@@ -1845,6 +1845,22 @@ void World::LoadAutobroadcasts()
+ 
+     sLog->outString(">> Loaded %u autobroadcasts definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+     sLog->outString();
++    
++    count = 0;
++    
++    result = WorldDatabase.Query("SELECT name FROM autobroadcast_names");
++    
++    do
++    {
++
++        Field* fields = result->Fetch();
++        std::string name = fields[0].GetString();
++
++        m_Autobroadcasts_names.push_back(name);
++
++        ++count;
++    } while (result->NextRow());
++    
+ }
+ 
+ /// Update the World !
+@@ -2556,17 +2572,50 @@ void World::ProcessCliCommands()
+ 
+ void World::SendAutoBroadcast()
+ {
+-    if (m_Autobroadcasts.empty())
++    if (m_Autobroadcasts.empty() || m_Autobroadcasts_names.empty())
+         return;
+-
++        
+     std::string msg;
+-
++    std::string name;
++    
+     msg = SelectRandomContainerElement(m_Autobroadcasts);
+-
++    name = SelectRandomContainerElement(m_Autobroadcasts_names);
++    
++    uint32 guid = sObjectMgr->GetPlayerGUIDByName(name);
++    uint64 pl_account = sObjectMgr->GetPlayerAccountIdByGUID(guid);
++    char* secLevel;
++    
++    sLog->outError("PROBANDO: %d, %s, %d, %d, %d", AccountMgr::GetSecurity(pl_account), name.c_str(), guid, pl_account, realmID);
++    
++    switch(AccountMgr::GetSecurity(pl_account)) {
++       case SEC_MODERATOR:
++         secLevel = "Mod";
++         break;
++       case SEC_GAMEMASTER:
++         secLevel = "GM";
++         break;
++       case SEC_DIRGM:
++         secLevel = "Dir. GM";
++         break;
++       case SEC_SUBADMIN:
++         secLevel = "Sub. Admin";
++         break;
++       case SEC_COADMIN:
++         secLevel = "Administrador";
++         break;
++       case SEC_ADMINISTRATOR:
++         secLevel = "Administrador";
++         break;
++       default:
++         return;
++     }
++    
++    sLog->outError("PROBANDO: %s",secLevel);
++    
+     uint32 abcenter = sWorld->getIntConfig(CONFIG_AUTOBROADCAST_CENTER);
+ 
+     if (abcenter == 0)
+-        sWorld->SendWorldText(LANG_AUTO_BROADCAST, msg.c_str());
++        sWorld->SendWorldText(LANG_SYSTEMMESSAGE, secLevel, name.c_str(), msg.c_str());
+ 
+     else if (abcenter == 1)
+     {
+@@ -2577,7 +2626,7 @@ void World::SendAutoBroadcast()
+ 
+     else if (abcenter == 2)
+     {
+-        sWorld->SendWorldText(LANG_AUTO_BROADCAST, msg.c_str());
++        sWorld->SendWorldText(LANG_SYSTEMMESSAGE, secLevel, name.c_str(), msg.c_str());
+ 
+         WorldPacket data(SMSG_NOTIFICATION, (msg.size()+1));
+         data << msg;
+diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
+index f643ae6..8dfccab 100755
+--- a/src/server/game/World/World.h
++++ b/src/server/game/World/World.h
+@@ -828,6 +828,7 @@ class World
+         std::string m_DBVersion;
+ 
+         std::list<std::string> m_Autobroadcasts;
++        std::list<std::string> m_Autobroadcasts_names;
+ 
+         std::map<uint32, CharacterNameData> _characterNameDataMap;
+         void LoadCharacterNameData();
+diff --git a/sql/own/char_Autobroadcast_names.sql b/sql/own/char_Autobroadcast_names.sql
+new file mode 100644
+index 0000000..6409baa
+--- /dev/null
++++ b/sql/own/char_Autobroadcast_names.sql
+@@ -0,0 +1,7 @@
++DROP TABLE IF EXISTS `autobroadcast_names`;
++
++CREATE TABLE `autobroadcast_names` (
++  `id` int(11) NOT NULL AUTO_INCREMENT,
++  `name` varchar(20) NOT NULL,
++  PRIMARY KEY (`id`)
++) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+-- 
+1.7.5.4
+
