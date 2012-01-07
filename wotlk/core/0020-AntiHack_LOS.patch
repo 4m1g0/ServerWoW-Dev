@@ -4,29 +4,10 @@ Date: Sat, 7 Jan 2012 00:36:43 +0100
 Subject: [PATCH 21/22] AntiHack
 
 ---
- null                                           |   13 +++++++++++--
  src/server/game/Entities/Creature/Creature.cpp |   15 +++++++++++++++
  src/server/game/Entities/Creature/Creature.h   |    1 +
  3 files changed, 27 insertions(+), 2 deletions(-)
 
-diff --git a/null b/null
-index f6c03dc..9b3832a 100644
---- a/null
-+++ b/null
-@@ -1,2 +1,11 @@
--[master 3ca41ab] Upgrade-Pinacle-Exploit-Last-Boss
-- 2 files changed, 22 insertions(+), 3 deletions(-)
-+[master 30b820b] AntiCheat
-+ 24 files changed, 1152 insertions(+), 4 deletions(-)
-+ create mode 100644 sql/own/characters_anticheat.sql
-+ create mode 100644 sql/own/world_anticheat.sql
-+ create mode 100644 src/server/game/Anticheat/AnticheatData.cpp
-+ create mode 100644 src/server/game/Anticheat/AnticheatData.h
-+ create mode 100644 src/server/game/Anticheat/AnticheatMgr.cpp
-+ create mode 100644 src/server/game/Anticheat/AnticheatMgr.h
-+ create mode 100644 src/server/game/Anticheat/AnticheatScripts.cpp
-+ create mode 100644 src/server/game/Anticheat/AnticheatScripts.h
-+ create mode 100644 src/server/scripts/Commands/cs_anticheat.cpp
 diff --git a/src/server/game/Entities/Creature/Creature.cpp b/src/server/game/Entities/Creature/Creature.cpp
 index 3e06f9e..4e03f75 100755
 --- a/src/server/game/Entities/Creature/Creature.cpp

@@ -4,21 +4,11 @@ Date: Sat, 7 Jan 2012 00:33:01 +0100
 Subject: [PATCH 13/22] Command-Erase-Dual
 
 ---
- null                                     |    4 ++--
  src/server/game/Chat/Chat.cpp            |    1 +
  src/server/game/Chat/Chat.h              |    1 +
  src/server/game/Chat/Commands/Level3.cpp |   23 +++++++++++++++++++++++
  4 files changed, 27 insertions(+), 2 deletions(-)
 
-diff --git a/null b/null
-index 8cb788b..8d0bdfc 100644
---- a/null
-+++ b/null
-@@ -1,2 +1,2 @@
--[master 22edbb4] 2-DisableChatNotifications
-- 2 files changed, 6 insertions(+), 6 deletions(-)
-+[master d977ec0] Command-Disable
-+ 2 files changed, 4 insertions(+), 2 deletions(-)
 diff --git a/src/server/game/Chat/Chat.cpp b/src/server/game/Chat/Chat.cpp
 index 035fbaf..acc38e5 100755
 --- a/src/server/game/Chat/Chat.cpp

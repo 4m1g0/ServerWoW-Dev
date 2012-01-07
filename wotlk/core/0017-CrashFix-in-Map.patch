@@ -4,19 +4,9 @@ Date: Sat, 7 Jan 2012 00:33:02 +0100
 Subject: [PATCH 17/22] CrashFix-in-Map
 
 ---
- null                         |    4 ++--
  src/server/game/Maps/Map.cpp |    2 +-
  2 files changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/null b/null
-index a1831a9..fdbbc7e 100644
---- a/null
-+++ b/null
-@@ -1,2 +1,2 @@
--[master c3d451b] Command-Modiy
-- 3 files changed, 9 insertions(+), 49 deletions(-)
-+[master 41bfedf] Command-Set-Email
-+ 4 files changed, 81 insertions(+), 2 deletions(-)
 diff --git a/src/server/game/Maps/Map.cpp b/src/server/game/Maps/Map.cpp
 index b2f8e56..2819084 100755
 --- a/src/server/game/Maps/Map.cpp

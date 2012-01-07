@@ -4,7 +4,6 @@ Date: Sat, 7 Jan 2012 00:33:01 +0100
 Subject: [PATCH 07/22] GM-invite-player
 
 ---
- null                                               |    7 ++++---
  src/server/game/Chat/Commands/Level1.cpp           |    6 +++---
  .../game/Server/Protocol/Handlers/GroupHandler.cpp |   10 +++++++++-
  src/server/game/World/World.cpp                    |    1 +
@@ -12,18 +11,6 @@ Subject: [PATCH 07/22] GM-invite-player
  src/server/worldserver/worldserver.conf.dist       |    8 ++++++++
  6 files changed, 26 insertions(+), 7 deletions(-)
 
-diff --git a/null b/null
-index 4a544c4..0c88dc7 100644
---- a/null
-+++ b/null
-@@ -1,3 +1,4 @@
--[master f5f9439] Mute-Announce
-- 3 files changed, 5 insertions(+), 4 deletions(-)
-- create mode 100644 sql/own/0005-GMAnnounceMute.sql
-+[master ff85c22] Mute-Log
-+ 11 files changed, 98 insertions(+), 18 deletions(-)
-+ create mode 100644 sql/own/auth_mutehistory.sql
-+ create mode 100644 sql/own/world_mutehistory.sql
 diff --git a/src/server/game/Chat/Commands/Level1.cpp b/src/server/game/Chat/Commands/Level1.cpp
 index f1ea85a..93c3fd1 100755
 --- a/src/server/game/Chat/Commands/Level1.cpp

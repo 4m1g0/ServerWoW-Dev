@@ -4,22 +4,11 @@ Date: Sat, 7 Jan 2012 00:18:31 +0100
 Subject: [PATCH 05/22] Mute-Announce
 
 ---
- null                                     |    5 ++---
  sql/own/0005-GMAnnounceMute.sql          |    2 ++
  src/server/game/Chat/Commands/Level2.cpp |    2 +-
  3 files changed, 5 insertions(+), 4 deletions(-)
  create mode 100644 sql/own/0005-GMAnnounceMute.sql
 
-diff --git a/null b/null
-index cea92d7..1f3f3cd 100644
---- a/null
-+++ b/null
-@@ -1,3 +1,2 @@
--[master 6693edc] Uptime
-- 4 files changed, 14 insertions(+), 8 deletions(-)
-- create mode 100644 sql/own/0004-Uptime.sql
-+[master 343e8c8] Online-Count
-+ 2 files changed, 4 insertions(+), 5 deletions(-)
 diff --git a/sql/own/0005-GMAnnounceMute.sql b/sql/own/0005-GMAnnounceMute.sql
 new file mode 100644
 index 0000000..47c904e

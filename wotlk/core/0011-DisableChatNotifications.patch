@@ -4,19 +4,9 @@ Date: Sat, 7 Jan 2012 00:33:01 +0100
 Subject: [PATCH 11/22] 2-DisableChatNotifications
 
 ---
- null                                      |    4 ++--
  src/server/game/Chat/Channels/Channel.cpp |    8 ++++----
  2 files changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/null b/null
-index 67abda0..87fb76a 100644
---- a/null
-+++ b/null
-@@ -1,2 +1,2 @@
--[master 941acb4] Server-Info
-- 2 files changed, 4 insertions(+), 3 deletions(-)
-+[master bd80d83] 1-Protect-channel-pass
-+ 2 files changed, 6 insertions(+), 4 deletions(-)
 diff --git a/src/server/game/Chat/Channels/Channel.cpp b/src/server/game/Chat/Channels/Channel.cpp
 index 37617bb..f6b7682 100755
 --- a/src/server/game/Chat/Channels/Channel.cpp

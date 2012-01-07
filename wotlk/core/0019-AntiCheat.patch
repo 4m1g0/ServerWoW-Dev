@@ -4,7 +4,6 @@ Date: Sat, 7 Jan 2012 00:36:43 +0100
 Subject: [PATCH 20/22] AntiCheat
 
 ---
- null                                               |    6 +-
  sql/own/characters_anticheat.sql                   |   15 +
  sql/own/world_anticheat.sql                        |    1 +
  src/server/game/Anticheat/AnticheatData.cpp        |  117 +++++
@@ -39,17 +38,6 @@ Subject: [PATCH 20/22] AntiCheat
  create mode 100644 src/server/game/Anticheat/AnticheatScripts.h
  create mode 100644 src/server/scripts/Commands/cs_anticheat.cpp
 
-diff --git a/null b/null
-index 9d89627..f6c03dc 100644
---- a/null
-+++ b/null
-@@ -1,4 +1,2 @@
--[master 02b6129] Halloween-Wands
-- 5 files changed, 161 insertions(+), 3 deletions(-)
-- create mode 100644 sql/own/world_halloween_wands.sql
-- create mode 100644 src/server/scripts/Custom/spells_custom.cpp
-+[master 3ca41ab] Upgrade-Pinacle-Exploit-Last-Boss
-+ 2 files changed, 22 insertions(+), 3 deletions(-)
 diff --git a/sql/own/characters_anticheat.sql b/sql/own/characters_anticheat.sql
 new file mode 100644
 index 0000000..8aecd42

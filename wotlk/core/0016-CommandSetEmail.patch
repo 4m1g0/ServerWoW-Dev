@@ -4,21 +4,11 @@ Date: Sat, 7 Jan 2012 00:33:02 +0100
 Subject: [PATCH 16/22] Command-Set-Email
 
 ---
- null                                       |    4 +-
  src/server/game/Accounts/AccountMgr.cpp    |   20 ++++++++++
  src/server/game/Accounts/AccountMgr.h      |    1 +
  src/server/scripts/Commands/cs_account.cpp |   58 ++++++++++++++++++++++++++++
  4 files changed, 81 insertions(+), 2 deletions(-)
 
-diff --git a/null b/null
-index f1b6f35..a1831a9 100644
---- a/null
-+++ b/null
-@@ -1,2 +1,2 @@
--[master 14c2e7a] Command-Instance-Unbind
-- 2 files changed, 7 insertions(+), 5 deletions(-)
-+[master c3d451b] Command-Modiy
-+ 3 files changed, 9 insertions(+), 49 deletions(-)
 diff --git a/src/server/game/Accounts/AccountMgr.cpp b/src/server/game/Accounts/AccountMgr.cpp
 index a6ae300..9564374 100755
 --- a/src/server/game/Accounts/AccountMgr.cpp

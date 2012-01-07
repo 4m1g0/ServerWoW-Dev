@@ -4,22 +4,12 @@ Date: Sat, 7 Jan 2012 01:00:52 +0100
 Subject: [PATCH 3/3] Autobroadcast
 
 ---
- null                                 |    4 +-
  sql/own/char_Autobroadcast_names.sql |    7 ++++
  src/server/game/World/World.cpp      |   57 ++++++++++++++++++++++++++++++---
  src/server/game/World/World.h        |    1 +
  4 files changed, 61 insertions(+), 8 deletions(-)
  create mode 100644 sql/own/char_Autobroadcast_names.sql
 
-diff --git a/null b/null
-index 06d3aa1..b7fd26e 100644
---- a/null
-+++ b/null
-@@ -1,2 +1,2 @@
--[master d9f2512] ArenaLog
-- 2 files changed, 6 insertions(+), 2 deletions(-)
-+[master 5321a94] CommandSetgmlevel
-+ 2 files changed, 14 insertions(+), 36 deletions(-)
 diff --git a/sql/own/char_Autobroadcast_names.sql b/sql/own/char_Autobroadcast_names.sql
 new file mode 100644
 index 0000000..6409baa

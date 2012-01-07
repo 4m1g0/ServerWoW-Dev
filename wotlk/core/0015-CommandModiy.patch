@@ -4,20 +4,10 @@ Date: Sat, 7 Jan 2012 00:33:01 +0100
 Subject: [PATCH 15/22] Command-Modiy
 
 ---
- null                                      |    4 +-
  src/server/scripts/Commands/cs_gm.cpp     |    4 +-
  src/server/scripts/Commands/cs_modify.cpp |   50 +++--------------------------
  3 files changed, 9 insertions(+), 49 deletions(-)
 
-diff --git a/null b/null
-index 1d41d3f..f1b6f35 100644
---- a/null
-+++ b/null
-@@ -1,2 +1,2 @@
--[master 968b7bf] Command-Erase-Dual
-- 4 files changed, 27 insertions(+), 2 deletions(-)
-+[master 14c2e7a] Command-Instance-Unbind
-+ 2 files changed, 7 insertions(+), 5 deletions(-)
 diff --git a/src/server/scripts/Commands/cs_gm.cpp b/src/server/scripts/Commands/cs_gm.cpp
 index b69f800..ab52968 100644
 --- a/src/server/scripts/Commands/cs_gm.cpp

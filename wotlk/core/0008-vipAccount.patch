@@ -4,7 +4,6 @@ Date: Sat, 7 Jan 2012 00:33:01 +0100
 Subject: [PATCH 08/22] vip-Account-WOTLK
 
 ---
- null                                    |    6 ++----
  sql/own/logon_vipAccount.sql            |    1 +
  src/server/game/Server/WorldSession.cpp |    4 ++--
  src/server/game/Server/WorldSession.h   |    4 +++-
@@ -13,17 +12,6 @@ Subject: [PATCH 08/22] vip-Account-WOTLK
  6 files changed, 14 insertions(+), 10 deletions(-)
  create mode 100644 sql/own/logon_vipAccount.sql
 
-diff --git a/null b/null
-index 0c88dc7..a3c9b57 100644
---- a/null
-+++ b/null
-@@ -1,4 +1,2 @@
--[master ff85c22] Mute-Log
-- 11 files changed, 98 insertions(+), 18 deletions(-)
-- create mode 100644 sql/own/auth_mutehistory.sql
-- create mode 100644 sql/own/world_mutehistory.sql
-+[master 1dd2037] GM-invite-player
-+ 6 files changed, 26 insertions(+), 7 deletions(-)
 diff --git a/sql/own/logon_vipAccount.sql b/sql/own/logon_vipAccount.sql
 new file mode 100644
 index 0000000..a556336

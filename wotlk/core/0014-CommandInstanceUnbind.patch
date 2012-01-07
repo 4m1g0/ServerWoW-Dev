@@ -4,19 +4,9 @@ Date: Sat, 7 Jan 2012 00:33:01 +0100
 Subject: [PATCH 14/22] Command-Instance-Unbind
 
 ---
- null                                     |    4 ++--
  src/server/game/Chat/Commands/Level3.cpp |    8 +++++---
  2 files changed, 7 insertions(+), 5 deletions(-)
 
-diff --git a/null b/null
-index 8d0bdfc..1d41d3f 100644
---- a/null
-+++ b/null
-@@ -1,2 +1,2 @@
--[master d977ec0] Command-Disable
-- 2 files changed, 4 insertions(+), 2 deletions(-)
-+[master 968b7bf] Command-Erase-Dual
-+ 4 files changed, 27 insertions(+), 2 deletions(-)
 diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
 index 77b10c4..8f70014 100755
 --- a/src/server/game/Chat/Commands/Level3.cpp

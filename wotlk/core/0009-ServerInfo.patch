@@ -4,20 +4,9 @@ Date: Sat, 7 Jan 2012 00:33:01 +0100
 Subject: [PATCH 09/22] Server-Info
 
 ---
- null                             |    5 +++--
  src/server/shared/SystemConfig.h |    2 +-
  2 files changed, 4 insertions(+), 3 deletions(-)
 
-diff --git a/null b/null
-index a3c9b57..67bc9ba 100644
---- a/null
-+++ b/null
-@@ -1,2 +1,3 @@
--[master 1dd2037] GM-invite-player
-- 6 files changed, 26 insertions(+), 7 deletions(-)
-+[master 713d1fc] vip-Account-WOTLK
-+ 6 files changed, 14 insertions(+), 10 deletions(-)
-+ create mode 100644 sql/own/logon_vipAccount.sql
 diff --git a/src/server/shared/SystemConfig.h b/src/server/shared/SystemConfig.h
 index 2431ebb..348a626 100755
 --- a/src/server/shared/SystemConfig.h
