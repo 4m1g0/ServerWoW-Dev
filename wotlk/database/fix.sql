@@ -38,3 +38,7 @@ UPDATE creature_template SET dmg_multiplier=dmg_multiplier*2 WHERE entry IN (380
 -- Inmunemask para las babas de profesor putricio, canalizan mucho daño y no deben ser cortadas
 update creature_template set mechanic_immune_mask = 617299839 where entry in (37697, 38604, 38758, 38759); 
 update creature_template set mechanic_immune_mask = 617299839 where entry in (37562, 38602, 38760, 38761);
+
+-- Añadido spawn de Lok'lira the Crone para hijos de hodir FROM ytdb (29975)
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES('900000','29975','571','1','1','0','0','6917.26','-1541.88','833.81','1.11376','600','0','0','12175','0','0','0','0','0');
+
