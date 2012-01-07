@@ -1,14 +1,25 @@
-From 87a541bb0a4ab66fda978e9514540275295fee49 Mon Sep 17 00:00:00 2001
-From: tuamigo <tuamigo@tuamigo-System-Product-Name.(none)>
-Date: Tue, 20 Sep 2011 05:47:04 +0200
-Subject: [PATCH] MuteAnnounce
+From f5f9439184ade893cca98bcc2eab6aca7e6ac637 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Sat, 7 Jan 2012 00:18:31 +0100
+Subject: [PATCH 05/22] Mute-Announce
 
 ---
+ null                                     |    5 ++---
  sql/own/0005-GMAnnounceMute.sql          |    2 ++
- src/server/game/Chat/Commands/Level2.cpp |    4 ++--
- 2 files changed, 4 insertions(+), 2 deletions(-)
+ src/server/game/Chat/Commands/Level2.cpp |    2 +-
+ 3 files changed, 5 insertions(+), 4 deletions(-)
  create mode 100644 sql/own/0005-GMAnnounceMute.sql
 
+diff --git a/null b/null
+index cea92d7..1f3f3cd 100644
+--- a/null
++++ b/null
+@@ -1,3 +1,2 @@
+-[master 6693edc] Uptime
+- 4 files changed, 14 insertions(+), 8 deletions(-)
+- create mode 100644 sql/own/0004-Uptime.sql
++[master 343e8c8] Online-Count
++ 2 files changed, 4 insertions(+), 5 deletions(-)
 diff --git a/sql/own/0005-GMAnnounceMute.sql b/sql/own/0005-GMAnnounceMute.sql
 new file mode 100644
 index 0000000..47c904e
@@ -18,20 +29,18 @@ index 0000000..47c904e
 +UPDATE trinity_string SET content_default= "Player's: %s chat have been disabled %u minutes by %s. Reason: %s", content_loc6="El personaje: %s ha sido muteado %u minutos por %s. Razón: %s" WHERE entry= 301;
 +UPDATE trinity_string SET content_default= "Player's: %s chat have been disabled %u minutes by %s, effective at the player's next login. Reason: %s.", content_loc6="El personaje: %s ha sido muteado %u minutos por %s. Se hará efectivo cuando el jugador entre en juego la próxima vez. Razón: %s" WHERE entry= 283;
 diff --git a/src/server/game/Chat/Commands/Level2.cpp b/src/server/game/Chat/Commands/Level2.cpp
-index 2055952..fa2d020 100755
+index 2f04ebc..4daa057 100755
 --- a/src/server/game/Chat/Commands/Level2.cpp
 +++ b/src/server/game/Chat/Commands/Level2.cpp
-@@ -93,8 +93,8 @@ bool ChatHandler::HandleMuteCommand(const char* args)
+@@ -102,7 +102,7 @@ bool ChatHandler::HandleMuteCommand(const char* args)
  
      std::string nameLink = playerLink(target_name);
  
 -    PSendSysMessage(target ? LANG_YOU_DISABLE_CHAT : LANG_COMMAND_DISABLE_CHAT_DELAYED, nameLink.c_str(), notspeaktime, mutereasonstr.c_str());
--
 +    sWorld->SendGMText(target ? LANG_YOU_DISABLE_CHAT : LANG_COMMAND_DISABLE_CHAT_DELAYED, nameLink.c_str(), notspeaktime, m_session->GetPlayer()->GetName(), mutereasonstr.c_str());
-+    
+ 
      return true;
  }
- 
 -- 
-1.7.4.1
+1.7.5.4
 

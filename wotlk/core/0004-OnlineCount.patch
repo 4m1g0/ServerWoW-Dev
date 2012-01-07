@@ -1,14 +1,27 @@
-From 54e162f098c5b7bfece50e5021ecb102cc0c871a Mon Sep 17 00:00:00 2001
-From: tuamigo <tuamigo@tuamigo-System-Product-Name.(none)>
-Date: Tue, 20 Sep 2011 05:32:35 +0200
-Subject: [PATCH] onlinecount
+From 343e8c8dbfc963a09d9c2682fa1aa4be75e589c4 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Sat, 7 Jan 2012 00:18:31 +0100
+Subject: [PATCH 04/22] Online-Count
 
 ---
+ null                                               |    7 +++----
  .../game/Server/Protocol/Handlers/MiscHandler.cpp  |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ 2 files changed, 4 insertions(+), 5 deletions(-)
 
+diff --git a/null b/null
+index 236fd8c..cea92d7 100644
+--- a/null
++++ b/null
+@@ -1,4 +1,3 @@
+-[master aa9fa14] External-Mail-Store-System
+- 7 files changed, 113 insertions(+), 0 deletions(-)
+- create mode 100644 null
+- create mode 100644 sql/own/0002-ExternalMail.sql
++[master 6693edc] Uptime
++ 4 files changed, 14 insertions(+), 8 deletions(-)
++ create mode 100644 sql/own/0004-Uptime.sql
 diff --git a/src/server/game/Server/Protocol/Handlers/MiscHandler.cpp b/src/server/game/Server/Protocol/Handlers/MiscHandler.cpp
-index f8752d9..4e4ba7b 100755
+index d828a86..4c10918 100755
 --- a/src/server/game/Server/Protocol/Handlers/MiscHandler.cpp
 +++ b/src/server/game/Server/Protocol/Handlers/MiscHandler.cpp
 @@ -351,7 +351,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
@@ -21,5 +34,5 @@ index f8752d9..4e4ba7b 100755
      SendPacket(&data);
      sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Send SMSG_WHO Message");
 -- 
-1.7.4.1
+1.7.5.4
 

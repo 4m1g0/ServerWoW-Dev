@@ -1,0 +1,35 @@
+From d977ec0bfde9ae4d7bb3679803f961d1238f382f Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Sat, 7 Jan 2012 00:33:01 +0100
+Subject: [PATCH 12/22] Command-Disable
+
+---
+ null                                     |    4 ++--
+ src/server/game/Chat/Commands/Level3.cpp |    2 ++
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/null b/null
+index 87fb76a..8cb788b 100644
+--- a/null
++++ b/null
+@@ -1,2 +1,2 @@
+-[master bd80d83] 1-Protect-channel-pass
+- 2 files changed, 6 insertions(+), 4 deletions(-)
++[master 22edbb4] 2-DisableChatNotifications
++ 2 files changed, 6 insertions(+), 6 deletions(-)
+diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
+index f3ff3a2..f7af3db 100755
+--- a/src/server/game/Chat/Commands/Level3.cpp
++++ b/src/server/game/Chat/Commands/Level3.cpp
+@@ -2662,6 +2662,8 @@ bool ChatHandler::HandleResetTalentsCommand(const char* args)
+ 
+ bool ChatHandler::HandleResetAllCommand(const char * args)
+ {
++    return false; // Comando demasiado peligroso DESHABILITADO
++
+     if (!*args)
+         return false;
+ 
+-- 
+1.7.5.4
+

@@ -1,17 +1,27 @@
-From 001fbee6b26406c8ffdd540a6047ff15ecb5f826 Mon Sep 17 00:00:00 2001
-From: Odyssey <odysseyhyd@gmail.com>
-Date: Sun, 9 Oct 2011 13:48:38 +0200
-Subject: [PATCH] HD 161. Disable notifications when a player joins/leaves channels
+From 22edbb41682863dd05e1d7983f113f67202b8111 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Sat, 7 Jan 2012 00:33:01 +0100
+Subject: [PATCH 11/22] 2-DisableChatNotifications
 
 ---
+ null                                      |    4 ++--
  src/server/game/Chat/Channels/Channel.cpp |    8 ++++----
- 1 files changed, 4 insertions(+), 4 deletions(-)
+ 2 files changed, 6 insertions(+), 6 deletions(-)
 
+diff --git a/null b/null
+index 67abda0..87fb76a 100644
+--- a/null
++++ b/null
+@@ -1,2 +1,2 @@
+-[master 941acb4] Server-Info
+- 2 files changed, 4 insertions(+), 3 deletions(-)
++[master bd80d83] 1-Protect-channel-pass
++ 2 files changed, 6 insertions(+), 4 deletions(-)
 diff --git a/src/server/game/Chat/Channels/Channel.cpp b/src/server/game/Chat/Channels/Channel.cpp
-index 413070c..c543665 100755
+index 37617bb..f6b7682 100755
 --- a/src/server/game/Chat/Channels/Channel.cpp
 +++ b/src/server/game/Chat/Channels/Channel.cpp
-@@ -799,15 +799,15 @@ void Channel::MakeNotifyPacket(WorldPacket* data, uint8 notify_type)
+@@ -806,15 +806,15 @@ void Channel::MakeNotifyPacket(WorldPacket* data, uint8 notify_type)
  // done 0x00
  void Channel::MakeJoined(WorldPacket* data, uint64 guid)
  {
@@ -32,5 +42,5 @@ index 413070c..c543665 100755
  
  // done 0x02
 -- 
-1.7.4.1
+1.7.5.4
 

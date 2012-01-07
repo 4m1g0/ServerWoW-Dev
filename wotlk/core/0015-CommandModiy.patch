@@ -1,15 +1,25 @@
-From 871a4c43c8dd4d313ea75e26c15961f159718543 Mon Sep 17 00:00:00 2001
-From: tuamigo <tuamigo@tuamigo-System-Product-Name.(none)>
-Date: Tue, 20 Sep 2011 05:57:42 +0200
-Subject: [PATCH] CommandModify
+From c3d451bac18c180b2f2ce5636b3c2b7b05f0fdb5 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Sat, 7 Jan 2012 00:33:01 +0100
+Subject: [PATCH 15/22] Command-Modiy
 
 ---
+ null                                      |    4 +-
  src/server/scripts/Commands/cs_gm.cpp     |    4 +-
  src/server/scripts/Commands/cs_modify.cpp |   50 +++--------------------------
- 2 files changed, 7 insertions(+), 47 deletions(-)
+ 3 files changed, 9 insertions(+), 49 deletions(-)
 
+diff --git a/null b/null
+index 1d41d3f..f1b6f35 100644
+--- a/null
++++ b/null
+@@ -1,2 +1,2 @@
+-[master 968b7bf] Command-Erase-Dual
+- 4 files changed, 27 insertions(+), 2 deletions(-)
++[master 14c2e7a] Command-Instance-Unbind
++ 2 files changed, 7 insertions(+), 5 deletions(-)
 diff --git a/src/server/scripts/Commands/cs_gm.cpp b/src/server/scripts/Commands/cs_gm.cpp
-index ce6baa2..426288a 100644
+index b69f800..ab52968 100644
 --- a/src/server/scripts/Commands/cs_gm.cpp
 +++ b/src/server/scripts/Commands/cs_gm.cpp
 @@ -91,9 +91,9 @@ public:
@@ -25,7 +35,7 @@ index ce6baa2..426288a 100644
          WorldPacket data(12);
          if (strncmp(args, "on", 3) == 0)
 diff --git a/src/server/scripts/Commands/cs_modify.cpp b/src/server/scripts/Commands/cs_modify.cpp
-index 1951b6c..2833de6 100644
+index 358eaac..e837994 100644
 --- a/src/server/scripts/Commands/cs_modify.cpp
 +++ b/src/server/scripts/Commands/cs_modify.cpp
 @@ -472,16 +472,8 @@ public:
@@ -119,5 +129,5 @@ index 1951b6c..2833de6 100644
  
          handler->PSendSysMessage(LANG_YOU_CHANGE_FLY_SPEED, FSpeed, handler->GetNameLink(target).c_str());
 -- 
-1.7.4.1
+1.7.5.4
 

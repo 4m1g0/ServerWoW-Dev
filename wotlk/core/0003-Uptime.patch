@@ -1,14 +1,28 @@
-From bd46bdf97f7b726a13b660e7df4d22b1f7bc1f80 Mon Sep 17 00:00:00 2001
-From: tuamigo <tuamigo@tuamigo-System-Product-Name.(none)>
-Date: Tue, 20 Sep 2011 05:31:29 +0200
-Subject: [PATCH] uptime
+From 6693edc242e60b4cbf807843dd74616ee0eab8b5 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Sat, 7 Jan 2012 00:18:31 +0100
+Subject: [PATCH 03/22] Uptime
 
 ---
- sql/own/0004-Uptime.sql         |    3 +++
- src/server/game/World/World.cpp |    5 +++--
- 2 files changed, 6 insertions(+), 2 deletions(-)
+ null                                               |    7 ++++---
+ sql/own/0004-Uptime.sql                            |    3 +++
+ src/server/game/World/World.cpp                    |   10 ++++++----
+ .../Database/Implementation/LoginDatabase.cpp      |    2 +-
+ 4 files changed, 14 insertions(+), 8 deletions(-)
  create mode 100644 sql/own/0004-Uptime.sql
 
+diff --git a/null b/null
+index a2c120d..236fd8c 100644
+--- a/null
++++ b/null
+@@ -1,3 +1,4 @@
+-[master a8e1414] Administrator-Levels
+- 4 files changed, 36 insertions(+), 5 deletions(-)
+- create mode 100644 sql/own/0001-Announce.sql
++[master aa9fa14] External-Mail-Store-System
++ 7 files changed, 113 insertions(+), 0 deletions(-)
++ create mode 100644 null
++ create mode 100644 sql/own/0002-ExternalMail.sql
 diff --git a/sql/own/0004-Uptime.sql b/sql/own/0004-Uptime.sql
 new file mode 100644
 index 0000000..91b0157
@@ -19,10 +33,10 @@ index 0000000..91b0157
 +  ADD column `players` smallint(5) UNSIGNED DEFAULT '0' NOT NULL after `uptime`,
 +  ADD column `queued` smallint(5) UNSIGNED DEFAULT '0' NOT NULL after `players`;
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 7631000..d3eb763 100755
+index fa47aa8..3c59075 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -1934,10 +1934,11 @@ void World::Update(uint32 diff)
+@@ -1942,16 +1942,18 @@ void World::Update(uint32 diff)
      if (m_timers[WUPDATE_UPTIME].Passed())
      {
          uint32 tmpDiff = uint32(m_gameTime - m_startTime);
@@ -31,11 +45,33 @@ index 7631000..d3eb763 100755
 +        uint32 activeQueued = GetQueuedSessionCount();
  
          m_timers[WUPDATE_UPTIME].Reset();
--        LoginDatabase.PExecute("UPDATE uptime SET uptime = %u, maxplayers = %u WHERE realmid = %u AND starttime = " UI64FMTD, tmpDiff, maxOnlinePlayers, realmID, uint64(m_startTime));
-+        LoginDatabase.PExecute("UPDATE uptime SET uptime = %u, players = %u, queued = %u WHERE realmid = %u AND starttime = " UI64FMTD, tmpDiff, OnlinePlayers, activeQueued, realmID, uint64(m_startTime));
-     }
  
-     /// <li> Clean logs table
+         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_UPTIME_PLAYERS);
+ 
+         stmt->setUInt64(0, uint64(tmpDiff));
+-        stmt->setUInt16(1, uint16(maxOnlinePlayers));
+-        stmt->setUInt32(2, realmID);
+-        stmt->setUInt64(3, uint64(m_startTime));
++        stmt->setUInt16(1, uint16(OnlinePlayers));
++        stmt->setUInt16(2, uint16(activeQueued));
++        stmt->setUInt32(3, realmID);
++        stmt->setUInt64(4, uint64(m_startTime));
+ 
+         LoginDatabase.Execute(stmt);
+     }
+diff --git a/src/server/shared/Database/Implementation/LoginDatabase.cpp b/src/server/shared/Database/Implementation/LoginDatabase.cpp
+index 7e497c4..4e25c6e 100755
+--- a/src/server/shared/Database/Implementation/LoginDatabase.cpp
++++ b/src/server/shared/Database/Implementation/LoginDatabase.cpp
+@@ -57,7 +57,7 @@ void LoginDatabaseConnection::DoPrepareStatements()
+     PREPARE_STATEMENT(LOGIN_UPD_MUTE_TIME, "UPDATE account SET mutetime = ? WHERE id = ?", CONNECTION_ASYNC);
+     PREPARE_STATEMENT(LOGIN_UPD_LAST_IP, "UPDATE account SET last_ip = ? WHERE username = ?", CONNECTION_ASYNC);
+     PREPARE_STATEMENT(LOGIN_UPD_ACCOUNT_ONLINE, "UPDATE account SET online = 1 WHERE id = ?", CONNECTION_ASYNC);
+-    PREPARE_STATEMENT(LOGIN_UPD_UPTIME_PLAYERS, "UPDATE uptime SET uptime = ?, maxplayers = ? WHERE realmid = ? AND starttime = ?", CONNECTION_ASYNC);
++    PREPARE_STATEMENT(LOGIN_UPD_UPTIME_PLAYERS, "UPDATE uptime SET uptime = ?, players = ?, queued = ? WHERE realmid = ? AND starttime = ?", CONNECTION_ASYNC);
+     PREPARE_STATEMENT(LOGIN_DEL_OLD_LOGS, "DELETE FROM logs WHERE (time + ?) < ?", CONNECTION_ASYNC);
+     PREPARE_STATEMENT(LOGIN_DEL_ACCOUNT_ACCESS, "DELETE FROM account_access WHERE id = ?", CONNECTION_ASYNC);
+     PREPARE_STATEMENT(LOGIN_DEL_ACCOUNT_ACCESS_BY_REALM, "DELETE FROM account_access WHERE id = ? AND (RealmID = ? OR RealmID = -1)", CONNECTION_ASYNC);
 -- 
-1.7.4.1
+1.7.5.4
 

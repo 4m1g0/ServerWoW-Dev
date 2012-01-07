@@ -1,24 +1,40 @@
-From ccd8f68721297fa2903dc1839d66507deb5b15c9 Mon Sep 17 00:00:00 2001
+From df8dbdcb051d2001684edffb7d1332dba060f2aa Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 14 Nov 2011 14:22:01 +0100
-Subject: [PATCH] antibug_LOS
+Date: Sat, 7 Jan 2012 00:36:43 +0100
+Subject: [PATCH 21/22] AntiHack
 
 ---
- sql/updates/all.sql                            |  298 ++++++++++++++++++++++++
- src/server/game/Entities/Creature/Creature.cpp |   15 ++
+ null                                           |   13 +++++++++++--
+ src/server/game/Entities/Creature/Creature.cpp |   15 +++++++++++++++
  src/server/game/Entities/Creature/Creature.h   |    1 +
- src/server/shared/SystemConfig.h               |    2 +-
- 4 files changed, 315 insertions(+), 1 deletions(-)
+ 3 files changed, 27 insertions(+), 2 deletions(-)
 
+diff --git a/null b/null
+index f6c03dc..9b3832a 100644
+--- a/null
++++ b/null
+@@ -1,2 +1,11 @@
+-[master 3ca41ab] Upgrade-Pinacle-Exploit-Last-Boss
+- 2 files changed, 22 insertions(+), 3 deletions(-)
++[master 30b820b] AntiCheat
++ 24 files changed, 1152 insertions(+), 4 deletions(-)
++ create mode 100644 sql/own/characters_anticheat.sql
++ create mode 100644 sql/own/world_anticheat.sql
++ create mode 100644 src/server/game/Anticheat/AnticheatData.cpp
++ create mode 100644 src/server/game/Anticheat/AnticheatData.h
++ create mode 100644 src/server/game/Anticheat/AnticheatMgr.cpp
++ create mode 100644 src/server/game/Anticheat/AnticheatMgr.h
++ create mode 100644 src/server/game/Anticheat/AnticheatScripts.cpp
++ create mode 100644 src/server/game/Anticheat/AnticheatScripts.h
++ create mode 100644 src/server/scripts/Commands/cs_anticheat.cpp
 diff --git a/src/server/game/Entities/Creature/Creature.cpp b/src/server/game/Entities/Creature/Creature.cpp
-index 922db88..429bc13 100755
+index 3e06f9e..4e03f75 100755
 --- a/src/server/game/Entities/Creature/Creature.cpp
 +++ b/src/server/game/Entities/Creature/Creature.cpp
-@@ -521,6 +521,21 @@ void Creature::Update(uint32 diff)
-                 i_AI->UpdateAI(diff);
+@@ -523,6 +523,21 @@ void Creature::Update(uint32 diff)
                  m_AI_locked = false;
              }
-+            
+ 
 +            // [HACK] Evita que los bosses esten mas de 13 segundos en combate
 +             if (GetCreatureInfo()->rank != CREATURE_ELITE_NORMAL)
 +             {
@@ -26,21 +42,22 @@ index 922db88..429bc13 100755
 +                 {
 +                     LOS_timer = 0;
 +                     // Debe estar en combate con algun player, contra npcs da igual (esto evita que se bugeen evento donde pelean npc entre ellos)
-+                     if (isInCombat() && getVictim() && getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself() && !IsWithinLOSInMap(getVictim()) && 
++                     if (isInCombat() && getVictim() && getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself() && !IsWithinLOSInMap(getVictim()) &&
 +                     GetEntry() != 36678 && GetEntry() != 38431 && GetEntry() != 38585 && GetEntry() != 38586) // Hack profesor putricio
 +                        SetHealth(GetMaxHealth());
 +                 }
 +                 else
 +                 LOS_timer += diff;
 +             }
- 
++
              // creature can be dead after UpdateAI call
              // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
+             if (!isAlive())
 diff --git a/src/server/game/Entities/Creature/Creature.h b/src/server/game/Entities/Creature/Creature.h
-index 665942e..ba62bb1 100755
+index adad026..e1cb33f 100755
 --- a/src/server/game/Entities/Creature/Creature.h
 +++ b/src/server/game/Entities/Creature/Creature.h
-@@ -722,6 +722,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
+@@ -726,6 +726,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
          /// Timers
          time_t m_corpseRemoveTime;                          // (msecs)timer for death or corpse disappearance
          time_t m_respawnTime;                               // (secs) time of next respawn

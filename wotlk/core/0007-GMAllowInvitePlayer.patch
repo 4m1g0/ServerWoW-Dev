@@ -1,21 +1,34 @@
-From 4bbb5f2535702e2dd4fec226e89db408c2a131bd Mon Sep 17 00:00:00 2001
+From 1dd203772a04986ff4ddaf70edaacf92c5f0dd2c Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 25 Oct 2011 23:54:13 +0200
-Subject: [PATCH] GMAllowInvitePlayer
+Date: Sat, 7 Jan 2012 00:33:01 +0100
+Subject: [PATCH 07/22] GM-invite-player
 
 ---
+ null                                               |    7 ++++---
  src/server/game/Chat/Commands/Level1.cpp           |    6 +++---
  .../game/Server/Protocol/Handlers/GroupHandler.cpp |   10 +++++++++-
  src/server/game/World/World.cpp                    |    1 +
  src/server/game/World/World.h                      |    1 +
  src/server/worldserver/worldserver.conf.dist       |    8 ++++++++
- 5 files changed, 22 insertions(+), 4 deletions(-)
+ 6 files changed, 26 insertions(+), 7 deletions(-)
 
+diff --git a/null b/null
+index 4a544c4..0c88dc7 100644
+--- a/null
++++ b/null
+@@ -1,3 +1,4 @@
+-[master f5f9439] Mute-Announce
+- 3 files changed, 5 insertions(+), 4 deletions(-)
+- create mode 100644 sql/own/0005-GMAnnounceMute.sql
++[master ff85c22] Mute-Log
++ 11 files changed, 98 insertions(+), 18 deletions(-)
++ create mode 100644 sql/own/auth_mutehistory.sql
++ create mode 100644 sql/own/world_mutehistory.sql
 diff --git a/src/server/game/Chat/Commands/Level1.cpp b/src/server/game/Chat/Commands/Level1.cpp
-index c737e2b..6914a16 100755
+index f1ea85a..93c3fd1 100755
 --- a/src/server/game/Chat/Commands/Level1.cpp
 +++ b/src/server/game/Chat/Commands/Level1.cpp
-@@ -177,7 +177,7 @@ bool ChatHandler::HandleSummonCommand(const char* args)
+@@ -201,7 +201,7 @@ bool ChatHandler::HandleSummonCommand(const char* args)
          }
          else if (map->IsDungeon())
          {
@@ -24,7 +37,7 @@ index c737e2b..6914a16 100755
  
              if (cMap->Instanceable() && cMap->GetInstanceId() != map->GetInstanceId())
                  target->UnbindInstance(map->GetInstanceId(), target->GetDungeonDifficulty(), true);
-@@ -187,11 +187,11 @@ bool ChatHandler::HandleSummonCommand(const char* args)
+@@ -211,11 +211,11 @@ bool ChatHandler::HandleSummonCommand(const char* args)
                  (target->GetGroup()->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) ||
                  (m_session->GetPlayer()->GetGroup()->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()))
                  // the last check is a bit excessive, but let it be, just in case
@@ -39,7 +52,7 @@ index c737e2b..6914a16 100755
  
          PSendSysMessage(LANG_SUMMONING, nameLink.c_str(), "");
 diff --git a/src/server/game/Server/Protocol/Handlers/GroupHandler.cpp b/src/server/game/Server/Protocol/Handlers/GroupHandler.cpp
-index 404a949..4469aab 100755
+index 9343a53..b64aa41 100755
 --- a/src/server/game/Server/Protocol/Handlers/GroupHandler.cpp
 +++ b/src/server/game/Server/Protocol/Handlers/GroupHandler.cpp
 @@ -83,7 +83,15 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
@@ -47,20 +60,20 @@ index 404a949..4469aab 100755
  
      // restrict invite to GMs
 -    if (!sWorld->getBoolConfig(CONFIG_ALLOW_GM_GROUP) && !GetPlayer()->isGameMaster() && player->isGameMaster())
-+    // Esto deberia estar programado como AccountMgr::IsGMAccount(player->GetSession()->GetSecurity()) 
++    // Esto deberia estar programado como AccountMgr::IsGMAccount(player->GetSession()->GetSecurity())
 +    // pero para eso habria que hacer #include AccountMgr.h y no se que consecuencias de desoptimizacion puede tener.
-+    if (!sWorld->getBoolConfig(CONFIG_ALLOW_GM_GROUP) && !GetPlayer()->isGameMaster() && player->GetSession()->GetSecurity() > 0) 
++    if (!sWorld->getBoolConfig(CONFIG_ALLOW_GM_GROUP) && !GetPlayer()->isGameMaster() && player->GetSession()->GetSecurity() > 0)
 +        return;
 +
 +    // Restrict gm invite players
-+    // Esto deberia estar programado como AccountMgr::IsGMAccount(GetPlayer()->GetSession()->GetSecurity()) 
++    // Esto deberia estar programado como AccountMgr::IsGMAccount(GetPlayer()->GetSession()->GetSecurity())
 +    // pero para eso habria que hacer #include AccountMgr.h y no se que consecuencias de desoptimizacion puede tener.
 +    if (!sWorld->getBoolConfig(CONFIG_ALLOW_GM_INVITE_PLAYER) && GetPlayer()->GetSession()->GetSecurity() > 0 && !player->isGameMaster())
          return;
  
      // can't group with
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 28657fa..439191e 100755
+index b29962f..424d290 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -870,6 +870,7 @@ void World::LoadConfigSettings(bool reload)
@@ -72,10 +85,10 @@ index 28657fa..439191e 100755
      m_bool_configs[CONFIG_GM_LOWER_SECURITY] = ConfigMgr::GetBoolDefault("GM.LowerSecurity", false);
      m_float_configs[CONFIG_CHANCE_OF_GM_SURVEY] = ConfigMgr::GetFloatDefault("GM.TicketSystem.ChanceOfGMSurvey", 50.0f);
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index 06dc006..9c645e8 100755
+index 7c100e8..2b15682 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
-@@ -106,6 +106,7 @@ enum WorldBoolConfigs
+@@ -107,6 +107,7 @@ enum WorldBoolConfigs
      CONFIG_CAST_UNSTUCK,
      CONFIG_GM_LOG_TRADE,
      CONFIG_ALLOW_GM_GROUP,
@@ -84,10 +97,10 @@ index 06dc006..9c645e8 100755
      CONFIG_GM_LOWER_SECURITY,
      CONFIG_SKILL_PROSPECTING,
 diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
-index a8c0d91..69305ea 100644
+index 51f55e2..41c955f 100644
 --- a/src/server/worldserver/worldserver.conf.dist
 +++ b/src/server/worldserver/worldserver.conf.dist
-@@ -1885,6 +1885,14 @@ GM.StartLevel = 1
+@@ -1900,6 +1900,14 @@ GM.StartLevel = 1
  GM.AllowInvite = 0
  
  #

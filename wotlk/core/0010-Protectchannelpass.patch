@@ -1,0 +1,46 @@
+From bd80d832a268488173a00258b53715c64bf0e765 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Sat, 7 Jan 2012 00:33:01 +0100
+Subject: [PATCH 10/22] 1-Protect-channel-pass
+
+---
+ null                                      |    5 ++---
+ src/server/game/Chat/Channels/Channel.cpp |    5 ++++-
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/null b/null
+index 67bc9ba..67abda0 100644
+--- a/null
++++ b/null
+@@ -1,3 +1,2 @@
+-[master 713d1fc] vip-Account-WOTLK
+- 6 files changed, 14 insertions(+), 10 deletions(-)
+- create mode 100644 sql/own/logon_vipAccount.sql
++[master 941acb4] Server-Info
++ 2 files changed, 4 insertions(+), 3 deletions(-)
+diff --git a/src/server/game/Chat/Channels/Channel.cpp b/src/server/game/Chat/Channels/Channel.cpp
+index b6e9dd3..37617bb 100755
+--- a/src/server/game/Chat/Channels/Channel.cpp
++++ b/src/server/game/Chat/Channels/Channel.cpp
+@@ -144,6 +144,9 @@ void Channel::CleanOldChannelsInDB()
+ 
+ void Channel::Join(uint64 p, const char *pass)
+ {
++    if (strstr(m_name.c_str(), "Crb"))    // Evitamos que el carbonite use el servidor para enviarse datos
++        return;
++
+     WorldPacket data;
+     if (IsOn(p))
+     {
+@@ -395,7 +398,7 @@ void Channel::Password(uint64 p, const char *pass)
+         MakeNotMember(&data);
+         SendToOne(&data, p);
+     }
+-    else if (!players[p].IsModerator() && !AccountMgr::IsGMAccount(sec))
++    else if (/*!players[p].IsModerator() && */!AccountMgr::IsGMAccount(sec))
+     {
+         WorldPacket data;
+         MakeNotModerator(&data);
+-- 
+1.7.5.4
+

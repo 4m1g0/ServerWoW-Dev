@@ -1,0 +1,143 @@
+From 41bfedf96b672d47de7833cbf789e7215ac509d9 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Sat, 7 Jan 2012 00:33:02 +0100
+Subject: [PATCH 16/22] Command-Set-Email
+
+---
+ null                                       |    4 +-
+ src/server/game/Accounts/AccountMgr.cpp    |   20 ++++++++++
+ src/server/game/Accounts/AccountMgr.h      |    1 +
+ src/server/scripts/Commands/cs_account.cpp |   58 ++++++++++++++++++++++++++++
+ 4 files changed, 81 insertions(+), 2 deletions(-)
+
+diff --git a/null b/null
+index f1b6f35..a1831a9 100644
+--- a/null
++++ b/null
+@@ -1,2 +1,2 @@
+-[master 14c2e7a] Command-Instance-Unbind
+- 2 files changed, 7 insertions(+), 5 deletions(-)
++[master c3d451b] Command-Modiy
++ 3 files changed, 9 insertions(+), 49 deletions(-)
+diff --git a/src/server/game/Accounts/AccountMgr.cpp b/src/server/game/Accounts/AccountMgr.cpp
+index a6ae300..9564374 100755
+--- a/src/server/game/Accounts/AccountMgr.cpp
++++ b/src/server/game/Accounts/AccountMgr.cpp
+@@ -146,6 +146,26 @@ AccountOpResult ChangePassword(uint32 accountId, std::string newPassword)
+     return AOR_OK;
+ }
+ 
++AccountOpResult ChangeEmail(uint32 accid, std::string new_email)
++{
++    std::string username;
++
++    if (!GetName(accid, username))
++        return AOR_NAME_NOT_EXIST;                          // account doesn't exist
++
++    if (utf8length(new_email) > 60)
++        return AOR_PASS_TOO_LONG;
++
++    normalizeString(username);
++    normalizeString(new_email);
++
++    // also reset s and v to force update at next realmd login
++    LoginDatabase.PExecute("UPDATE account SET v='0', s='0', email='%s' WHERE id='%d'",
++                new_email.c_str(), accid);
++
++    return AOR_OK;
++}
++
+ uint32 GetId(std::string username)
+ {
+     LoginDatabase.EscapeString(username);
+diff --git a/src/server/game/Accounts/AccountMgr.h b/src/server/game/Accounts/AccountMgr.h
+index 1b1ecfa..bd8b41d 100755
+--- a/src/server/game/Accounts/AccountMgr.h
++++ b/src/server/game/Accounts/AccountMgr.h
+@@ -40,6 +40,7 @@ namespace AccountMgr
+         AccountOpResult DeleteAccount(uint32 accountId);
+         AccountOpResult ChangeUsername(uint32 accountId, std::string newUsername, std::string newPassword);
+         AccountOpResult ChangePassword(uint32 accountId, std::string newPassword);
++	AccountOpResult ChangeEmail(uint32 accid, std::string new_email);
+         bool CheckPassword(uint32 accountId, std::string password);
+ 
+         uint32 GetId(std::string username);
+diff --git a/src/server/scripts/Commands/cs_account.cpp b/src/server/scripts/Commands/cs_account.cpp
+index ac265ac..fb79655 100644
+--- a/src/server/scripts/Commands/cs_account.cpp
++++ b/src/server/scripts/Commands/cs_account.cpp
+@@ -38,6 +38,7 @@ public:
+             { "addon",          SEC_ADMINISTRATOR,  true,  &HandleAccountSetAddonCommand,     "", NULL },
+             { "gmlevel",        SEC_CONSOLE,        true,  &HandleAccountSetGmLevelCommand,   "", NULL },
+             { "password",       SEC_CONSOLE,        true,  &HandleAccountSetPasswordCommand,  "", NULL },
++            { "email",          SEC_CONSOLE,        true,  &HandleAccountSetEmailCommand,     "", NULL },
+             { NULL,             0,                  false, NULL,                              "", NULL }
+         };
+         static ChatCommand accountCommandTable[] =
+@@ -585,6 +586,63 @@ public:
+ 
+         return true;
+     }
++
++    /// Set email for account
++    static bool HandleAccountSetEmailCommand(ChatHandler* handler, const char *args)
++    {
++        if (!*args)
++            return false;
++
++        ///- Get the command line arguments
++        char *szAccount = strtok ((char*)args, " ");
++        char *szEmail =  strtok (NULL, " ");
++
++        if (!szAccount||!szEmail)
++            return false;
++
++        std::string account_name = szAccount;
++        if (!AccountMgr::normalizeString(account_name))
++        {
++            handler->PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, account_name.c_str());
++            handler->SetSentErrorMessage(true);
++            return false;
++        }
++
++        uint32 targetAccountId = AccountMgr::GetId(account_name);
++        if (!targetAccountId)
++        {
++            handler->PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, account_name.c_str());
++            handler->SetSentErrorMessage(true);
++            return false;
++        }
++
++        /// can set email only for target with less security
++        /// This is also reject self apply in fact
++        if (handler->HasLowerSecurityAccount (NULL, targetAccountId, true))
++            return false;
++
++        AccountOpResult result = AccountMgr::ChangeEmail(targetAccountId, szEmail);
++
++        switch (result)
++        {
++        case AOR_OK:
++            handler->SendSysMessage(LANG_COMMAND_PASSWORD);
++            break;
++        case AOR_NAME_NOT_EXIST:
++            handler->PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, account_name.c_str());
++            handler->SetSentErrorMessage(true);
++            return false;
++        case AOR_PASS_TOO_LONG:
++            handler->SendSysMessage(LANG_PASSWORD_TOO_LONG);
++            handler->SetSentErrorMessage(true);
++            return false;
++        default:
++            handler->SendSysMessage(LANG_COMMAND_NOTCHANGEPASSWORD);
++            handler->SetSentErrorMessage(true);
++            return false;
++        }
++        return true;
++    }
+ };
+ 
+ void AddSC_account_commandscript()
+-- 
+1.7.5.4
+

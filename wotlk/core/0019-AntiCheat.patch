@@ -1,9 +1,10 @@
-From 94d575b847a85077aa0cae607105c66f868f922a Mon Sep 17 00:00:00 2001
+From 30b820b33a88a830fbdd49dbf677c9a0139c4e07 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 30 Oct 2011 02:17:09 +0200
-Subject: [PATCH] Anticheat
+Date: Sat, 7 Jan 2012 00:36:43 +0100
+Subject: [PATCH 20/22] AntiCheat
 
 ---
+ null                                               |    6 +-
  sql/own/characters_anticheat.sql                   |   15 +
  sql/own/world_anticheat.sql                        |    1 +
  src/server/game/Anticheat/AnticheatData.cpp        |  117 +++++
@@ -20,14 +21,14 @@ Subject: [PATCH] Anticheat
  .../WaypointMovementGenerator.cpp                  |    1 +
  src/server/game/Scripting/ScriptLoader.cpp         |    4 +
  .../Server/Protocol/Handlers/MovementHandler.cpp   |   10 +
- src/server/game/Spells/SpellEffects.cpp            |    8 +-
+ src/server/game/Spells/SpellEffects.cpp            |    7 +
  src/server/game/World/World.cpp                    |    5 +
  src/server/game/World/World.h                      |    4 +
  src/server/scripts/CMakeLists.txt                  |    1 +
  src/server/scripts/Commands/CMakeLists.txt         |    1 +
  src/server/scripts/Commands/cs_anticheat.cpp       |  263 +++++++++++
  src/server/worldserver/worldserver.conf.dist       |   35 ++
- 23 files changed, 1150 insertions(+), 1 deletions(-)
+ 24 files changed, 1152 insertions(+), 4 deletions(-)
  create mode 100644 sql/own/characters_anticheat.sql
  create mode 100644 sql/own/world_anticheat.sql
  create mode 100644 src/server/game/Anticheat/AnticheatData.cpp
@@ -38,6 +39,17 @@ Subject: [PATCH] Anticheat
  create mode 100644 src/server/game/Anticheat/AnticheatScripts.h
  create mode 100644 src/server/scripts/Commands/cs_anticheat.cpp
 
+diff --git a/null b/null
+index 9d89627..f6c03dc 100644
+--- a/null
++++ b/null
+@@ -1,4 +1,2 @@
+-[master 02b6129] Halloween-Wands
+- 5 files changed, 161 insertions(+), 3 deletions(-)
+- create mode 100644 sql/own/world_halloween_wands.sql
+- create mode 100644 src/server/scripts/Custom/spells_custom.cpp
++[master 3ca41ab] Upgrade-Pinacle-Exploit-Last-Boss
++ 2 files changed, 22 insertions(+), 3 deletions(-)
 diff --git a/sql/own/characters_anticheat.sql b/sql/own/characters_anticheat.sql
 new file mode 100644
 index 0000000..8aecd42
@@ -261,7 +273,7 @@ index 0000000..1eae96e
 +#endif
 diff --git a/src/server/game/Anticheat/AnticheatMgr.cpp b/src/server/game/Anticheat/AnticheatMgr.cpp
 new file mode 100644
-index 0000000..d33503e
+index 0000000..847e8ef
 --- /dev/null
 +++ b/src/server/game/Anticheat/AnticheatMgr.cpp
 @@ -0,0 +1,463 @@
@@ -500,9 +512,9 @@ index 0000000..d33503e
 +        return;
 +
 +    // Si ha usado algun portal o sistema de teleport legal hace menos de 10 min no reportamos hack.
-+    if (time(NULL) - player->Anti__GetLastTeleTime() < 20) 
++    if (time(NULL) - player->Anti__GetLastTeleTime() < 20)
 +        return;
-+    
++
 +    float delta_x = player->GetPositionX() - movementInfo.pos.GetPositionX();
 +    float delta_y = player->GetPositionY() - movementInfo.pos.GetPositionY();
 +    float delta = sqrt(delta_x * delta_x + delta_y * delta_y); // Len of movement-vector via Pythagoras (a^2+b^2=Len^2)
@@ -606,7 +618,7 @@ index 0000000..d33503e
 +        m_Players[key].SetAverage(average);
 +    }
 +
-+    if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION) && 
++    if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION) &&
 +    (getMSTime() - m_Players[key].GetLastAnnTime()) / IN_MILLISECONDS > sWorld->getIntConfig(CONFIG_ANTICHEAT_ANN_DIFF))
 +    {
 +        m_Players[key].UpdateLastAnnTime();
@@ -876,7 +888,7 @@ index 0000000..bd811ba
 +#endif
 \ No newline at end of file
 diff --git a/src/server/game/CMakeLists.txt b/src/server/game/CMakeLists.txt
-index 65ba160..c7ac451 100644
+index 117a8f6..db36707 100644
 --- a/src/server/game/CMakeLists.txt
 +++ b/src/server/game/CMakeLists.txt
 @@ -13,6 +13,7 @@ if( USE_COREPCH )
@@ -904,7 +916,7 @@ index 65ba160..c7ac451 100644
    ${CMAKE_CURRENT_SOURCE_DIR}/Addons
    ${CMAKE_CURRENT_SOURCE_DIR}/AI
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index 961d1e5..2e5d9c5 100755
+index 09b1922..1435a6d 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
 @@ -16,6 +16,7 @@
@@ -915,7 +927,7 @@ index 961d1e5..2e5d9c5 100755
  #include "Common.h"
  #include "Language.h"
  #include "DatabaseEnv.h"
-@@ -762,6 +763,9 @@ Player::Player (WorldSession* session): Unit(), m_achievementMgr(this), m_reputa
+@@ -760,6 +761,9 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
      rest_type=REST_TYPE_NO;
      ////////////////////Rest System/////////////////////
  
@@ -925,7 +937,7 @@ index 961d1e5..2e5d9c5 100755
      m_mailsLoaded = false;
      m_mailsUpdated = false;
      unReadMails = 0;
-@@ -1509,6 +1513,8 @@ void Player::Update(uint32 p_time)
+@@ -1506,6 +1510,8 @@ void Player::Update(uint32 p_time)
      if (!IsInWorld())
          return;
  
@@ -934,7 +946,7 @@ index 961d1e5..2e5d9c5 100755
      // undelivered mail
      if (m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
      {
-@@ -2079,6 +2085,8 @@ void Player::TeleportOutOfMap(Map* oldMap)
+@@ -2053,6 +2059,8 @@ void Player::SendTeleportAckPacket()
  
  bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options)
  {
@@ -943,7 +955,7 @@ index 961d1e5..2e5d9c5 100755
      if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
      {
          sLog->outError("TeleportTo: invalid map (%d) or invalid coordinates (X: %f, Y: %f, Z: %f, O: %f) given when teleporting player (GUID: %u, name: %s, map: %d, X: %f, Y: %f, Z: %f, O: %f).",
-@@ -18461,6 +18469,12 @@ void Player::SaveToDB()
+@@ -18634,6 +18642,12 @@ void Player::SaveToDB(bool create /*=false*/)
  
      CharacterDatabase.CommitTransaction(trans);
  
@@ -957,10 +969,10 @@ index 961d1e5..2e5d9c5 100755
      if (Pet* pet = GetPet())
          pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
-index 7d0803a..a512b5b 100755
+index 21c87a9..b984587 100755
 --- a/src/server/game/Entities/Player/Player.h
 +++ b/src/server/game/Entities/Player/Player.h
-@@ -1072,6 +1072,11 @@ class Player : public Unit, public GridObject<Player>
+@@ -1083,6 +1083,11 @@ class Player : public Unit, public GridObject<Player>
          explicit Player (WorldSession* session);
          ~Player ();
  
@@ -973,7 +985,7 @@ index 7d0803a..a512b5b 100755
  
          static UpdateMask updateVisualBits;
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-index 3843366..d7f24a9 100755
+index fdc6eef..6469249 100755
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
 @@ -16,6 +16,7 @@
@@ -984,7 +996,7 @@ index 3843366..d7f24a9 100755
  #include "Common.h"
  #include "CreatureAIImpl.h"
  #include "Log.h"
-@@ -12443,6 +12444,9 @@ void Unit::SetVisible(bool x)
+@@ -12463,6 +12464,9 @@ void Unit::SetVisible(bool x)
  
  void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
  {
@@ -994,7 +1006,7 @@ index 3843366..d7f24a9 100755
      int32 main_speed_mod  = 0;
      float stack_bonus     = 1.0f;
      float non_stack_bonus = 1.0f;
-@@ -16522,6 +16526,9 @@ void Unit::UpdateObjectVisibility(bool forced)
+@@ -16547,6 +16551,9 @@ void Unit::UpdateObjectVisibility(bool forced)
  
  void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
  {
@@ -1005,10 +1017,10 @@ index 3843366..d7f24a9 100755
      if (GetTypeId() == TYPEID_PLAYER)
          player = (Player*)this;
 diff --git a/src/server/game/Miscellaneous/Language.h b/src/server/game/Miscellaneous/Language.h
-index ffdf013..3efb7af 100755
+index a7854aa..c9451e3 100755
 --- a/src/server/game/Miscellaneous/Language.h
 +++ b/src/server/game/Miscellaneous/Language.h
-@@ -1054,6 +1054,9 @@ enum TrinityStrings
+@@ -1058,6 +1058,9 @@ enum TrinityStrings
      LANG_BG_SA_H_GY_WEST                    = 10072, //The Horde captured the West Graveyard!
      LANG_BG_SA_H_GY_EAST                    = 10073, //The Horde captured the East Graveyard!
  
@@ -1019,7 +1031,7 @@ index ffdf013..3efb7af 100755
      LANG_AUTO_BROADCAST                 = 11000,
      LANG_INVALID_REALMID                = 11001,
 diff --git a/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp
-index 808d831..bb40ca9 100755
+index f88ed24..1b4d305 100755
 --- a/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp
 +++ b/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp
 @@ -272,6 +272,7 @@ void FlightPathMovementGenerator::Finalize(Player & player)
@@ -1031,7 +1043,7 @@ index 808d831..bb40ca9 100755
  
  }
 diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
-index 26d7034..3cca84e 100755
+index d9af14c..18e9a95 100755
 --- a/src/server/game/Scripting/ScriptLoader.cpp
 +++ b/src/server/game/Scripting/ScriptLoader.cpp
 @@ -16,6 +16,7 @@
@@ -1050,7 +1062,7 @@ index 26d7034..3cca84e 100755
  void AddSC_account_commandscript();
  void AddSC_achievement_commandscript();
  void AddSC_debug_commandscript();
-@@ -604,6 +606,7 @@ void AddScripts()
+@@ -607,6 +609,7 @@ void AddScripts()
      AddSpellScripts();
      AddSC_SmartSCripts();
      AddCommandScripts();
@@ -1058,7 +1070,7 @@ index 26d7034..3cca84e 100755
  #ifdef SCRIPTS
      AddWorldScripts();
      AddEasternKingdomsScripts();
-@@ -645,6 +648,7 @@ void AddSpellScripts()
+@@ -648,6 +651,7 @@ void AddSpellScripts()
  
  void AddCommandScripts()
  {
@@ -1067,7 +1079,7 @@ index 26d7034..3cca84e 100755
      AddSC_achievement_commandscript();
      AddSC_debug_commandscript();
 diff --git a/src/server/game/Server/Protocol/Handlers/MovementHandler.cpp b/src/server/game/Server/Protocol/Handlers/MovementHandler.cpp
-index d343e1b..4c03305 100755
+index 75bd2e2..7d8b9b2 100755
 --- a/src/server/game/Server/Protocol/Handlers/MovementHandler.cpp
 +++ b/src/server/game/Server/Protocol/Handlers/MovementHandler.cpp
 @@ -16,6 +16,7 @@
@@ -1085,7 +1097,7 @@ index d343e1b..4c03305 100755
 +    GetPlayer()->m_anti_TeleTime=time(NULL);
 +
      GetPlayer()->SendInitialPacketsBeforeAddToMap();
-     if (!GetPlayer()->GetMap()->AddToMap(GetPlayer()))
+     if (!GetPlayer()->GetMap()->AddPlayerToMap(GetPlayer()))
      {
 @@ -183,6 +186,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
  
@@ -1095,16 +1107,16 @@ index d343e1b..4c03305 100755
  
      //lets process all delayed operations on successful teleport
      GetPlayer()->ProcessDelayedOperations();
-@@ -235,6 +239,9 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
- 
+@@ -236,6 +240,9 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
      // resummon pet
      GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
-+    
+ 
 +    if(plMover)
 +        plMover->Anti__SetLastTeleTime(::time(NULL));
- 
++
      //lets process all delayed operations on successful teleport
      GetPlayer()->ProcessDelayedOperations();
+ }
 @@ -337,6 +344,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
          plMover->SetInWater(!plMover->IsInWater() || plMover->GetBaseMap()->IsUnderWater(movementInfo.pos.GetPositionX(), movementInfo.pos.GetPositionY(), movementInfo.pos.GetPositionZ()));
      }
@@ -1116,7 +1128,7 @@ index d343e1b..4c03305 100755
  
      /* process position-change */
 diff --git a/src/server/game/Spells/SpellEffects.cpp b/src/server/game/Spells/SpellEffects.cpp
-index 5cd81e1..bf3b309 100755
+index 40b3101..d692878 100755
 --- a/src/server/game/Spells/SpellEffects.cpp
 +++ b/src/server/game/Spells/SpellEffects.cpp
 @@ -16,6 +16,7 @@
@@ -1127,36 +1139,31 @@ index 5cd81e1..bf3b309 100755
  #include "Common.h"
  #include "DatabaseEnv.h"
  #include "WorldPacket.h"
-@@ -6182,11 +6183,13 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
-         if (!unitTarget)
-             return;
- 
-+    //if (m_caster->ToPlayer())
-+    //   sAnticheatMgr->DisableAnticheatDetection(m_caster->ToPlayer());
-+
-         float x, y, z;
-         unitTarget->GetContactPoint(m_caster, x, y, z);
-         m_caster->GetMotionMaster()->MoveCharge(x, y, z);
-     }
--
-     if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
+@@ -6235,6 +6236,9 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
      {
          if (!unitTarget)
-@@ -6205,6 +6208,9 @@ void Spell::EffectChargeDest(SpellEffIndex /*effIndex*/)
+             return;
++        
++        //if (m_caster->ToPlayer())
++        //   sAnticheatMgr->DisableAnticheatDetection(m_caster->ToPlayer());
  
-     if (m_targets.HasDst())
+         float angle = unitTarget->GetRelativeAngle(m_caster);
+         Position pos;
+@@ -7245,6 +7249,9 @@ void Spell::GetSummonPosition(uint32 i, Position &pos, float radius, uint32 coun
+     // Summon if dest location not present near caster
+     else
      {
 +        //if (m_caster->ToPlayer())
 +        //    sAnticheatMgr->DisableAnticheatDetection(m_caster->ToPlayer());
 +
          float x, y, z;
-         m_targets.GetDst()->GetPosition(x, y, z);
-         m_caster->GetMotionMaster()->MoveCharge(x, y, z);
+         m_caster->GetClosePoint(x, y, z, 3.0f);
+         pos.Relocate(x, y, z);
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 408db18..9a9a43c 100755
+index bc9825e..5a390e9 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -1189,6 +1189,11 @@ void World::LoadConfigSettings(bool reload)
+@@ -1193,6 +1193,11 @@ void World::LoadConfigSettings(bool reload)
      m_bool_configs[CONFIG_PDUMP_NO_PATHS] = ConfigMgr::GetBoolDefault("PlayerDump.DisallowPaths", true);
      m_bool_configs[CONFIG_PDUMP_NO_OVERWRITE] = ConfigMgr::GetBoolDefault("PlayerDump.DisallowOverwrite", true);
  
@@ -1169,10 +1176,10 @@ index 408db18..9a9a43c 100755
  }
  
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index b493b8b..7eeaee1 100755
+index 2b15682..e514620 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
-@@ -160,6 +160,7 @@ enum WorldBoolConfigs
+@@ -162,6 +162,7 @@ enum WorldBoolConfigs
      CONFIG_PRESERVE_CUSTOM_CHANNELS,
      CONFIG_PDUMP_NO_PATHS,
      CONFIG_PDUMP_NO_OVERWRITE,
@@ -1180,7 +1187,7 @@ index b493b8b..7eeaee1 100755
      BOOL_CONFIG_VALUE_COUNT
  };
  
-@@ -306,7 +307,10 @@ enum WorldIntConfigs
+@@ -310,7 +311,10 @@ enum WorldIntConfigs
      CONFIG_DB_PING_INTERVAL,
      CONFIG_PRESERVE_CUSTOM_CHANNEL_DURATION,
      CONFIG_PERSISTENT_CHARACTER_CLEAN_FLAGS,
@@ -1192,7 +1199,7 @@ index b493b8b..7eeaee1 100755
  };
  
 diff --git a/src/server/scripts/CMakeLists.txt b/src/server/scripts/CMakeLists.txt
-index de660b8..2dd4ac2 100644
+index d34b1b8..46d759a 100644
 --- a/src/server/scripts/CMakeLists.txt
 +++ b/src/server/scripts/CMakeLists.txt
 @@ -74,6 +74,7 @@ include_directories(
@@ -1485,10 +1492,10 @@ index 0000000..df81af4
 +    new anticheat_commandscript();
 +}
 diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
-index a8c0d91..8c41264 100644
+index 41c955f..ff65ad8 100644
 --- a/src/server/worldserver/worldserver.conf.dist
 +++ b/src/server/worldserver/worldserver.conf.dist
-@@ -2784,4 +2784,39 @@ PlayerDump.DisallowPaths = 1
+@@ -2807,4 +2807,39 @@ PlayerDump.DisallowPaths = 1
  PlayerDump.DisallowOverwrite = 1
  
  #
@@ -1503,7 +1510,7 @@ index a8c0d91..8c41264 100644
 +#        Description: How many reports the player must have to notify to GameMasters ingame when he generates a new report.
 +#        Default:     70
 +
-+Anticheat.ReportsForIngameWarnings = 7
++Anticheat.ReportsForIngameWarnings = 70
 +
 +#     Anticheat.AnnDiff
 +#        Description: Time between every chat report of the same player.
@@ -1525,7 +1532,7 @@ index a8c0d91..8c41264 100644
 +#
 +#        Default:     31
 +
-+Anticheat.DetectionsEnabled = 127
++Anticheat.DetectionsEnabled = 31
 +
  ###################################################################################################
 -- 
