@@ -42,3 +42,8 @@ update creature_template set mechanic_immune_mask = 617299839 where entry in (37
 -- Añadido spawn de Lok'lira the Crone para hijos de hodir FROM ytdb (29975)
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES('900000','29975','571','1','1','0','0','6917.26','-1541.88','833.81','1.11376','600','0','0','12175','0','0','0','0','0');
 
+-- InhabitType de este npc debe ser 4 para que se mantenga en el aire y el vehicle id para que el arpon surta efecto sobre el.
+UPDATE creature_template SET inhabittype=4, vehicleid=197 WHERE entry=29754;
+
+-- Asignado el spell correcto a la quest Disncipline
+UPDATE smart_scripts SET event_param1=56033 WHERE entryorguid=30146 AND id=1;
