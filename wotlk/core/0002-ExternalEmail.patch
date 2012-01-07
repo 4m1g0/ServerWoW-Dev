@@ -14,11 +14,11 @@ Subject: [PATCH 02/22] External-Mail-Store-System
  create mode 100644 null
  create mode 100644 sql/own/0002-ExternalMail.sql
 
-diff --git a/sql/own/0002-ExternalMail.sql b/sql/own/0002-ExternalMail.sql
+diff --git a/sql/own/0002-char_ExternalMail.sql b/sql/own/0002-char_ExternalMail.sql
 new file mode 100644
 index 0000000..cb7ef27
 --- /dev/null
-+++ b/sql/own/0002-ExternalMail.sql
++++ b/sql/own/0002-char_ExternalMail.sql
 @@ -0,0 +1,12 @@
 +CREATE TABLE `mail_external` (
 +  `id` INT(20) UNSIGNED NOT NULL AUTO_INCREMENT,

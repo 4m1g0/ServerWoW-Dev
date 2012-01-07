@@ -9,14 +9,14 @@ Subject: [PATCH 05/22] Mute-Announce
  3 files changed, 5 insertions(+), 4 deletions(-)
  create mode 100644 sql/own/0005-GMAnnounceMute.sql
 
-diff --git a/sql/own/0005-GMAnnounceMute.sql b/sql/own/0005-GMAnnounceMute.sql
+diff --git a/sql/own/0005-world_GMAnnounceMute.sql b/sql/own/0005-world_GMAnnounceMute.sql
 new file mode 100644
 index 0000000..47c904e
 --- /dev/null
-+++ b/sql/own/0005-GMAnnounceMute.sql
++++ b/sql/own/0005-world_GMAnnounceMute.sql
 @@ -0,0 +1,2 @@
-+UPDATE trinity_string SET content_default= "Player's: %s chat have been disabled %u minutes by %s. Reason: %s", content_loc6="El personaje: %s ha sido muteado %u minutos por %s. Razón: %s" WHERE entry= 301;
-+UPDATE trinity_string SET content_default= "Player's: %s chat have been disabled %u minutes by %s, effective at the player's next login. Reason: %s.", content_loc6="El personaje: %s ha sido muteado %u minutos por %s. Se hará efectivo cuando el jugador entre en juego la próxima vez. Razón: %s" WHERE entry= 283;
++UPDATE trinity_string SET content_default= 'Player\'s: %s chat have been disabled %u minutes by %s. Reason: %s', content_loc6='El personaje: %s ha sido muteado %u minutos por %s. Razón: %s' WHERE entry= 301;
++UPDATE trinity_string SET content_default= 'Player\'s: %s chat have been disabled %u minutes by %s, effective at the player\'s next login. Reason: %s.', content_loc6='El personaje: %s ha sido muteado %u minutos por %s. Se hará efectivo cuando el jugador entre en juego la próxima vez. Razón: %s' WHERE entry= 283;
 diff --git a/src/server/game/Chat/Commands/Level2.cpp b/src/server/game/Chat/Commands/Level2.cpp
 index 2f04ebc..4daa057 100755
 --- a/src/server/game/Chat/Commands/Level2.cpp
