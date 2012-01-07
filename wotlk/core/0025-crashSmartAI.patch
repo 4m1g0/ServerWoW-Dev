@@ -1,0 +1,43 @@
+From ff2ece75dba157af75e565f3564490c52e6e48bd Mon Sep 17 00:00:00 2001
+From: Oscar <zazu@server4.serverwow.co>
+Date: Fri, 6 Jan 2012 23:00:54 -0600
+Subject: [PATCH] crashSmartAI
+
+---
+ src/server/game/AI/SmartScripts/SmartScript.cpp |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/server/game/AI/SmartScripts/SmartScript.cpp b/src/server/game/AI/SmartScripts/SmartScript.cpp
+index a7be152..4d2f834 100644
+--- a/src/server/game/AI/SmartScripts/SmartScript.cpp
++++ b/src/server/game/AI/SmartScripts/SmartScript.cpp
+@@ -78,7 +78,7 @@ void SmartScript::OnReset()
+ 
+ void SmartScript::ProcessEventsFor(SMART_EVENT e, Unit* unit, uint32 var0, uint32 var1, bool bvar, const SpellInfo* spell, GameObject* gob)
+ {
+-    if (e == SMART_EVENT_AGGRO)
++    /*if (e == SMART_EVENT_AGGRO)
+     {
+         if (!mResumeActionList)
+             mTimedActionList.clear();//clear action list if it is not resumable
+@@ -93,7 +93,7 @@ void SmartScript::ProcessEventsFor(SMART_EVENT e, Unit* unit, uint32 var0, uint3
+                 }
+             }
+         }
+-    }
++    }*/
+     for (SmartAIEventList::iterator i = mEvents.begin(); i != mEvents.end(); ++i)
+     {
+         SMART_EVENT eventType = SMART_EVENT((*i).GetEventType());
+@@ -3018,7 +3018,7 @@ void SmartScript::SetScript9(SmartScriptHolder& e, uint32 entry)
+             i->event.type = SMART_EVENT_UPDATE_IC;
+         else if (e.action.timedActionList.timerType > 1)
+             i->event.type = SMART_EVENT_UPDATE;
+-        mResumeActionList = e.action.timedActionList.dontResume ? false : true;
++        //mResumeActionList = e.action.timedActionList.dontResume ? false : true;
+         InitTimer((*i));
+     }
+ }
+-- 
+1.7.1
+
