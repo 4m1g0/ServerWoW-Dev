@@ -47,3 +47,6 @@ UPDATE creature_template SET inhabittype=4, vehicleid=197 WHERE entry=29754;
 
 -- Asignado el spell correcto a la quest Disncipline
 UPDATE smart_scripts SET event_param1=56033 WHERE entryorguid=30146 AND id=1;
+
+-- Eliminada quest incorrecta de un npc, la quest correcta es 10870 y no 10871 la segunda debio ser marcada como obsoleta por blizzard
+DELETE FROM creature_questrelation WHERE id=22112 AND quest=10871;
