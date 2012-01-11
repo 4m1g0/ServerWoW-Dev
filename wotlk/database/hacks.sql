@@ -6,3 +6,6 @@ UPDATE quest_template SET requirednpcorgo1=29694 WHERE id=12886;
 
 -- Asignamos una faccion hackeada al npc Garhal para que no lo maten los otros
 UPDATE creature_template SET faction_A=7, faction_h=7 WHERE entry=30147;
+
+-- Hack Fix quest Karynaku 10858 Deberia ser controlada por un SMART SCRIPT para que la dragona se levante al ser liberada pero el SMART_EVENT_SPELLHIT no funciona con gameobject (bug)
+UPDATE quest_template SET requiredNpcOrGo1=-185156, requirednpcorgocount1=1, requiredspellcast1=38790 WHERE id=10858;
