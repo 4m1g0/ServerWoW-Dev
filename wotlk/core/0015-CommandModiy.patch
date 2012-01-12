@@ -1,12 +1,12 @@
-From c3d451bac18c180b2f2ce5636b3c2b7b05f0fdb5 Mon Sep 17 00:00:00 2001
+From efaf87d3333931b3b1332c0d71ba3e40651b2915 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:33:01 +0100
-Subject: [PATCH 15/22] Command-Modiy
+Date: Thu, 12 Jan 2012 18:05:39 +0100
+Subject: [PATCH 15/25] CommandModiy
 
 ---
  src/server/scripts/Commands/cs_gm.cpp     |    4 +-
  src/server/scripts/Commands/cs_modify.cpp |   50 +++--------------------------
- 3 files changed, 9 insertions(+), 49 deletions(-)
+ 2 files changed, 7 insertions(+), 47 deletions(-)
 
 diff --git a/src/server/scripts/Commands/cs_gm.cpp b/src/server/scripts/Commands/cs_gm.cpp
 index b69f800..ab52968 100644

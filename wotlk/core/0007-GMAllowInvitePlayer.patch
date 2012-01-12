@@ -1,7 +1,7 @@
-From 1dd203772a04986ff4ddaf70edaacf92c5f0dd2c Mon Sep 17 00:00:00 2001
+From 628caf69f2f8baa2fbe8979ac6c75859db747735 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:33:01 +0100
-Subject: [PATCH 07/22] GM-invite-player
+Date: Thu, 12 Jan 2012 18:05:38 +0100
+Subject: [PATCH 07/25] GMAllowInvitePlayer
 
 ---
  src/server/game/Chat/Commands/Level1.cpp           |    6 +++---
@@ -9,7 +9,7 @@ Subject: [PATCH 07/22] GM-invite-player
  src/server/game/World/World.cpp                    |    1 +
  src/server/game/World/World.h                      |    1 +
  src/server/worldserver/worldserver.conf.dist       |    8 ++++++++
- 6 files changed, 26 insertions(+), 7 deletions(-)
+ 5 files changed, 22 insertions(+), 4 deletions(-)
 
 diff --git a/src/server/game/Chat/Commands/Level1.cpp b/src/server/game/Chat/Commands/Level1.cpp
 index f1ea85a..93c3fd1 100755
@@ -60,7 +60,7 @@ index 9343a53..b64aa41 100755
  
      // can't group with
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index b29962f..424d290 100755
+index dbc4c3d..59d0708 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -870,6 +870,7 @@ void World::LoadConfigSettings(bool reload)

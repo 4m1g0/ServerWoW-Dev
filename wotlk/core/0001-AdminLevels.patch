@@ -1,15 +1,15 @@
-From a8e1414d750975636578121c78df5a0ae9ee9b23 Mon Sep 17 00:00:00 2001
+From 0a39cc9c6f463b5fe90dd71ecf8fc17a687ef7fa Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:11:53 +0100
-Subject: [PATCH 01/22] Administrator-Levels
+Date: Thu, 12 Jan 2012 18:05:37 +0100
+Subject: [PATCH 01/25] AdminLevels
 
 ---
- sql/own/0001-Announce.sql                       |    3 ++
+ sql/own/0001-world_Announce.sql                 |    3 ++
  src/server/game/AI/SmartScripts/SmartScript.cpp |    1 +
  src/server/game/Chat/Commands/Level1.cpp        |   30 ++++++++++++++++++++--
  src/server/shared/Common.h                      |    7 ++++-
  4 files changed, 36 insertions(+), 5 deletions(-)
- create mode 100644 sql/own/0001-Announce.sql
+ create mode 100644 sql/own/0001-world_Announce.sql
 
 diff --git a/sql/own/0001-world_Announce.sql b/sql/own/0001-world_Announce.sql
 new file mode 100644
@@ -21,10 +21,10 @@ index 0000000..77bb028
 +INSERT INTO `trinity_string` VALUES
 +(3,'|cffff0000<%s>|c1f40af20 %s|cffffff00: %s|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 diff --git a/src/server/game/AI/SmartScripts/SmartScript.cpp b/src/server/game/AI/SmartScripts/SmartScript.cpp
-index a2e70e9..a7be152 100644
+index 9cea61c..9025314 100644
 --- a/src/server/game/AI/SmartScripts/SmartScript.cpp
 +++ b/src/server/game/AI/SmartScripts/SmartScript.cpp
-@@ -1586,6 +1586,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
+@@ -1569,6 +1569,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
              delete casters;
              break;
          }

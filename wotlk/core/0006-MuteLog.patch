@@ -1,8 +1,22 @@
-From dff44b2d12c24113e7dd4f309b9c3e149a060d08 Mon Sep 17 00:00:00 2001
+From 9c73d27476d8ad7dfb6677153845ff2f9e4c6e43 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 02:06:22 +0100
-Subject: [PATCH] MuteLog
+Date: Thu, 12 Jan 2012 18:05:38 +0100
+Subject: [PATCH 06/25] MuteLog
 
+---
+ sql/own/auth_mutehistory.sql                       |   11 ++++
+ sql/own/world_mutehistory.sql                      |    3 +
+ src/server/authserver/Server/AuthSocket.cpp        |    2 +
+ src/server/game/Chat/Commands/Level2.cpp           |    4 ++
+ src/server/game/Chat/Commands/Level3.cpp           |   50 +++++++++++++------
+ src/server/game/Miscellaneous/Language.h           |    3 +
+ src/server/game/World/World.cpp                    |   30 +++++++++++-
+ src/server/game/World/World.h                      |    2 +
+ .../Database/Implementation/LoginDatabase.cpp      |    3 +
+ .../shared/Database/Implementation/LoginDatabase.h |    3 +
+ 10 files changed, 94 insertions(+), 17 deletions(-)
+ create mode 100644 sql/own/auth_mutehistory.sql
+ create mode 100644 sql/own/world_mutehistory.sql
 
 diff --git a/sql/own/auth_mutehistory.sql b/sql/own/auth_mutehistory.sql
 new file mode 100644
@@ -44,7 +58,7 @@ index 1f85cb6..fca0c01 100755
                  // If the account is banned, reject the logon attempt
                  stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BANNED);
 diff --git a/src/server/game/Chat/Commands/Level2.cpp b/src/server/game/Chat/Commands/Level2.cpp
-index 2f04ebc..aa9f97f 100755
+index 4daa057..473d8b2 100755
 --- a/src/server/game/Chat/Commands/Level2.cpp
 +++ b/src/server/game/Chat/Commands/Level2.cpp
 @@ -75,6 +75,8 @@ bool ChatHandler::HandleMuteCommand(const char* args)
@@ -145,10 +159,10 @@ index 66610ad..a7854aa 100755
      LANG_BANINFO_NEVER                  = 420,
      LANG_BANINFO_YES                    = 421,
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 426a93f..1045039 100755
+index 3c59075..dbc4c3d 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -2286,10 +2286,11 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
+@@ -2303,10 +2303,11 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
  
          if (mode != BAN_IP)
          {
@@ -161,7 +175,7 @@ index 426a93f..1045039 100755
              // No SQL injection with prepared statements
              stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT_BANNED);
              stmt->setUInt32(0, account);
-@@ -2409,6 +2410,33 @@ bool World::RemoveBanCharacter(std::string name)
+@@ -2426,6 +2427,33 @@ bool World::RemoveBanCharacter(std::string name)
      return true;
  }
  
@@ -196,10 +210,10 @@ index 426a93f..1045039 100755
  void World::_UpdateGameTime()
  {
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index bedd8a8..3b175e5 100755
+index 0352b3f..7c100e8 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
-@@ -704,6 +704,8 @@ class World
+@@ -707,6 +707,8 @@ class World
          bool RemoveBanAccount(BanMode mode, std::string nameOrIP);
          BanReturn BanCharacter(std::string name, std::string duration, std::string reason, std::string author);
          bool RemoveBanCharacter(std::string name);
@@ -209,7 +223,7 @@ index bedd8a8..3b175e5 100755
          // for max speed access
          static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
 diff --git a/src/server/shared/Database/Implementation/LoginDatabase.cpp b/src/server/shared/Database/Implementation/LoginDatabase.cpp
-index 7e497c4..8954695 100755
+index 4e25c6e..4baa4e7 100755
 --- a/src/server/shared/Database/Implementation/LoginDatabase.cpp
 +++ b/src/server/shared/Database/Implementation/LoginDatabase.cpp
 @@ -45,6 +45,9 @@ void LoginDatabaseConnection::DoPrepareStatements()

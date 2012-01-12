@@ -1,17 +1,17 @@
-From 343e8c8dbfc963a09d9c2682fa1aa4be75e589c4 Mon Sep 17 00:00:00 2001
+From 7b68db68f545621465f695210014c9483484a236 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:18:31 +0100
-Subject: [PATCH 04/22] Online-Count
+Date: Thu, 12 Jan 2012 18:05:38 +0100
+Subject: [PATCH 04/25] OnlineCount
 
 ---
  .../game/Server/Protocol/Handlers/MiscHandler.cpp  |    2 +-
- 2 files changed, 4 insertions(+), 5 deletions(-)
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/game/Server/Protocol/Handlers/MiscHandler.cpp b/src/server/game/Server/Protocol/Handlers/MiscHandler.cpp
-index d828a86..4c10918 100755
+index d1227c9..73bcb92 100755
 --- a/src/server/game/Server/Protocol/Handlers/MiscHandler.cpp
 +++ b/src/server/game/Server/Protocol/Handlers/MiscHandler.cpp
-@@ -351,7 +351,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
+@@ -357,7 +357,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
      }
  
      data.put(0, displaycount);                            // insert right count, count displayed

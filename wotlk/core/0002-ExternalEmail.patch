@@ -1,18 +1,17 @@
-From aa9fa149206ba1b6b2d8065b804398906a35a088 Mon Sep 17 00:00:00 2001
+From 3a58c81887e1eb5fd881224c647ded5ebd3b6451 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:11:53 +0100
-Subject: [PATCH 02/22] External-Mail-Store-System
+Date: Thu, 12 Jan 2012 18:05:37 +0100
+Subject: [PATCH 02/25] ExternalEmail
 
 ---
- sql/own/0002-ExternalMail.sql                |   12 +++++
+ sql/own/0002-char_ExternalMail.sql           |   12 +++++
  src/server/game/Mails/Mail.cpp               |   64 ++++++++++++++++++++++++++
  src/server/game/Server/WorldSession.h        |    2 +
  src/server/game/World/World.cpp              |   15 ++++++
  src/server/game/World/World.h                |    3 +
  src/server/worldserver/worldserver.conf.dist |   14 ++++++
- 7 files changed, 113 insertions(+), 0 deletions(-)
- create mode 100644 null
- create mode 100644 sql/own/0002-ExternalMail.sql
+ 6 files changed, 110 insertions(+), 0 deletions(-)
+ create mode 100644 sql/own/0002-char_ExternalMail.sql
 
 diff --git a/sql/own/0002-char_ExternalMail.sql b/sql/own/0002-char_ExternalMail.sql
 new file mode 100644
@@ -105,7 +104,7 @@ index 3c3888e..e2e59ca 100755
 +    sLog->outString("EXTERNAL MAIL> All Mails Sent.");
 +}
 diff --git a/src/server/game/Server/WorldSession.h b/src/server/game/Server/WorldSession.h
-index fac910a..88757ce 100755
+index 951f205..4dca2f1 100755
 --- a/src/server/game/Server/WorldSession.h
 +++ b/src/server/game/Server/WorldSession.h
 @@ -326,6 +326,8 @@ class WorldSession

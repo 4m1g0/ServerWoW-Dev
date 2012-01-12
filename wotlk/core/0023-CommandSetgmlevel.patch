@@ -1,14 +1,14 @@
-From 5321a94bc2121626dfd1954acf5910e507c1601f Mon Sep 17 00:00:00 2001
+From 31e12f0144b7e0dd4843136d46155e64b278ee73 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 01:00:52 +0100
-Subject: [PATCH 2/3] CommandSetgmlevel
+Date: Thu, 12 Jan 2012 18:07:07 +0100
+Subject: [PATCH 23/25] CommandSetgmlevel
 
 ---
  src/server/scripts/Commands/cs_account.cpp |   45 +++++++--------------------
- 2 files changed, 14 insertions(+), 36 deletions(-)
+ 1 files changed, 12 insertions(+), 33 deletions(-)
 
 diff --git a/src/server/scripts/Commands/cs_account.cpp b/src/server/scripts/Commands/cs_account.cpp
-index fb79655..b3c12ea 100644
+index 8feab1c..d287686 100644
 --- a/src/server/scripts/Commands/cs_account.cpp
 +++ b/src/server/scripts/Commands/cs_account.cpp
 @@ -413,10 +413,9 @@ public:
@@ -103,7 +103,7 @@ index fb79655..b3c12ea 100644
  
              stmt->setUInt32(0, targetAccountId);
              stmt->setUInt8(1, uint8(gm));
--            stmt->setUInt32(2, gmRealmID);
+-            stmt->setInt32(2, gmRealmID);
 +            stmt->setUInt32(2, realmID);
  
              LoginDatabase.Execute(stmt);

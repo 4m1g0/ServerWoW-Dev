@@ -1,7 +1,7 @@
-From 72ba52235b669abdaae4be9694b02b0b4f2f26ab Mon Sep 17 00:00:00 2001
+From e86e0289a26cd06b4b9afa32454148f5e45b6d21 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:36:44 +0100
-Subject: [PATCH 22/22] Armory
+Date: Thu, 12 Jan 2012 18:05:40 +0100
+Subject: [PATCH 21/25] Armory
 
 ---
  src/server/game/Achievements/AchievementMgr.cpp |    1 +
@@ -9,7 +9,7 @@ Subject: [PATCH 22/22] Armory
  src/server/game/Entities/Player/Player.cpp      |   67 +++++++++++++++++++++++
  src/server/game/Entities/Player/Player.h        |   23 ++++++++
  src/server/game/Entities/Unit/Unit.cpp          |    3 +
- 6 files changed, 104 insertions(+), 11 deletions(-)
+ 5 files changed, 101 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/game/Achievements/AchievementMgr.cpp b/src/server/game/Achievements/AchievementMgr.cpp
 index 0268699..ed5de11 100755
@@ -42,7 +42,7 @@ index 12c2690..f3f51f7 100755
  }
  
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index 1435a6d..56deaeb 100755
+index 61ad65d..b98a1a6 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
 @@ -4943,6 +4943,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
@@ -54,7 +54,7 @@ index 1435a6d..56deaeb 100755
  
              CharacterDatabase.CommitTransaction(trans);
              break;
-@@ -16539,6 +16541,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
+@@ -16538,6 +16540,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
  
          return false;
      }
@@ -94,7 +94,7 @@ index 1435a6d..56deaeb 100755
      // save pet (hunter pet level and experience and all type pets health/mana).
      if (Pet* pet = GetPet())
          pet->SavePetToDB(PET_SAVE_AS_CURRENT);
-@@ -25038,3 +25066,42 @@ bool Player::IsInWhisperWhiteList(uint64 guid)
+@@ -25040,3 +25068,42 @@ bool Player::IsInWhisperWhiteList(uint64 guid)
      }
      return false;
  }
@@ -187,10 +187,10 @@ index b984587..bea83d4 100755
          InstanceTimeMap _instanceResetTimes;
          uint32 _pendingBindId;
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-index 6469249..5001a43 100755
+index a7a8a69..7671880 100755
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
-@@ -15573,7 +15573,10 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
+@@ -15572,7 +15572,10 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
                  if (instanceMap->IsRaidOrHeroicDungeon())
                  {
                      if (creature->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)

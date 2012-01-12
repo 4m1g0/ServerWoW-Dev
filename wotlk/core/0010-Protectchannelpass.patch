@@ -1,11 +1,11 @@
-From bd80d832a268488173a00258b53715c64bf0e765 Mon Sep 17 00:00:00 2001
+From 706ee94fe8dd3b2b2999d7e70800712c135333e7 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:33:01 +0100
-Subject: [PATCH 10/22] 1-Protect-channel-pass
+Date: Thu, 12 Jan 2012 18:05:38 +0100
+Subject: [PATCH 10/25] Protectchannelpass
 
 ---
  src/server/game/Chat/Channels/Channel.cpp |    5 ++++-
- 2 files changed, 6 insertions(+), 4 deletions(-)
+ 1 files changed, 4 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/game/Chat/Channels/Channel.cpp b/src/server/game/Chat/Channels/Channel.cpp
 index b6e9dd3..37617bb 100755

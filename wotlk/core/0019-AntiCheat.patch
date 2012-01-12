@@ -1,7 +1,7 @@
-From 30b820b33a88a830fbdd49dbf677c9a0139c4e07 Mon Sep 17 00:00:00 2001
+From 445bef287b7a1575ed6eb1c902409b720b54536a Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:36:43 +0100
-Subject: [PATCH 20/22] AntiCheat
+Date: Thu, 12 Jan 2012 18:05:39 +0100
+Subject: [PATCH 19/25] AntiCheat
 
 ---
  sql/own/characters_anticheat.sql                   |   15 +
@@ -27,7 +27,7 @@ Subject: [PATCH 20/22] AntiCheat
  src/server/scripts/Commands/CMakeLists.txt         |    1 +
  src/server/scripts/Commands/cs_anticheat.cpp       |  263 +++++++++++
  src/server/worldserver/worldserver.conf.dist       |   35 ++
- 24 files changed, 1152 insertions(+), 4 deletions(-)
+ 23 files changed, 1150 insertions(+), 0 deletions(-)
  create mode 100644 sql/own/characters_anticheat.sql
  create mode 100644 sql/own/world_anticheat.sql
  create mode 100644 src/server/game/Anticheat/AnticheatData.cpp
@@ -904,7 +904,7 @@ index 117a8f6..db36707 100644
    ${CMAKE_CURRENT_SOURCE_DIR}/Addons
    ${CMAKE_CURRENT_SOURCE_DIR}/AI
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index 09b1922..1435a6d 100755
+index 7f7facf..61ad65d 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
 @@ -16,6 +16,7 @@
@@ -973,7 +973,7 @@ index 21c87a9..b984587 100755
  
          static UpdateMask updateVisualBits;
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-index fdc6eef..6469249 100755
+index 2d6e8f1..a7a8a69 100755
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
 @@ -16,6 +16,7 @@
@@ -984,7 +984,7 @@ index fdc6eef..6469249 100755
  #include "Common.h"
  #include "CreatureAIImpl.h"
  #include "Log.h"
-@@ -12463,6 +12464,9 @@ void Unit::SetVisible(bool x)
+@@ -12462,6 +12463,9 @@ void Unit::SetVisible(bool x)
  
  void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
  {
@@ -994,7 +994,7 @@ index fdc6eef..6469249 100755
      int32 main_speed_mod  = 0;
      float stack_bonus     = 1.0f;
      float non_stack_bonus = 1.0f;
-@@ -16547,6 +16551,9 @@ void Unit::UpdateObjectVisibility(bool forced)
+@@ -16546,6 +16550,9 @@ void Unit::UpdateObjectVisibility(bool forced)
  
  void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
  {
@@ -1031,7 +1031,7 @@ index f88ed24..1b4d305 100755
  
  }
 diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
-index d9af14c..18e9a95 100755
+index c46721d..8ff0a68 100755
 --- a/src/server/game/Scripting/ScriptLoader.cpp
 +++ b/src/server/game/Scripting/ScriptLoader.cpp
 @@ -16,6 +16,7 @@
@@ -1050,7 +1050,7 @@ index d9af14c..18e9a95 100755
  void AddSC_account_commandscript();
  void AddSC_achievement_commandscript();
  void AddSC_debug_commandscript();
-@@ -607,6 +609,7 @@ void AddScripts()
+@@ -605,6 +607,7 @@ void AddScripts()
      AddSpellScripts();
      AddSC_SmartSCripts();
      AddCommandScripts();
@@ -1058,7 +1058,7 @@ index d9af14c..18e9a95 100755
  #ifdef SCRIPTS
      AddWorldScripts();
      AddEasternKingdomsScripts();
-@@ -648,6 +651,7 @@ void AddSpellScripts()
+@@ -646,6 +649,7 @@ void AddSpellScripts()
  
  void AddCommandScripts()
  {
@@ -1067,7 +1067,7 @@ index d9af14c..18e9a95 100755
      AddSC_achievement_commandscript();
      AddSC_debug_commandscript();
 diff --git a/src/server/game/Server/Protocol/Handlers/MovementHandler.cpp b/src/server/game/Server/Protocol/Handlers/MovementHandler.cpp
-index 75bd2e2..7d8b9b2 100755
+index 7d1233c..4491fad 100755
 --- a/src/server/game/Server/Protocol/Handlers/MovementHandler.cpp
 +++ b/src/server/game/Server/Protocol/Handlers/MovementHandler.cpp
 @@ -16,6 +16,7 @@
@@ -1116,7 +1116,7 @@ index 75bd2e2..7d8b9b2 100755
  
      /* process position-change */
 diff --git a/src/server/game/Spells/SpellEffects.cpp b/src/server/game/Spells/SpellEffects.cpp
-index 40b3101..d692878 100755
+index 2c33488..749f1bf 100755
 --- a/src/server/game/Spells/SpellEffects.cpp
 +++ b/src/server/game/Spells/SpellEffects.cpp
 @@ -16,6 +16,7 @@
@@ -1127,7 +1127,7 @@ index 40b3101..d692878 100755
  #include "Common.h"
  #include "DatabaseEnv.h"
  #include "WorldPacket.h"
-@@ -6235,6 +6236,9 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
+@@ -6203,6 +6204,9 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
      {
          if (!unitTarget)
              return;
@@ -1137,7 +1137,7 @@ index 40b3101..d692878 100755
  
          float angle = unitTarget->GetRelativeAngle(m_caster);
          Position pos;
-@@ -7245,6 +7249,9 @@ void Spell::GetSummonPosition(uint32 i, Position &pos, float radius, uint32 coun
+@@ -7213,6 +7217,9 @@ void Spell::GetSummonPosition(uint32 i, Position &pos, float radius, uint32 coun
      // Summon if dest location not present near caster
      else
      {
@@ -1148,7 +1148,7 @@ index 40b3101..d692878 100755
          m_caster->GetClosePoint(x, y, z, 3.0f);
          pos.Relocate(x, y, z);
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index bc9825e..5a390e9 100755
+index 57f500a..f841297 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -1193,6 +1193,11 @@ void World::LoadConfigSettings(bool reload)

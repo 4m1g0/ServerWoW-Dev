@@ -1,17 +1,17 @@
-From f5f9439184ade893cca98bcc2eab6aca7e6ac637 Mon Sep 17 00:00:00 2001
+From 99b2a26f23889df7b74cbf53dc3025fcadbbd948 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:18:31 +0100
-Subject: [PATCH 05/22] Mute-Announce
+Date: Thu, 12 Jan 2012 18:05:38 +0100
+Subject: [PATCH 05/25] MuteAnnounce
 
 ---
- sql/own/0005-GMAnnounceMute.sql          |    2 ++
+ sql/own/0005-world_GMAnnounceMute.sql    |    2 ++
  src/server/game/Chat/Commands/Level2.cpp |    2 +-
- 3 files changed, 5 insertions(+), 4 deletions(-)
- create mode 100644 sql/own/0005-GMAnnounceMute.sql
+ 2 files changed, 3 insertions(+), 1 deletions(-)
+ create mode 100644 sql/own/0005-world_GMAnnounceMute.sql
 
 diff --git a/sql/own/0005-world_GMAnnounceMute.sql b/sql/own/0005-world_GMAnnounceMute.sql
 new file mode 100644
-index 0000000..47c904e
+index 0000000..e30fdc1
 --- /dev/null
 +++ b/sql/own/0005-world_GMAnnounceMute.sql
 @@ -0,0 +1,2 @@

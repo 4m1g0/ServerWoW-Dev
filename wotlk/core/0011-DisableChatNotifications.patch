@@ -1,11 +1,11 @@
-From 22edbb41682863dd05e1d7983f113f67202b8111 Mon Sep 17 00:00:00 2001
+From f6e56fdef37eb8aa86c35798cf9f029bfbf60ba5 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:33:01 +0100
-Subject: [PATCH 11/22] 2-DisableChatNotifications
+Date: Thu, 12 Jan 2012 18:05:38 +0100
+Subject: [PATCH 11/25] DisableChatNotifications
 
 ---
  src/server/game/Chat/Channels/Channel.cpp |    8 ++++----
- 2 files changed, 6 insertions(+), 6 deletions(-)
+ 1 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/src/server/game/Chat/Channels/Channel.cpp b/src/server/game/Chat/Channels/Channel.cpp
 index 37617bb..f6b7682 100755

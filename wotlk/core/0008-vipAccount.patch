@@ -1,7 +1,7 @@
-From 713d1fcc8028f9ca5173f8deff5e90af1c618292 Mon Sep 17 00:00:00 2001
+From f04fb1289a0344ae11f9432149c23311fea8edcd Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:33:01 +0100
-Subject: [PATCH 08/22] vip-Account-WOTLK
+Date: Thu, 12 Jan 2012 18:05:38 +0100
+Subject: [PATCH 08/25] vipAccount
 
 ---
  sql/own/logon_vipAccount.sql            |    1 +
@@ -9,7 +9,7 @@ Subject: [PATCH 08/22] vip-Account-WOTLK
  src/server/game/Server/WorldSession.h   |    4 +++-
  src/server/game/Server/WorldSocket.cpp  |    7 +++++--
  src/server/game/World/World.cpp         |    2 +-
- 6 files changed, 14 insertions(+), 10 deletions(-)
+ 5 files changed, 12 insertions(+), 6 deletions(-)
  create mode 100644 sql/own/logon_vipAccount.sql
 
 diff --git a/sql/own/logon_vipAccount.sql b/sql/own/logon_vipAccount.sql
@@ -20,7 +20,7 @@ index 0000000..a556336
 @@ -0,0 +1 @@
 +ALTER TABLE `account` ADD `vip` tinyint(3) unsigned NOT NULL DEFAULT '0' AFTER `recruiter`;
 diff --git a/src/server/game/Server/WorldSession.cpp b/src/server/game/Server/WorldSession.cpp
-index 11085c9..8349344 100755
+index 6bd09f2..a8d3fce 100755
 --- a/src/server/game/Server/WorldSession.cpp
 +++ b/src/server/game/Server/WorldSession.cpp
 @@ -86,9 +86,9 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
@@ -36,7 +36,7 @@ index 11085c9..8349344 100755
  m_playerRecentlyLogout(false), m_playerSave(false),
  m_sessionDbcLocale(sWorld->GetAvailableDbcLocale(locale)),
 diff --git a/src/server/game/Server/WorldSession.h b/src/server/game/Server/WorldSession.h
-index 88757ce..a3e2a55 100755
+index 4dca2f1..6a7cf38 100755
 --- a/src/server/game/Server/WorldSession.h
 +++ b/src/server/game/Server/WorldSession.h
 @@ -211,7 +211,7 @@ class CharacterCreateInfo
@@ -62,8 +62,8 @@ index 88757ce..a3e2a55 100755
          bool isRecruiter;
 +        bool vip;
          ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
+         time_t timeLastWhoCommand;
  };
- #endif
 diff --git a/src/server/game/Server/WorldSocket.cpp b/src/server/game/Server/WorldSocket.cpp
 index ac6f116..d5284c8 100755
 --- a/src/server/game/Server/WorldSocket.cpp
@@ -97,7 +97,7 @@ index ac6f116..d5284c8 100755
      m_Crypt.Init(&K);
  
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 424d290..bc9825e 100755
+index 59d0708..57f500a 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -260,7 +260,7 @@ World::AddSession_(WorldSession* s)

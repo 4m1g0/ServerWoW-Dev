@@ -1,18 +1,18 @@
-From 6693edc242e60b4cbf807843dd74616ee0eab8b5 Mon Sep 17 00:00:00 2001
+From f785e2f0a73d8a56b1dad7c360e0712fa908fee5 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:18:31 +0100
-Subject: [PATCH 03/22] Uptime
+Date: Thu, 12 Jan 2012 18:05:38 +0100
+Subject: [PATCH 03/25] Uptime
 
 ---
- sql/own/0004-Uptime.sql                            |    3 +++
+ sql/own/0004-world_Uptime.sql                      |    3 +++
  src/server/game/World/World.cpp                    |   10 ++++++----
  .../Database/Implementation/LoginDatabase.cpp      |    2 +-
- 4 files changed, 14 insertions(+), 8 deletions(-)
- create mode 100644 sql/own/0004-Uptime.sql
+ 3 files changed, 10 insertions(+), 5 deletions(-)
+ create mode 100644 sql/own/0004-world_Uptime.sql
 
 diff --git a/sql/own/0004-world_Uptime.sql b/sql/own/0004-world_Uptime.sql
 new file mode 100644
-index 0000000..91b0157
+index 0000000..c5465e2
 --- /dev/null
 +++ b/sql/own/0004-world_Uptime.sql
 @@ -0,0 +1,3 @@

@@ -1,14 +1,14 @@
-From c5a9aeda5aac608419286ed3d697020dad14f130 Mon Sep 17 00:00:00 2001
+From 64d79219d6347b59f46e05a13261e00f48852660 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 01:00:52 +0100
-Subject: [PATCH 3/3] Autobroadcast
+Date: Thu, 12 Jan 2012 18:07:07 +0100
+Subject: [PATCH 24/25] Autobroadcast
 
 ---
- sql/own/char_Autobroadcast_names.sql |    7 ++++
- src/server/game/World/World.cpp      |   57 ++++++++++++++++++++++++++++++---
- src/server/game/World/World.h        |    1 +
- 4 files changed, 61 insertions(+), 8 deletions(-)
- create mode 100644 sql/own/char_Autobroadcast_names.sql
+ sql/own/world_Autobroadcast_names.sql |    7 ++++
+ src/server/game/World/World.cpp       |   57 +++++++++++++++++++++++++++++---
+ src/server/game/World/World.h         |    1 +
+ 3 files changed, 59 insertions(+), 6 deletions(-)
+ create mode 100644 sql/own/world_Autobroadcast_names.sql
 
 diff --git a/sql/own/world_Autobroadcast_names.sql b/sql/own/world_Autobroadcast_names.sql
 new file mode 100644
@@ -24,7 +24,7 @@ index 0000000..6409baa
 +  PRIMARY KEY (`id`)
 +) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 5a390e9..9a26752 100755
+index f841297..934cc6f 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -1858,6 +1858,22 @@ void World::LoadAutobroadcasts()

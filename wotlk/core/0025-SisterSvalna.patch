@@ -1,7 +1,7 @@
-From c1d7f077e583217ea4e1142bfe9f8eb19e1b799e Mon Sep 17 00:00:00 2001
+From 7ada140e8521887dae9af1dcc156ee0286e2a3fc Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Wed, 11 Jan 2012 23:38:04 +0100
-Subject: [PATCH] SisterSvalna
+Date: Thu, 12 Jan 2012 18:07:07 +0100
+Subject: [PATCH 25/25] SisterSvalna
 
 ---
  .../Northrend/IcecrownCitadel/icecrown_citadel.cpp |    4 ++++

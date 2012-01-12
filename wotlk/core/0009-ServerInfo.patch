@@ -1,11 +1,11 @@
-From 941acb40b4801c714e53753a5122408af3509f2c Mon Sep 17 00:00:00 2001
+From c0de831241b3e3c392ab48e0ec065eaf1246c1fc Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:33:01 +0100
-Subject: [PATCH 09/22] Server-Info
+Date: Thu, 12 Jan 2012 18:05:38 +0100
+Subject: [PATCH 09/25] ServerInfo
 
 ---
  src/server/shared/SystemConfig.h |    2 +-
- 2 files changed, 4 insertions(+), 3 deletions(-)
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/shared/SystemConfig.h b/src/server/shared/SystemConfig.h
 index 2431ebb..348a626 100755

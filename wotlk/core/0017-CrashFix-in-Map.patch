@@ -1,11 +1,11 @@
-From f7f4dc935262276c128e0f55f06c8a3e75d98de0 Mon Sep 17 00:00:00 2001
+From b965bf95444ace5a9afbec8563b18223c2662688 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:33:02 +0100
-Subject: [PATCH 17/22] CrashFix-in-Map
+Date: Thu, 12 Jan 2012 18:05:39 +0100
+Subject: [PATCH 17/25] CrashFix-in-Map
 
 ---
  src/server/game/Maps/Map.cpp |    2 +-
- 2 files changed, 3 insertions(+), 3 deletions(-)
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/game/Maps/Map.cpp b/src/server/game/Maps/Map.cpp
 index b2f8e56..2819084 100755

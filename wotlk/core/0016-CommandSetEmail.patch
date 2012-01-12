@@ -1,13 +1,13 @@
-From 41bfedf96b672d47de7833cbf789e7215ac509d9 Mon Sep 17 00:00:00 2001
+From e657731278f6cd3aff67d92f87d5bd552288f9fe Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 7 Jan 2012 00:33:02 +0100
-Subject: [PATCH 16/22] Command-Set-Email
+Date: Thu, 12 Jan 2012 18:05:39 +0100
+Subject: [PATCH 16/25] CommandSetEmail
 
 ---
  src/server/game/Accounts/AccountMgr.cpp    |   20 ++++++++++
  src/server/game/Accounts/AccountMgr.h      |    1 +
  src/server/scripts/Commands/cs_account.cpp |   58 ++++++++++++++++++++++++++++
- 4 files changed, 81 insertions(+), 2 deletions(-)
+ 3 files changed, 79 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/game/Accounts/AccountMgr.cpp b/src/server/game/Accounts/AccountMgr.cpp
 index a6ae300..9564374 100755
@@ -53,7 +53,7 @@ index 1b1ecfa..bd8b41d 100755
  
          uint32 GetId(std::string username);
 diff --git a/src/server/scripts/Commands/cs_account.cpp b/src/server/scripts/Commands/cs_account.cpp
-index ac265ac..fb79655 100644
+index 7372c92..8feab1c 100644
 --- a/src/server/scripts/Commands/cs_account.cpp
 +++ b/src/server/scripts/Commands/cs_account.cpp
 @@ -38,6 +38,7 @@ public:
