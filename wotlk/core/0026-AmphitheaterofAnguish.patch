@@ -1,0 +1,60 @@
+From 4cac9d6d0a0e0b65652aa580b183856a58d5a85e Mon Sep 17 00:00:00 2001
+From: zazu <zazu@serverwow.com>
+Date: Thu, 12 Jan 2012 13:59:29 -0600
+Subject: [PATCH] AmphitheaterofAnguish
+
+---
+ src/server/scripts/Northrend/zuldrak.cpp |   15 +++++++++++++++
+ 1 files changed, 15 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/zuldrak.cpp b/src/server/scripts/Northrend/zuldrak.cpp
+index 2b73d57..cd72937 100644
+--- a/src/server/scripts/Northrend/zuldrak.cpp
++++ b/src/server/scripts/Northrend/zuldrak.cpp
+@@ -248,7 +248,9 @@ enum eGurgthock
+     QUEST_AMPHITHEATER_ANGUISH_YGGDRAS_1          = 12932,
+     QUEST_AMPHITHEATER_ANGUISH_MAGNATAUR          = 12933,
+     QUEST_AMPHITHEATER_ANGUISH_FROM_BEYOND        = 12934,
++    QUEST_THE_CHAMPION_OF_ANGUISH                 = 12948,
+ 
++    NPC_VLADOF_THE_BUTCHER                        = 30022,
+     NPC_ORINOKO_TUSKBREAKER                       = 30020,
+     NPC_KORRAK_BLOODRAGER                         = 30023,
+     NPC_YGGDRAS                                   = 30014,
+@@ -399,6 +401,10 @@ public:
+                             uiTimer = 2000;
+                             uiPhase = 12;
+                             break;
++                        case QUEST_THE_CHAMPION_OF_ANGUISH:
++                            uiTimer = 5000;
++                            uiPhase = 15;
++                            break;
+                    }
+                         break;
+                 }
+@@ -521,6 +527,12 @@ public:
+                                 creature->AI()->SetData(1, uiBossRandom);
+                             uiPhase = 0;
+                             break;
++                        case 15:
++                            if (Creature* summon = me->SummonCreature(NPC_VLADOF_THE_BUTCHER, SpawnPosition[0], TEMPSUMMON_CORPSE_DESPAWN, 1000))
++                                SummonGUID = summon->GetGUID();
++                            // TODO: DoScriptText(EMOTE_, me);
++                            uiPhase = 16;
++                            break;
+                     }
+                 }else uiTimer -= uiDiff;
+             }
+@@ -547,6 +559,9 @@ public:
+             case QUEST_AMPHITHEATER_ANGUISH_FROM_BEYOND:
+                 creature->AI()->SetData(1, quest->GetQuestId());
+                 break;
++            case QUEST_THE_CHAMPION_OF_ANGUISH:
++                creature->AI()->SetData(1, quest->GetQuestId());
++                break;
+         }
+ 
+         creature->AI()->SetGUID(player->GetGUID());
+-- 
+1.7.1
+

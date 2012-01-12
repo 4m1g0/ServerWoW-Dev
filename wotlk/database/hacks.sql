@@ -12,3 +12,6 @@ UPDATE quest_template SET requiredNpcOrGo1=-185156, requirednpcorgocount1=1, req
 
 -- Eliminado landro tirolargo por peligro de que regale monturas.
 DELETE FROM creature WHERE id = 17249;
+
+-- Esta quest debe ser completada por el script del boss, pero mientras no esta acabado hack fix
+UPDATE quest_template SET requirednpcorgo1=30022, requirednpcorgocount1=1 WHERE id=12948;
