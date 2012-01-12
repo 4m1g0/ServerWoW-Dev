@@ -15,3 +15,6 @@ DELETE FROM creature WHERE id = 17249;
 
 -- Esta quest debe ser completada por el script del boss, pero mientras no esta acabado hack fix
 UPDATE quest_template SET requirednpcorgo1=30022, requirednpcorgocount1=1 WHERE id=12948;
+
+-- Eliminamos temporalmente los vendedores del torneo argenta por que venden cosas sin restricciones
+delete from creature where id in (33556, 33554, 33553, 33555);
