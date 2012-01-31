@@ -1,7 +1,7 @@
-From f6e56fdef37eb8aa86c35798cf9f029bfbf60ba5 Mon Sep 17 00:00:00 2001
+From bb4f2bad8ecf7f5520c876a05d6377915bdaaa5a Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 12 Jan 2012 18:05:38 +0100
-Subject: [PATCH 11/25] DisableChatNotifications
+Date: Tue, 31 Jan 2012 16:35:49 +0100
+Subject: [PATCH 11/26] DisableChatNotifications
 
 ---
  src/server/game/Chat/Channels/Channel.cpp |    8 ++++----

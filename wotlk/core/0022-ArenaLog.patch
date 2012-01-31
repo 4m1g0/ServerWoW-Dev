@@ -1,14 +1,14 @@
-From 087245c7ed761bb1475528e46580387832d9863f Mon Sep 17 00:00:00 2001
+From a70faf72b1625df888fb8d30beed777b05211484 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 12 Jan 2012 18:05:40 +0100
-Subject: [PATCH 22/25] ArenaLog
+Date: Tue, 31 Jan 2012 16:36:15 +0100
+Subject: [PATCH 22/26] ArenaLog
 
 ---
  src/server/game/Battlegrounds/Battleground.cpp |    4 ++++
  1 files changed, 4 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/game/Battlegrounds/Battleground.cpp b/src/server/game/Battlegrounds/Battleground.cpp
-index 6a75869..72f4f05 100755
+index 5d12186..4500fe3 100755
 --- a/src/server/game/Battlegrounds/Battleground.cpp
 +++ b/src/server/game/Battlegrounds/Battleground.cpp
 @@ -754,6 +754,10 @@ void Battleground::EndBattleground(uint32 winner)

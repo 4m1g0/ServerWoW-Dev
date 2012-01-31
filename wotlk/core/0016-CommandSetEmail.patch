@@ -1,7 +1,7 @@
-From e657731278f6cd3aff67d92f87d5bd552288f9fe Mon Sep 17 00:00:00 2001
+From e38f5274d61618b923d808537927e2d10236c392 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 12 Jan 2012 18:05:39 +0100
-Subject: [PATCH 16/25] CommandSetEmail
+Date: Tue, 31 Jan 2012 16:35:49 +0100
+Subject: [PATCH 16/26] CommandSetEmail
 
 ---
  src/server/game/Accounts/AccountMgr.cpp    |   20 ++++++++++

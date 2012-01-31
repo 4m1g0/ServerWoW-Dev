@@ -1,7 +1,7 @@
-From efaf87d3333931b3b1332c0d71ba3e40651b2915 Mon Sep 17 00:00:00 2001
+From 5911fb687a028f5bfd76e5a3663a5a0810144357 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 12 Jan 2012 18:05:39 +0100
-Subject: [PATCH 15/25] CommandModiy
+Date: Tue, 31 Jan 2012 16:35:49 +0100
+Subject: [PATCH 15/26] CommandModiy
 
 ---
  src/server/scripts/Commands/cs_gm.cpp     |    4 +-
@@ -9,10 +9,10 @@ Subject: [PATCH 15/25] CommandModiy
  2 files changed, 7 insertions(+), 47 deletions(-)
 
 diff --git a/src/server/scripts/Commands/cs_gm.cpp b/src/server/scripts/Commands/cs_gm.cpp
-index b69f800..ab52968 100644
+index 9b9d1cf..c03b4a7 100644
 --- a/src/server/scripts/Commands/cs_gm.cpp
 +++ b/src/server/scripts/Commands/cs_gm.cpp
-@@ -91,9 +91,9 @@ public:
+@@ -92,9 +92,9 @@ public:
          if (!*args)
              return false;
  

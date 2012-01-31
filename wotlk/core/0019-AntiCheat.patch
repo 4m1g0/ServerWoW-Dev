@@ -1,7 +1,7 @@
-From 445bef287b7a1575ed6eb1c902409b720b54536a Mon Sep 17 00:00:00 2001
+From 39ddd2bc9f28aabf045e5fa4bfded1a3c5d10d31 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 12 Jan 2012 18:05:39 +0100
-Subject: [PATCH 19/25] AntiCheat
+Date: Tue, 31 Jan 2012 16:36:15 +0100
+Subject: [PATCH 19/26] AntiCheat
 
 ---
  sql/own/characters_anticheat.sql                   |   15 +
@@ -17,9 +17,8 @@ Subject: [PATCH 19/25] AntiCheat
  src/server/game/Entities/Player/Player.h           |    5 +
  src/server/game/Entities/Unit/Unit.cpp             |    7 +
  src/server/game/Miscellaneous/Language.h           |    3 +
- .../WaypointMovementGenerator.cpp                  |    1 +
+ .../WaypointMovementGenerator.cpp                  |    2 +
  src/server/game/Scripting/ScriptLoader.cpp         |    4 +
- .../Server/Protocol/Handlers/MovementHandler.cpp   |   10 +
  src/server/game/Spells/SpellEffects.cpp            |    7 +
  src/server/game/World/World.cpp                    |    5 +
  src/server/game/World/World.h                      |    4 +
@@ -27,7 +26,7 @@ Subject: [PATCH 19/25] AntiCheat
  src/server/scripts/Commands/CMakeLists.txt         |    1 +
  src/server/scripts/Commands/cs_anticheat.cpp       |  263 +++++++++++
  src/server/worldserver/worldserver.conf.dist       |   35 ++
- 23 files changed, 1150 insertions(+), 0 deletions(-)
+ 22 files changed, 1141 insertions(+), 0 deletions(-)
  create mode 100644 sql/own/characters_anticheat.sql
  create mode 100644 sql/own/world_anticheat.sql
  create mode 100644 src/server/game/Anticheat/AnticheatData.cpp
@@ -876,7 +875,7 @@ index 0000000..bd811ba
 +#endif
 \ No newline at end of file
 diff --git a/src/server/game/CMakeLists.txt b/src/server/game/CMakeLists.txt
-index 117a8f6..db36707 100644
+index 745e596..7feb333 100644
 --- a/src/server/game/CMakeLists.txt
 +++ b/src/server/game/CMakeLists.txt
 @@ -13,6 +13,7 @@ if( USE_COREPCH )
@@ -887,7 +886,7 @@ index 117a8f6..db36707 100644
  file(GLOB_RECURSE sources_Achievements Achievements/*.cpp Achievements/*.h)
  file(GLOB_RECURSE sources_Addons Addons/*.cpp Addons/*.h)
  file(GLOB_RECURSE sources_AI AI/*.cpp AI/*.h)
-@@ -62,6 +63,7 @@ endif()
+@@ -63,6 +64,7 @@ endif()
  set(game_STAT_SRCS
    ${game_STAT_SRCS}
    ${sources_Accounts}
@@ -895,7 +894,7 @@ index 117a8f6..db36707 100644
    ${sources_Achievements}
    ${sources_Addons}
    ${sources_AI}
-@@ -124,6 +126,7 @@ include_directories(
+@@ -125,6 +127,7 @@ include_directories(
    ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
    ${CMAKE_CURRENT_SOURCE_DIR}
    ${CMAKE_CURRENT_SOURCE_DIR}/Accounts
@@ -904,7 +903,7 @@ index 117a8f6..db36707 100644
    ${CMAKE_CURRENT_SOURCE_DIR}/Addons
    ${CMAKE_CURRENT_SOURCE_DIR}/AI
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index 7f7facf..61ad65d 100755
+index 1ca0f9c..fa2a7c6 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
 @@ -16,6 +16,7 @@
@@ -915,7 +914,7 @@ index 7f7facf..61ad65d 100755
  #include "Common.h"
  #include "Language.h"
  #include "DatabaseEnv.h"
-@@ -760,6 +761,9 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
+@@ -769,6 +770,9 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
      rest_type=REST_TYPE_NO;
      ////////////////////Rest System/////////////////////
  
@@ -925,7 +924,7 @@ index 7f7facf..61ad65d 100755
      m_mailsLoaded = false;
      m_mailsUpdated = false;
      unReadMails = 0;
-@@ -1506,6 +1510,8 @@ void Player::Update(uint32 p_time)
+@@ -1515,6 +1519,8 @@ void Player::Update(uint32 p_time)
      if (!IsInWorld())
          return;
  
@@ -934,7 +933,7 @@ index 7f7facf..61ad65d 100755
      // undelivered mail
      if (m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
      {
-@@ -2053,6 +2059,8 @@ void Player::SendTeleportAckPacket()
+@@ -2062,6 +2068,8 @@ void Player::SendTeleportAckPacket()
  
  bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options)
  {
@@ -943,7 +942,7 @@ index 7f7facf..61ad65d 100755
      if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
      {
          sLog->outError("TeleportTo: invalid map (%d) or invalid coordinates (X: %f, Y: %f, Z: %f, O: %f) given when teleporting player (GUID: %u, name: %s, map: %d, X: %f, Y: %f, Z: %f, O: %f).",
-@@ -18634,6 +18642,12 @@ void Player::SaveToDB(bool create /*=false*/)
+@@ -18723,6 +18731,12 @@ void Player::SaveToDB(bool create /*=false*/)
  
      CharacterDatabase.CommitTransaction(trans);
  
@@ -957,10 +956,10 @@ index 7f7facf..61ad65d 100755
      if (Pet* pet = GetPet())
          pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
-index 21c87a9..b984587 100755
+index 2fa171c..7cc27d9 100755
 --- a/src/server/game/Entities/Player/Player.h
 +++ b/src/server/game/Entities/Player/Player.h
-@@ -1083,6 +1083,11 @@ class Player : public Unit, public GridObject<Player>
+@@ -1086,6 +1086,11 @@ class Player : public Unit, public GridObject<Player>
          explicit Player (WorldSession* session);
          ~Player ();
  
@@ -973,7 +972,7 @@ index 21c87a9..b984587 100755
  
          static UpdateMask updateVisualBits;
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-index 2d6e8f1..a7a8a69 100755
+index e02331e..07e751f 100755
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
 @@ -16,6 +16,7 @@
@@ -984,7 +983,7 @@ index 2d6e8f1..a7a8a69 100755
  #include "Common.h"
  #include "CreatureAIImpl.h"
  #include "Log.h"
-@@ -12462,6 +12463,9 @@ void Unit::SetVisible(bool x)
+@@ -12375,6 +12376,9 @@ void Unit::SetVisible(bool x)
  
  void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
  {
@@ -994,7 +993,7 @@ index 2d6e8f1..a7a8a69 100755
      int32 main_speed_mod  = 0;
      float stack_bonus     = 1.0f;
      float non_stack_bonus = 1.0f;
-@@ -16546,6 +16550,9 @@ void Unit::UpdateObjectVisibility(bool forced)
+@@ -16459,6 +16463,9 @@ void Unit::UpdateObjectVisibility(bool forced)
  
  void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
  {
@@ -1005,10 +1004,10 @@ index 2d6e8f1..a7a8a69 100755
      if (GetTypeId() == TYPEID_PLAYER)
          player = (Player*)this;
 diff --git a/src/server/game/Miscellaneous/Language.h b/src/server/game/Miscellaneous/Language.h
-index a7854aa..c9451e3 100755
+index 8e3078a..aa74b29 100755
 --- a/src/server/game/Miscellaneous/Language.h
 +++ b/src/server/game/Miscellaneous/Language.h
-@@ -1058,6 +1058,9 @@ enum TrinityStrings
+@@ -1062,6 +1062,9 @@ enum TrinityStrings
      LANG_BG_SA_H_GY_WEST                    = 10072, //The Horde captured the West Graveyard!
      LANG_BG_SA_H_GY_EAST                    = 10073, //The Horde captured the East Graveyard!
  
@@ -1019,17 +1018,18 @@ index a7854aa..c9451e3 100755
      LANG_AUTO_BROADCAST                 = 11000,
      LANG_INVALID_REALMID                = 11001,
 diff --git a/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp
-index f88ed24..1b4d305 100755
+index ce8628a..2756e7c 100755
 --- a/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp
 +++ b/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp
-@@ -272,6 +272,7 @@ void FlightPathMovementGenerator::Finalize(Player & player)
-     float y = 0;
-     float z = 0;
-     i_destinationHolder.GetLocationNow(player.GetBaseMap(), x, y, z);
-+    player.Anti__SetLastTeleTime(time(NULL));
-     player.UpdatePosition(x, y, z, player.GetOrientation());
+@@ -214,6 +214,8 @@ void FlightPathMovementGenerator::Finalize(Player & player)
+         player.getHostileRefManager().setOnlineOfflineState(true);
+         if(player.pvpInfo.inHostileArea)
+             player.CastSpell(&player, 2479, true);
++        
++        // ATENCION: Aqui antes el core hacia la animacion de vuelo y solo actualizaba la posicion al terminar la ruta, pero ahora no hace ese teleport aqui por lo tanto no creo necesario poner la excepccion de alnticheat (necesita test antes de eliminar este mensaje)
  
- }
+         // update z position to ground and orientation for landing point
+         // this prevent cheating with landing  point at lags
 diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
 index c46721d..8ff0a68 100755
 --- a/src/server/game/Scripting/ScriptLoader.cpp
@@ -1066,57 +1066,8 @@ index c46721d..8ff0a68 100755
      AddSC_account_commandscript();
      AddSC_achievement_commandscript();
      AddSC_debug_commandscript();
-diff --git a/src/server/game/Server/Protocol/Handlers/MovementHandler.cpp b/src/server/game/Server/Protocol/Handlers/MovementHandler.cpp
-index 7d1233c..4491fad 100755
---- a/src/server/game/Server/Protocol/Handlers/MovementHandler.cpp
-+++ b/src/server/game/Server/Protocol/Handlers/MovementHandler.cpp
-@@ -16,6 +16,7 @@
-  * with this program. If not, see <http://www.gnu.org/licenses/>.
-  */
- 
-+#include "AnticheatMgr.h"
- #include "Common.h"
- #include "WorldPacket.h"
- #include "WorldSession.h"
-@@ -87,6 +88,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
-     GetPlayer()->ResetMap();
-     GetPlayer()->SetMap(newMap);
- 
-+    GetPlayer()->m_anti_TeleTime=time(NULL);
-+
-     GetPlayer()->SendInitialPacketsBeforeAddToMap();
-     if (!GetPlayer()->GetMap()->AddPlayerToMap(GetPlayer()))
-     {
-@@ -183,6 +186,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
- 
-     // resummon pet
-     GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
-+    GetPlayer()->Anti__SetLastTeleTime(::time(NULL));
- 
-     //lets process all delayed operations on successful teleport
-     GetPlayer()->ProcessDelayedOperations();
-@@ -236,6 +240,9 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
-     // resummon pet
-     GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
- 
-+    if(plMover)
-+        plMover->Anti__SetLastTeleTime(::time(NULL));
-+
-     //lets process all delayed operations on successful teleport
-     GetPlayer()->ProcessDelayedOperations();
- }
-@@ -337,6 +344,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
-         plMover->SetInWater(!plMover->IsInWater() || plMover->GetBaseMap()->IsUnderWater(movementInfo.pos.GetPositionX(), movementInfo.pos.GetPositionY(), movementInfo.pos.GetPositionZ()));
-     }
- 
-+    if (plMover)
-+        sAnticheatMgr->StartHackDetection(plMover, movementInfo, opcode);
-+
-     /*----------------------*/
- 
-     /* process position-change */
 diff --git a/src/server/game/Spells/SpellEffects.cpp b/src/server/game/Spells/SpellEffects.cpp
-index 2c33488..749f1bf 100755
+index d5a9bf9..2f59fe4 100755
 --- a/src/server/game/Spells/SpellEffects.cpp
 +++ b/src/server/game/Spells/SpellEffects.cpp
 @@ -16,6 +16,7 @@
@@ -1127,7 +1078,7 @@ index 2c33488..749f1bf 100755
  #include "Common.h"
  #include "DatabaseEnv.h"
  #include "WorldPacket.h"
-@@ -6203,6 +6204,9 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
+@@ -6194,6 +6195,9 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
      {
          if (!unitTarget)
              return;
@@ -1137,7 +1088,7 @@ index 2c33488..749f1bf 100755
  
          float angle = unitTarget->GetRelativeAngle(m_caster);
          Position pos;
-@@ -7213,6 +7217,9 @@ void Spell::GetSummonPosition(uint32 i, Position &pos, float radius, uint32 coun
+@@ -7204,6 +7208,9 @@ void Spell::GetSummonPosition(uint32 i, Position &pos, float radius, uint32 coun
      // Summon if dest location not present near caster
      else
      {
@@ -1187,10 +1138,10 @@ index 2b15682..e514620 100755
  };
  
 diff --git a/src/server/scripts/CMakeLists.txt b/src/server/scripts/CMakeLists.txt
-index d34b1b8..46d759a 100644
+index 56e63af..9e361c9 100644
 --- a/src/server/scripts/CMakeLists.txt
 +++ b/src/server/scripts/CMakeLists.txt
-@@ -74,6 +74,7 @@ include_directories(
+@@ -72,6 +72,7 @@ include_directories(
    ${CMAKE_SOURCE_DIR}/src/server/shared
    ${CMAKE_SOURCE_DIR}/src/server/shared/Database
    ${CMAKE_SOURCE_DIR}/src/server/game/Accounts

@@ -1,7 +1,7 @@
-From 64d79219d6347b59f46e05a13261e00f48852660 Mon Sep 17 00:00:00 2001
+From fcb64da33e5b10bafba7ae3a633ae0a3ef19c34f Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 12 Jan 2012 18:07:07 +0100
-Subject: [PATCH 24/25] Autobroadcast
+Date: Tue, 31 Jan 2012 16:36:15 +0100
+Subject: [PATCH 24/26] Autobroadcast
 
 ---
  sql/own/world_Autobroadcast_names.sql |    7 ++++

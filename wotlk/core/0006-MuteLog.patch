@@ -1,7 +1,7 @@
-From 9c73d27476d8ad7dfb6677153845ff2f9e4c6e43 Mon Sep 17 00:00:00 2001
+From 0f25105c476b64ebc7166e335c33e899c486c88c Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 12 Jan 2012 18:05:38 +0100
-Subject: [PATCH 06/25] MuteLog
+Date: Tue, 31 Jan 2012 16:35:48 +0100
+Subject: [PATCH 06/26] MuteLog
 
 ---
  sql/own/auth_mutehistory.sql                       |   11 ++++
@@ -45,7 +45,7 @@ index 0000000..3e3d720
 +INSERT INTO trinity_string (entry, content_default, content_loc6) VALUES(90002, 'Mute history for account %s:', 'Historial de mute para la cuenta %s:');
 +INSERT INTO trinity_string (entry, content_default, content_loc6) VALUES(90003, 'Mute Date: %s Mutetime: %s Still active: %s  Reason: %s Set by: %s', 'Fecha de muteo: %s Tiempo: %s AÃºn activo: %s  Motivo: %s Puesto por: %s');
 diff --git a/src/server/authserver/Server/AuthSocket.cpp b/src/server/authserver/Server/AuthSocket.cpp
-index 1f85cb6..fca0c01 100755
+index 6d295a0..bd40ab9 100755
 --- a/src/server/authserver/Server/AuthSocket.cpp
 +++ b/src/server/authserver/Server/AuthSocket.cpp
 @@ -394,6 +394,8 @@ bool AuthSocket::_HandleLogonChallenge()
@@ -58,7 +58,7 @@ index 1f85cb6..fca0c01 100755
                  // If the account is banned, reject the logon attempt
                  stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BANNED);
 diff --git a/src/server/game/Chat/Commands/Level2.cpp b/src/server/game/Chat/Commands/Level2.cpp
-index 4daa057..473d8b2 100755
+index e10842c..07558ba 100755
 --- a/src/server/game/Chat/Commands/Level2.cpp
 +++ b/src/server/game/Chat/Commands/Level2.cpp
 @@ -75,6 +75,8 @@ bool ChatHandler::HandleMuteCommand(const char* args)
@@ -80,7 +80,7 @@ index 4daa057..473d8b2 100755
      if (target)
          ChatHandler(target).PSendSysMessage(LANG_YOUR_CHAT_ENABLED);
 diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
-index d23a429..9ba3b1c 100755
+index cb3eb82..a19a3e9 100755
 --- a/src/server/game/Chat/Commands/Level3.cpp
 +++ b/src/server/game/Chat/Commands/Level3.cpp
 @@ -3157,26 +3157,44 @@ bool ChatHandler::HandleBanInfoCharacterCommand(const char *args)
@@ -145,7 +145,7 @@ index d23a429..9ba3b1c 100755
      return true;
  }
 diff --git a/src/server/game/Miscellaneous/Language.h b/src/server/game/Miscellaneous/Language.h
-index 66610ad..a7854aa 100755
+index e751dbf..8e3078a 100755
 --- a/src/server/game/Miscellaneous/Language.h
 +++ b/src/server/game/Miscellaneous/Language.h
 @@ -363,6 +363,9 @@ enum TrinityStrings

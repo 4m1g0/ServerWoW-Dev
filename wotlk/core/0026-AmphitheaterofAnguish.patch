@@ -1,7 +1,7 @@
-From 4cac9d6d0a0e0b65652aa580b183856a58d5a85e Mon Sep 17 00:00:00 2001
-From: zazu <zazu@serverwow.com>
-Date: Thu, 12 Jan 2012 13:59:29 -0600
-Subject: [PATCH] AmphitheaterofAnguish
+From e3ca35693eefcb09066e7423ead576c2c4d86dec Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Tue, 31 Jan 2012 16:36:15 +0100
+Subject: [PATCH 26/26] AmphitheaterofAnguish
 
 ---
  src/server/scripts/Northrend/zuldrak.cpp |   15 +++++++++++++++
@@ -56,5 +56,5 @@ index 2b73d57..cd72937 100644
  
          creature->AI()->SetGUID(player->GetGUID());
 -- 
-1.7.1
+1.7.5.4
 
