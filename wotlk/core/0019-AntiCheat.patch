@@ -1,32 +1,32 @@
-From 39ddd2bc9f28aabf045e5fa4bfded1a3c5d10d31 Mon Sep 17 00:00:00 2001
+From 862364367f439fc21f6fdbf0363122bf5d0c2568 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 16:36:15 +0100
+Date: Tue, 31 Jan 2012 18:34:00 +0100
 Subject: [PATCH 19/26] AntiCheat
 
 ---
- sql/own/characters_anticheat.sql                   |   15 +
- sql/own/world_anticheat.sql                        |    1 +
- src/server/game/Anticheat/AnticheatData.cpp        |  117 +++++
- src/server/game/Anticheat/AnticheatData.h          |   63 +++
- src/server/game/Anticheat/AnticheatMgr.cpp         |  463 ++++++++++++++++++++
- src/server/game/Anticheat/AnticheatMgr.h           |   99 +++++
- src/server/game/Anticheat/AnticheatScripts.cpp     |   14 +
- src/server/game/Anticheat/AnticheatScripts.h       |   15 +
- src/server/game/CMakeLists.txt                     |    3 +
- src/server/game/Entities/Player/Player.cpp         |   14 +
- src/server/game/Entities/Player/Player.h           |    5 +
- src/server/game/Entities/Unit/Unit.cpp             |    7 +
- src/server/game/Miscellaneous/Language.h           |    3 +
- .../WaypointMovementGenerator.cpp                  |    2 +
- src/server/game/Scripting/ScriptLoader.cpp         |    4 +
- src/server/game/Spells/SpellEffects.cpp            |    7 +
- src/server/game/World/World.cpp                    |    5 +
- src/server/game/World/World.h                      |    4 +
- src/server/scripts/CMakeLists.txt                  |    1 +
- src/server/scripts/Commands/CMakeLists.txt         |    1 +
- src/server/scripts/Commands/cs_anticheat.cpp       |  263 +++++++++++
- src/server/worldserver/worldserver.conf.dist       |   35 ++
- 22 files changed, 1141 insertions(+), 0 deletions(-)
+ sql/own/characters_anticheat.sql               |   15 +
+ sql/own/world_anticheat.sql                    |    1 +
+ src/server/game/Anticheat/AnticheatData.cpp    |  117 ++++++
+ src/server/game/Anticheat/AnticheatData.h      |   63 ++++
+ src/server/game/Anticheat/AnticheatMgr.cpp     |  463 ++++++++++++++++++++++++
+ src/server/game/Anticheat/AnticheatMgr.h       |   99 +++++
+ src/server/game/Anticheat/AnticheatScripts.cpp |   14 +
+ src/server/game/Anticheat/AnticheatScripts.h   |   15 +
+ src/server/game/CMakeLists.txt                 |    3 +
+ src/server/game/Entities/Player/Player.cpp     |   14 +
+ src/server/game/Entities/Player/Player.h       |    5 +
+ src/server/game/Entities/Unit/Unit.cpp         |    7 +
+ src/server/game/Handlers/MovementHandler.cpp   |   10 +
+ src/server/game/Miscellaneous/Language.h       |    3 +
+ src/server/game/Scripting/ScriptLoader.cpp     |    4 +
+ src/server/game/Spells/SpellEffects.cpp        |    7 +
+ src/server/game/World/World.cpp                |    5 +
+ src/server/game/World/World.h                  |    4 +
+ src/server/scripts/CMakeLists.txt              |    1 +
+ src/server/scripts/Commands/CMakeLists.txt     |    1 +
+ src/server/scripts/Commands/cs_anticheat.cpp   |  263 ++++++++++++++
+ src/server/worldserver/worldserver.conf.dist   |   35 ++
+ 22 files changed, 1149 insertions(+), 0 deletions(-)
  create mode 100644 sql/own/characters_anticheat.sql
  create mode 100644 sql/own/world_anticheat.sql
  create mode 100644 src/server/game/Anticheat/AnticheatData.cpp
@@ -1003,6 +1003,55 @@ index e02331e..07e751f 100755
      Player* player = NULL;
      if (GetTypeId() == TYPEID_PLAYER)
          player = (Player*)this;
+diff --git a/src/server/game/Handlers/MovementHandler.cpp b/src/server/game/Handlers/MovementHandler.cpp
+index 7d1233c..4491fad 100755
+--- a/src/server/game/Handlers/MovementHandler.cpp
++++ b/src/server/game/Handlers/MovementHandler.cpp
+@@ -16,6 +16,7 @@
+  * with this program. If not, see <http://www.gnu.org/licenses/>.
+  */
+ 
++#include "AnticheatMgr.h"
+ #include "Common.h"
+ #include "WorldPacket.h"
+ #include "WorldSession.h"
+@@ -87,6 +88,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
+     GetPlayer()->ResetMap();
+     GetPlayer()->SetMap(newMap);
+ 
++    GetPlayer()->m_anti_TeleTime=time(NULL);
++
+     GetPlayer()->SendInitialPacketsBeforeAddToMap();
+     if (!GetPlayer()->GetMap()->AddPlayerToMap(GetPlayer()))
+     {
+@@ -183,6 +186,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
+ 
+     // resummon pet
+     GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
++    GetPlayer()->Anti__SetLastTeleTime(::time(NULL));
+ 
+     //lets process all delayed operations on successful teleport
+     GetPlayer()->ProcessDelayedOperations();
+@@ -236,6 +240,9 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
+     // resummon pet
+     GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
+ 
++    if(plMover)
++        plMover->Anti__SetLastTeleTime(::time(NULL));
++
+     //lets process all delayed operations on successful teleport
+     GetPlayer()->ProcessDelayedOperations();
+ }
+@@ -337,6 +344,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
+         plMover->SetInWater(!plMover->IsInWater() || plMover->GetBaseMap()->IsUnderWater(movementInfo.pos.GetPositionX(), movementInfo.pos.GetPositionY(), movementInfo.pos.GetPositionZ()));
+     }
+ 
++    if (plMover)
++        sAnticheatMgr->StartHackDetection(plMover, movementInfo, opcode);
++
+     /*----------------------*/
+ 
+     /* process position-change */
 diff --git a/src/server/game/Miscellaneous/Language.h b/src/server/game/Miscellaneous/Language.h
 index 8e3078a..aa74b29 100755
 --- a/src/server/game/Miscellaneous/Language.h
@@ -1017,19 +1066,6 @@ index 8e3078a..aa74b29 100755
      // Use for custom patches             11000-11999
      LANG_AUTO_BROADCAST                 = 11000,
      LANG_INVALID_REALMID                = 11001,
-diff --git a/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp
-index ce8628a..2756e7c 100755
---- a/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp
-+++ b/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp
-@@ -214,6 +214,8 @@ void FlightPathMovementGenerator::Finalize(Player & player)
-         player.getHostileRefManager().setOnlineOfflineState(true);
-         if(player.pvpInfo.inHostileArea)
-             player.CastSpell(&player, 2479, true);
-+        
-+        // ATENCION: Aqui antes el core hacia la animacion de vuelo y solo actualizaba la posicion al terminar la ruta, pero ahora no hace ese teleport aqui por lo tanto no creo necesario poner la excepccion de alnticheat (necesita test antes de eliminar este mensaje)
- 
-         // update z position to ground and orientation for landing point
-         // this prevent cheating with landing  point at lags
 diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
 index c46721d..8ff0a68 100755
 --- a/src/server/game/Scripting/ScriptLoader.cpp

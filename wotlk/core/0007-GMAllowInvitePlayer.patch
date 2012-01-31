@@ -1,14 +1,15 @@
-From 6eee3b9b912ba97f90dcb77dd5165a43be09cbae Mon Sep 17 00:00:00 2001
+From 939dafa00cfea1bea9213a451a765577a4b9da00 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 16:35:48 +0100
+Date: Tue, 31 Jan 2012 18:32:42 +0100
 Subject: [PATCH 07/26] GMAllowInvitePlayer
 
 ---
  src/server/game/Chat/Commands/Level1.cpp     |    6 +++---
+ src/server/game/Handlers/GroupHandler.cpp    |   10 +++++++++-
  src/server/game/World/World.cpp              |    1 +
  src/server/game/World/World.h                |    1 +
  src/server/worldserver/worldserver.conf.dist |    8 ++++++++
- 4 files changed, 13 insertions(+), 3 deletions(-)
+ 5 files changed, 22 insertions(+), 4 deletions(-)
 
 diff --git a/src/server/game/Chat/Commands/Level1.cpp b/src/server/game/Chat/Commands/Level1.cpp
 index f1ea85a..93c3fd1 100755
@@ -37,6 +38,27 @@ index f1ea85a..93c3fd1 100755
          }
  
          PSendSysMessage(LANG_SUMMONING, nameLink.c_str(), "");
+diff --git a/src/server/game/Handlers/GroupHandler.cpp b/src/server/game/Handlers/GroupHandler.cpp
+index 9343a53..b64aa41 100755
+--- a/src/server/game/Handlers/GroupHandler.cpp
++++ b/src/server/game/Handlers/GroupHandler.cpp
+@@ -83,7 +83,15 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
+     }
+ 
+     // restrict invite to GMs
+-    if (!sWorld->getBoolConfig(CONFIG_ALLOW_GM_GROUP) && !GetPlayer()->isGameMaster() && player->isGameMaster())
++    // Esto deberia estar programado como AccountMgr::IsGMAccount(player->GetSession()->GetSecurity())
++    // pero para eso habria que hacer #include AccountMgr.h y no se que consecuencias de desoptimizacion puede tener.
++    if (!sWorld->getBoolConfig(CONFIG_ALLOW_GM_GROUP) && !GetPlayer()->isGameMaster() && player->GetSession()->GetSecurity() > 0)
++        return;
++
++    // Restrict gm invite players
++    // Esto deberia estar programado como AccountMgr::IsGMAccount(GetPlayer()->GetSession()->GetSecurity())
++    // pero para eso habria que hacer #include AccountMgr.h y no se que consecuencias de desoptimizacion puede tener.
++    if (!sWorld->getBoolConfig(CONFIG_ALLOW_GM_INVITE_PLAYER) && GetPlayer()->GetSession()->GetSecurity() > 0 && !player->isGameMaster())
+         return;
+ 
+     // can't group with
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
 index dbc4c3d..59d0708 100755
 --- a/src/server/game/World/World.cpp

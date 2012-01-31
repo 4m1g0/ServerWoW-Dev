@@ -1,6 +1,6 @@
-From bb4f2bad8ecf7f5520c876a05d6377915bdaaa5a Mon Sep 17 00:00:00 2001
+From 36d4db1416bb142c08dd0dbc7414dd5fdb86da44 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 16:35:49 +0100
+Date: Tue, 31 Jan 2012 18:32:43 +0100
 Subject: [PATCH 11/26] DisableChatNotifications
 
 ---
