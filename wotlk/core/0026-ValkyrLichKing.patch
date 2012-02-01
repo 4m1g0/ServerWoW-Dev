@@ -1,0 +1,34 @@
+From 35fc93a82b43c175ce24b617a90cbfa32c81a4a5 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Thu, 2 Feb 2012 00:33:34 +0100
+Subject: [PATCH] asd
+
+---
+ .../IcecrownCitadel/boss_the_lich_king.cpp         |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
+index 5029dbc..f83c6e0 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
+@@ -116,7 +116,7 @@ enum Spells
+     SPELL_SOUL_REAPER_BUFF              = 69410,
+     SPELL_WINGS_OF_THE_DAMNED           = 74352,
+     SPELL_VALKYR_TARGET_SEARCH          = 69030,
+-    SPELL_CHARGE                        = 74399,    // cast on selected target
++    SPELL_CHARGE                        = 43807,    // cast on selected target (Spell provisional, el original es 74399)
+     SPELL_VALKYR_CARRY                  = 74445,    // removes unselectable flag
+     SPELL_LIFE_SIPHON                   = 73488,
+     SPELL_LIFE_SIPHON_HEAL              = 73489,
+@@ -1523,6 +1523,8 @@ class npc_valkyr_shadowguard : public CreatureScript
+                 {
+                     case POINT_DROP_PLAYER:
+                         DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
++                        if (Player* target = ObjectAccessor::GetPlayer(*me, _grabbedPlayer))
++                        	target->setDeathState(JUST_DIED);
+                         me->DespawnOrUnsummon(1000);
+                         break;
+                     case POINT_CHARGE:
+-- 
+1.7.5.4
+
