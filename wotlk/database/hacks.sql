@@ -18,3 +18,6 @@ UPDATE quest_template SET requirednpcorgo1=30022, requirednpcorgocount1=1 WHERE 
 
 -- Eliminamos temporalmente los vendedores del torneo argenta por que venden cosas sin restricciones
 delete from creature where id in (33556, 33554, 33553, 33555);
+
+-- aumentada velocidad de las esferas del lich king
+UPDATE creature_template SET speed_run = 1.4 WHERE entry = 36633;
