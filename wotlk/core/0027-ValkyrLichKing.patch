@@ -25,7 +25,7 @@ index 5029dbc..f83c6e0 100644
                      case POINT_DROP_PLAYER:
                          DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
 +                        if (Player* target = ObjectAccessor::GetPlayer(*me, _grabbedPlayer))
-+                        	target->setDeathState(JUST_DIED);
++                            target->setDeathState(JUST_DIED);
                          me->DespawnOrUnsummon(1000);
                          break;
                      case POINT_CHARGE:
