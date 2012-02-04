@@ -263,7 +263,7 @@ new file mode 100644
 index 0000000..847e8ef
 --- /dev/null
 +++ b/src/server/game/Anticheat/AnticheatMgr.cpp
-@@ -0,0 +1,463 @@
+@@ -0,0 +1,461 @@
 +/*
 + * This program is free software; you can redistribute it and/or modify it
 + * under the terms of the GNU General Public License as published by the
@@ -725,6 +725,7 @@ index 0000000..847e8ef
 +        CharacterDatabase.PExecute("DELETE FROM players_reports_status WHERE guid=%u;",guid);
 +    }
 +}
++}
 diff --git a/src/server/game/Anticheat/AnticheatMgr.h b/src/server/game/Anticheat/AnticheatMgr.h
 new file mode 100644
 index 0000000..40e3d2a
@@ -1116,7 +1117,7 @@ index d5a9bf9..2f59fe4 100755
      {
          if (!unitTarget)
              return;
-+        
++
 +        //if (m_caster->ToPlayer())
 +        //   sAnticheatMgr->DisableAnticheatDetection(m_caster->ToPlayer());
  

@@ -57,4 +57,3 @@ index 2b73d57..cd72937 100644
          creature->AI()->SetGUID(player->GetGUID());
 -- 
 1.7.5.4
-

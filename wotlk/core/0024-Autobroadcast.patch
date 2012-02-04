@@ -31,11 +31,11 @@ index f841297..934cc6f 100755
  
      sLog->outString(">> Loaded %u autobroadcasts definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
      sLog->outString();
-+    
++
 +    count = 0;
-+    
++
 +    result = WorldDatabase.Query("SELECT name FROM autobroadcast_names");
-+    
++
 +    do
 +    {
 +
@@ -46,7 +46,7 @@ index f841297..934cc6f 100755
 +
 +        ++count;
 +    } while (result->NextRow());
-+    
++
  }
  
  /// Update the World !
@@ -58,19 +58,19 @@ index f841297..934cc6f 100755
 +    if (m_Autobroadcasts.empty() || m_Autobroadcasts_names.empty())
          return;
 -
-+        
++
      std::string msg;
 -
 +    std::string name;
-+    
++
      msg = SelectRandomContainerElement(m_Autobroadcasts);
 -
 +    name = SelectRandomContainerElement(m_Autobroadcasts_names);
-+    
++
 +    uint32 guid = sObjectMgr->GetPlayerGUIDByName(name);
 +    uint64 pl_account = sObjectMgr->GetPlayerAccountIdByGUID(guid);
 +    char* secLevel;
-+    
++
 +    switch(AccountMgr::GetSecurity(pl_account)) {
 +       case SEC_MODERATOR:
 +         secLevel = "Mod";
@@ -93,7 +93,7 @@ index f841297..934cc6f 100755
 +       default:
 +         return;
 +     }
-+    
++
      uint32 abcenter = sWorld->getIntConfig(CONFIG_AUTOBROADCAST_CENTER);
  
      if (abcenter == 0)
@@ -125,4 +125,3 @@ index e514620..16180aa 100755
          void LoadCharacterNameData();
 -- 
 1.7.5.4
-

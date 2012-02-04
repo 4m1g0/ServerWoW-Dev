@@ -15,10 +15,10 @@ index 5d12186..4500fe3 100755
                      for (Battleground::BattlegroundScoreMap::const_iterator itr = GetPlayerScoresBegin(); itr != GetPlayerScoresEnd(); ++itr)
                          if (Player* player = ObjectAccessor::FindPlayer(itr->first))
                              sLog->outArena("Statistics for %s (GUID: " UI64FMTD ", Team: %d, IP: %s): %u damage, %u healing, %u killing blows", player->GetName(), itr->first, player->GetArenaTeamId(m_ArenaType == 5 ? 2 : m_ArenaType == 3), player->GetSession()->GetRemoteAddress().c_str(), itr->second->DamageDone, itr->second->HealingDone, itr->second->KillingBlows);
-+                
++
 +                // Guardamos los de arena en tabla logs
 +                CharacterDatabase.PExecute("INSERT INTO `logs` (type, param1, param2, param3, param4, param5, param6) VALUES (2, %u, %d, %d, %d, %d, %d)", m_ArenaType, winner_arena_team->GetId(), loser_arena_team->GetId(), winner_team_rating, loser_team_rating, GetStartTime());
-+                
++
              }
              // Deduct 16 points from each teams arena-rating if there are no winners after 45+2 minutes
              else

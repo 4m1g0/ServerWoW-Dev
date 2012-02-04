@@ -65,7 +65,7 @@ index e10842c..07558ba 100755
      // must have strong lesser security level
      if (HasLowerSecurity (target, target_guid, true))
          return false;
-+        
++
 +    sWorld->MuteAccount(accountId, notspeaktime*60, mutereasonstr.c_str(), m_session ? m_session->GetPlayerName() : "");
  
      PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
@@ -74,7 +74,7 @@ index e10842c..07558ba 100755
      stmt->setUInt32(1, accountId);
  
      LoginDatabase.Execute(stmt);
-+    
++
 +    sWorld->RemoveMuteAccount(accountId);
  
      if (target)
@@ -105,7 +105,7 @@ index cb3eb82..a19a3e9 100755
 +            std::string bantime = permanent ? GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[1].GetUInt64(), true);
 +            PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
 +                fields[0].GetCString(), bantime.c_str(), active ? GetTrinityString(LANG_BANINFO_YES) : GetTrinityString(LANG_BANINFO_NO), fields[4].GetCString(), fields[5].GetCString());
-+        } while (result->NextRow());  
++        } while (result->NextRow());
      }
 +    else
 +        PSendSysMessage(LANG_BANINFO_NOACCOUNTBAN, accountname);
