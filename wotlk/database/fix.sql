@@ -53,3 +53,13 @@ DELETE FROM creature_questrelation WHERE id=22112 AND quest=10871;
 
 -- Corregidas immunidades de las valkyr en el encuentro del rey exanime
 UPDATE creature_template SET mechanic_immune_mask = 617299839 WHERE entry IN (36609, 39120, 39121, 39122);
+
+-- Añadidas inmunidades a los bosses de TOC (data ytdb)
+UPDATE creature_template SET mechanic_immune_mask = 803160063 WHERE entry IN (34796, 35438, 35439, 35440);
+UPDATE creature_template SET mechanic_immune_mask = 803160063 WHERE entry IN (35144, 35511, 35512, 35513);
+UPDATE creature_template SET mechanic_immune_mask = 803160063 WHERE entry IN (34799, 35514, 35515, 35516);
+UPDATE creature_template SET mechanic_immune_mask = 803160063 WHERE entry IN (34797, 35447, 35448, 35449);
+UPDATE creature_template SET mechanic_immune_mask = 803160063 WHERE entry IN (34780, 35216, 35268, 35269);
+UPDATE creature_template SET mechanic_immune_mask = 668942335 WHERE entry IN (34497, 35350, 35351, 35352);
+UPDATE creature_template SET mechanic_immune_mask = 769605631 WHERE entry IN (34496, 35347, 35348, 35349);
+UPDATE creature_template SET mechanic_immune_mask = 650854235 WHERE entry IN (34564, 34566, 35615, 35616);
