@@ -1,14 +1,43 @@
-From a077fd2e72d7671694b97db9ea5b8978d5d96533 Mon Sep 17 00:00:00 2001
+From 6acdf74d1098f6af271f1616bbdf9895dce40664 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:32:43 +0100
-Subject: [PATCH 16/26] CommandSetEmail
+Date: Sat, 4 Feb 2012 17:10:23 +0100
+Subject: [PATCH] changemail
 
 ---
+ sql/own/char_logs.sql                      |   21 ++++++++++
  src/server/game/Accounts/AccountMgr.cpp    |   20 ++++++++++
  src/server/game/Accounts/AccountMgr.h      |    1 +
  src/server/scripts/Commands/cs_account.cpp |   58 ++++++++++++++++++++++++++++
- 3 files changed, 79 insertions(+), 0 deletions(-)
+ 4 files changed, 100 insertions(+), 0 deletions(-)
+ create mode 100644 sql/own/char_logs.sql
 
+diff --git a/sql/own/char_logs.sql b/sql/own/char_logs.sql
+new file mode 100644
+index 0000000..c941f19
+--- /dev/null
++++ b/sql/own/char_logs.sql
+@@ -0,0 +1,21 @@
++DROP TABLE IF EXISTS `logs`;
++
++CREATE TABLE `logs` (
++  `entry` int(20) NOT NULL AUTO_INCREMENT,
++  `accid` int(11) unsigned NOT NULL,
++  `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
++  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
++  `param1` int(10) unsigned NOT NULL DEFAULT '0',
++  `param2` int(10) unsigned NOT NULL DEFAULT '0',
++  `param3` int(10) unsigned NOT NULL DEFAULT '0',
++  `param4` int(10) unsigned NOT NULL DEFAULT '0',
++  `param5` int(10) unsigned NOT NULL DEFAULT '0',
++  `param6` int(10) unsigned NOT NULL DEFAULT '0',
++  `param7` int(10) unsigned NOT NULL DEFAULT '0',
++  `text_param1` text,
++  `text_param2` text,
++  `text_param3` text,
++  `text_param4` text,
++  `comment` text NOT NULL COMMENT 'Log Comment',
++  PRIMARY KEY (`entry`)
++) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
 diff --git a/src/server/game/Accounts/AccountMgr.cpp b/src/server/game/Accounts/AccountMgr.cpp
 index a6ae300..9564374 100755
 --- a/src/server/game/Accounts/AccountMgr.cpp
