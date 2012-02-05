@@ -1,7 +1,7 @@
-From de6fefb4f35b6f59f8096d035f0f6dccb33cd8fd Mon Sep 17 00:00:00 2001
+From 8e087a20f745a2db675991a1e7d9c3ce72972092 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:31:07 +0100
-Subject: [PATCH 01/26] AdminLevels
+Date: Sun, 5 Feb 2012 18:06:48 +0100
+Subject: [PATCH 01/29] AdminLevels
 
 ---
  sql/own/0001-world_Announce.sql                 |    3 ++
@@ -21,10 +21,10 @@ index 0000000..77bb028
 +INSERT INTO `trinity_string` VALUES
 +(3,'|cffff0000<%s>|c1f40af20 %s|cffffff00: %s|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 diff --git a/src/server/game/AI/SmartScripts/SmartScript.cpp b/src/server/game/AI/SmartScripts/SmartScript.cpp
-index 3c0bdfc..80081f2 100644
+index a6923ea..9794a53 100644
 --- a/src/server/game/AI/SmartScripts/SmartScript.cpp
 +++ b/src/server/game/AI/SmartScripts/SmartScript.cpp
-@@ -1573,6 +1573,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
+@@ -1577,6 +1577,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
              delete casters;
              break;
          }

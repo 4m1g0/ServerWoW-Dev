@@ -1,7 +1,7 @@
-From a47c72de1358c06b789f9ee6b3a485ce1d26adc2 Mon Sep 17 00:00:00 2001
+From fd0817f768383ffe861155ebe7141b78ad09c53b Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:32:43 +0100
-Subject: [PATCH 09/26] ServerInfo
+Date: Sun, 5 Feb 2012 18:06:49 +0100
+Subject: [PATCH 09/29] ServerInfo
 
 ---
  src/server/shared/SystemConfig.h |    2 +-

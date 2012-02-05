@@ -1,14 +1,14 @@
-From 6fa3eef5d346afa1a7a083b2ac6c691016c20399 Mon Sep 17 00:00:00 2001
+From 4d660497b2cf832179c48849fb3b9145add9ae71 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:34:01 +0100
-Subject: [PATCH 23/26] CommandSetgmlevel
+Date: Sun, 5 Feb 2012 18:06:51 +0100
+Subject: [PATCH 23/29] CommandSetgmlevel
 
 ---
- src/server/scripts/Commands/cs_account.cpp |   45 +++++++--------------------
- 1 files changed, 12 insertions(+), 33 deletions(-)
+ src/server/scripts/Commands/cs_account.cpp |   43 +++++++--------------------
+ 1 files changed, 11 insertions(+), 32 deletions(-)
 
 diff --git a/src/server/scripts/Commands/cs_account.cpp b/src/server/scripts/Commands/cs_account.cpp
-index 8feab1c..d287686 100644
+index 8feab1c..e8bfed5 100644
 --- a/src/server/scripts/Commands/cs_account.cpp
 +++ b/src/server/scripts/Commands/cs_account.cpp
 @@ -413,10 +413,9 @@ public:
@@ -89,13 +89,12 @@ index 8feab1c..d287686 100644
 -        else
 -        {
 -            stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_ACCESS_BY_REALM);
--
++        stmt->setUInt32(0, targetAccountId);
++        stmt->setUInt32(1, realmID);
+ 
 -            stmt->setUInt32(0, targetAccountId);
 -            stmt->setUInt32(1, realmID);
 -        }
-+        stmt->setUInt32(0, targetAccountId);
-+        stmt->setUInt32(1, realmID);
-+
          LoginDatabase.Execute(stmt);
  
          if (gm != 0)

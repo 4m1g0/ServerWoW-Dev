@@ -1,7 +1,7 @@
-From 48eec54881a21a152bbadf7c1be6dc49fa582f33 Mon Sep 17 00:00:00 2001
+From 944cc1591b05dd2e4442ec3465e604f748b597b9 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:32:43 +0100
-Subject: [PATCH 08/26] vipAccount
+Date: Sun, 5 Feb 2012 18:06:49 +0100
+Subject: [PATCH 08/29] vipAccount
 
 ---
  sql/own/logon_vipAccount.sql            |    1 +

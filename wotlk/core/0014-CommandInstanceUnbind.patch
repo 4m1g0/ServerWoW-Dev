@@ -1,14 +1,14 @@
-From 1350a0fcf3b5b0b9ac11bba601a6566aa1759528 Mon Sep 17 00:00:00 2001
+From a321bacefa49ad486594a1f4f7c395ee39912121 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:32:43 +0100
-Subject: [PATCH 14/26] CommandInstanceUnbind
+Date: Sun, 5 Feb 2012 18:06:49 +0100
+Subject: [PATCH 14/29] CommandInstanceUnbind
 
 ---
  src/server/game/Chat/Commands/Level3.cpp |    8 +++++---
  1 files changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
-index 9b6018d..92864f8 100755
+index be5ae20..db53f0a 100755
 --- a/src/server/game/Chat/Commands/Level3.cpp
 +++ b/src/server/game/Chat/Commands/Level3.cpp
 @@ -4195,9 +4195,11 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char *args)

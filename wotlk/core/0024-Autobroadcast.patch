@@ -1,13 +1,13 @@
-From 262c55345f8b07b3decb5fc8135651f1baee3bc8 Mon Sep 17 00:00:00 2001
+From 5256522d1b818001afbba0d3f2fc5056a8aa5183 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:34:01 +0100
-Subject: [PATCH 24/26] Autobroadcast
+Date: Sun, 5 Feb 2012 18:06:51 +0100
+Subject: [PATCH 24/29] Autobroadcast
 
 ---
  sql/own/world_Autobroadcast_names.sql |    7 ++++
- src/server/game/World/World.cpp       |   57 +++++++++++++++++++++++++++++---
+ src/server/game/World/World.cpp       |   51 +++++++++++++++++++++++++++++++--
  src/server/game/World/World.h         |    1 +
- 3 files changed, 59 insertions(+), 6 deletions(-)
+ 3 files changed, 56 insertions(+), 3 deletions(-)
  create mode 100644 sql/own/world_Autobroadcast_names.sql
 
 diff --git a/sql/own/world_Autobroadcast_names.sql b/sql/own/world_Autobroadcast_names.sql
@@ -24,7 +24,7 @@ index 0000000..6409baa
 +  PRIMARY KEY (`id`)
 +) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index f841297..934cc6f 100755
+index f841297..6bbc504 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -1858,6 +1858,22 @@ void World::LoadAutobroadcasts()
@@ -57,14 +57,11 @@ index f841297..934cc6f 100755
 -    if (m_Autobroadcasts.empty())
 +    if (m_Autobroadcasts.empty() || m_Autobroadcasts_names.empty())
          return;
--
-+
+ 
      std::string msg;
--
 +    std::string name;
-+
+ 
      msg = SelectRandomContainerElement(m_Autobroadcasts);
--
 +    name = SelectRandomContainerElement(m_Autobroadcasts_names);
 +
 +    uint32 guid = sObjectMgr->GetPlayerGUIDByName(name);
@@ -93,7 +90,7 @@ index f841297..934cc6f 100755
 +       default:
 +         return;
 +     }
-+
+ 
      uint32 abcenter = sWorld->getIntConfig(CONFIG_AUTOBROADCAST_CENTER);
  
      if (abcenter == 0)
@@ -125,3 +122,4 @@ index e514620..16180aa 100755
          void LoadCharacterNameData();
 -- 
 1.7.5.4
+

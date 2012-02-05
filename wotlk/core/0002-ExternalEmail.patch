@@ -1,7 +1,7 @@
-From 4ad3882f810d10f987d20b78b6cf7392bde5f391 Mon Sep 17 00:00:00 2001
+From 744549a1546f09b90db04d74ee3b48dc7b919b3f Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:31:07 +0100
-Subject: [PATCH 02/26] ExternalEmail
+Date: Sun, 5 Feb 2012 18:06:48 +0100
+Subject: [PATCH 02/29] ExternalEmail
 
 ---
  sql/own/0002-char_ExternalMail.sql           |   12 +++++

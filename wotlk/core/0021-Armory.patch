@@ -1,7 +1,7 @@
-From 7df130c55bd58c568cb5dde1fbb0a1d59779cc58 Mon Sep 17 00:00:00 2001
+From 9ab0785e645200beba73b711c47e482dd71f6e15 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:34:01 +0100
-Subject: [PATCH 21/26] Armory
+Date: Sun, 5 Feb 2012 18:06:50 +0100
+Subject: [PATCH 21/29] Armory
 
 ---
  src/server/game/Achievements/AchievementMgr.cpp |    1 +
@@ -12,10 +12,10 @@ Subject: [PATCH 21/26] Armory
  5 files changed, 101 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/game/Achievements/AchievementMgr.cpp b/src/server/game/Achievements/AchievementMgr.cpp
-index 3ad9cf4..394e478 100755
+index 271e78a..1f861fc 100755
 --- a/src/server/game/Achievements/AchievementMgr.cpp
 +++ b/src/server/game/Achievements/AchievementMgr.cpp
-@@ -2033,6 +2033,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
+@@ -2032,6 +2032,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
          return;
  
      SendAchievementEarned(achievement);
@@ -42,10 +42,10 @@ index 12c2690..f3f51f7 100755
  }
  
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index fa2a7c6..f5ac1ff 100755
+index efc7ecb..41dd733 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
-@@ -4958,6 +4958,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
+@@ -4953,6 +4953,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
              trans->PAppend("DELETE FROM character_queststatus_daily WHERE guid = '%u'", guid);
              trans->PAppend("DELETE FROM character_talent WHERE guid = '%u'", guid);
              trans->PAppend("DELETE FROM character_skills WHERE guid = '%u'", guid);
@@ -54,7 +54,7 @@ index fa2a7c6..f5ac1ff 100755
  
              CharacterDatabase.CommitTransaction(trans);
              break;
-@@ -16627,6 +16629,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
+@@ -16624,6 +16626,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
  
          return false;
      }
@@ -63,7 +63,7 @@ index fa2a7c6..f5ac1ff 100755
  
      // overwrite possible wrong/corrupted guid
      SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
-@@ -18737,6 +18741,30 @@ void Player::SaveToDB(bool create /*=false*/)
+@@ -18734,6 +18738,30 @@ void Player::SaveToDB(bool create /*=false*/)
      // in this way we prevent to spam the db by each report made!
      // sAnticheatMgr->SavePlayerData(this);
  
@@ -94,7 +94,7 @@ index fa2a7c6..f5ac1ff 100755
      // save pet (hunter pet level and experience and all type pets health/mana).
      if (Pet* pet = GetPet())
          pet->SavePetToDB(PET_SAVE_AS_CURRENT);
-@@ -25127,3 +25155,42 @@ bool Player::IsInWhisperWhiteList(uint64 guid)
+@@ -25124,3 +25152,42 @@ bool Player::IsInWhisperWhiteList(uint64 guid)
      }
      return false;
  }
@@ -139,7 +139,7 @@ index fa2a7c6..f5ac1ff 100755
 +}
 \ No newline at end of file
 diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
-index 7cc27d9..f0382dc 100755
+index 223d7b9..94e1fb6 100755
 --- a/src/server/game/Entities/Player/Player.h
 +++ b/src/server/game/Entities/Player/Player.h
 @@ -1077,6 +1077,21 @@ private:
@@ -187,10 +187,10 @@ index 7cc27d9..f0382dc 100755
          InstanceTimeMap _instanceResetTimes;
          uint32 _pendingBindId;
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-index 07e751f..875a04b 100755
+index 6ff0fba..9652063 100755
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
-@@ -15483,7 +15483,10 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
+@@ -15516,7 +15516,10 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
                  if (instanceMap->IsRaidOrHeroicDungeon())
                  {
                      if (creature->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)

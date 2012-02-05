@@ -1,14 +1,14 @@
-From 35fc93a82b43c175ce24b617a90cbfa32c81a4a5 Mon Sep 17 00:00:00 2001
+From 3aa595cac0dc4aa83c8f5b1f913fbe491bb13f34 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 2 Feb 2012 00:33:34 +0100
-Subject: [PATCH] asd
+Date: Sun, 5 Feb 2012 18:06:51 +0100
+Subject: [PATCH 27/29] ValkyrLichKing
 
 ---
  .../IcecrownCitadel/boss_the_lich_king.cpp         |    4 +++-
  1 files changed, 3 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
-index 5029dbc..f83c6e0 100644
+index 9866d2a..34d20b3 100644
 --- a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
 +++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
 @@ -116,7 +116,7 @@ enum Spells

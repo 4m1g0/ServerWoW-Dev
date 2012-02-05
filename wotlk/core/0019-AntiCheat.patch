@@ -1,14 +1,14 @@
-From 862364367f439fc21f6fdbf0363122bf5d0c2568 Mon Sep 17 00:00:00 2001
+From 5240d4dc302cf543b61b30dd930b843b561578e1 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:34:00 +0100
-Subject: [PATCH 19/26] AntiCheat
+Date: Sun, 5 Feb 2012 18:06:50 +0100
+Subject: [PATCH 19/29] AntiCheat
 
 ---
  sql/own/characters_anticheat.sql               |   15 +
  sql/own/world_anticheat.sql                    |    1 +
  src/server/game/Anticheat/AnticheatData.cpp    |  117 ++++++
  src/server/game/Anticheat/AnticheatData.h      |   63 ++++
- src/server/game/Anticheat/AnticheatMgr.cpp     |  463 ++++++++++++++++++++++++
+ src/server/game/Anticheat/AnticheatMgr.cpp     |  461 ++++++++++++++++++++++++
  src/server/game/Anticheat/AnticheatMgr.h       |   99 +++++
  src/server/game/Anticheat/AnticheatScripts.cpp |   14 +
  src/server/game/Anticheat/AnticheatScripts.h   |   15 +
@@ -26,7 +26,7 @@ Subject: [PATCH 19/26] AntiCheat
  src/server/scripts/Commands/CMakeLists.txt     |    1 +
  src/server/scripts/Commands/cs_anticheat.cpp   |  263 ++++++++++++++
  src/server/worldserver/worldserver.conf.dist   |   35 ++
- 22 files changed, 1149 insertions(+), 0 deletions(-)
+ 22 files changed, 1147 insertions(+), 0 deletions(-)
  create mode 100644 sql/own/characters_anticheat.sql
  create mode 100644 sql/own/world_anticheat.sql
  create mode 100644 src/server/game/Anticheat/AnticheatData.cpp
@@ -260,7 +260,7 @@ index 0000000..1eae96e
 +#endif
 diff --git a/src/server/game/Anticheat/AnticheatMgr.cpp b/src/server/game/Anticheat/AnticheatMgr.cpp
 new file mode 100644
-index 0000000..847e8ef
+index 0000000..82cdaed
 --- /dev/null
 +++ b/src/server/game/Anticheat/AnticheatMgr.cpp
 @@ -0,0 +1,461 @@
@@ -725,7 +725,6 @@ index 0000000..847e8ef
 +        CharacterDatabase.PExecute("DELETE FROM players_reports_status WHERE guid=%u;",guid);
 +    }
 +}
-+}
 diff --git a/src/server/game/Anticheat/AnticheatMgr.h b/src/server/game/Anticheat/AnticheatMgr.h
 new file mode 100644
 index 0000000..40e3d2a
@@ -874,7 +873,7 @@ index 0000000..bd811ba
 +#endif
 \ No newline at end of file
 diff --git a/src/server/game/CMakeLists.txt b/src/server/game/CMakeLists.txt
-index 745e596..7feb333 100644
+index ac1bb9e..f7439c3 100644
 --- a/src/server/game/CMakeLists.txt
 +++ b/src/server/game/CMakeLists.txt
 @@ -13,6 +13,7 @@ if( USE_COREPCH )
@@ -902,7 +901,7 @@ index 745e596..7feb333 100644
    ${CMAKE_CURRENT_SOURCE_DIR}/Addons
    ${CMAKE_CURRENT_SOURCE_DIR}/AI
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index 1ca0f9c..fa2a7c6 100755
+index 38af97f..efc7ecb 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
 @@ -16,6 +16,7 @@
@@ -941,7 +940,7 @@ index 1ca0f9c..fa2a7c6 100755
      if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
      {
          sLog->outError("TeleportTo: invalid map (%d) or invalid coordinates (X: %f, Y: %f, Z: %f, O: %f) given when teleporting player (GUID: %u, name: %s, map: %d, X: %f, Y: %f, Z: %f, O: %f).",
-@@ -18723,6 +18731,12 @@ void Player::SaveToDB(bool create /*=false*/)
+@@ -18720,6 +18728,12 @@ void Player::SaveToDB(bool create /*=false*/)
  
      CharacterDatabase.CommitTransaction(trans);
  
@@ -955,7 +954,7 @@ index 1ca0f9c..fa2a7c6 100755
      if (Pet* pet = GetPet())
          pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
-index 2fa171c..7cc27d9 100755
+index 489b4ea..223d7b9 100755
 --- a/src/server/game/Entities/Player/Player.h
 +++ b/src/server/game/Entities/Player/Player.h
 @@ -1086,6 +1086,11 @@ class Player : public Unit, public GridObject<Player>
@@ -971,7 +970,7 @@ index 2fa171c..7cc27d9 100755
  
          static UpdateMask updateVisualBits;
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-index e02331e..07e751f 100755
+index 96e8978..6ff0fba 100755
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
 @@ -16,6 +16,7 @@
@@ -982,7 +981,7 @@ index e02331e..07e751f 100755
  #include "Common.h"
  #include "CreatureAIImpl.h"
  #include "Log.h"
-@@ -12375,6 +12376,9 @@ void Unit::SetVisible(bool x)
+@@ -12405,6 +12406,9 @@ void Unit::SetVisible(bool x)
  
  void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
  {
@@ -992,7 +991,7 @@ index e02331e..07e751f 100755
      int32 main_speed_mod  = 0;
      float stack_bonus     = 1.0f;
      float non_stack_bonus = 1.0f;
-@@ -16459,6 +16463,9 @@ void Unit::UpdateObjectVisibility(bool forced)
+@@ -16492,6 +16496,9 @@ void Unit::UpdateObjectVisibility(bool forced)
  
  void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
  {
@@ -1102,7 +1101,7 @@ index c46721d..8ff0a68 100755
      AddSC_achievement_commandscript();
      AddSC_debug_commandscript();
 diff --git a/src/server/game/Spells/SpellEffects.cpp b/src/server/game/Spells/SpellEffects.cpp
-index d5a9bf9..2f59fe4 100755
+index 0dd8eb6..3bee04c 100755
 --- a/src/server/game/Spells/SpellEffects.cpp
 +++ b/src/server/game/Spells/SpellEffects.cpp
 @@ -16,6 +16,7 @@
@@ -1113,16 +1112,16 @@ index d5a9bf9..2f59fe4 100755
  #include "Common.h"
  #include "DatabaseEnv.h"
  #include "WorldPacket.h"
-@@ -6194,6 +6195,9 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
-     {
+@@ -6195,6 +6196,9 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
          if (!unitTarget)
              return;
-+
+ 
 +        //if (m_caster->ToPlayer())
 +        //   sAnticheatMgr->DisableAnticheatDetection(m_caster->ToPlayer());
- 
++
          float angle = unitTarget->GetRelativeAngle(m_caster);
          Position pos;
+ 
 @@ -7204,6 +7208,9 @@ void Spell::GetSummonPosition(uint32 i, Position &pos, float radius, uint32 coun
      // Summon if dest location not present near caster
      else

@@ -1,7 +1,7 @@
-From 58780ba46596d34994f2fb232c9fddd206c70dc1 Mon Sep 17 00:00:00 2001
+From ce1034b24e18c2e4a89ce7d2f50aba004a114803 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:31:07 +0100
-Subject: [PATCH 06/26] MuteLog
+Date: Sun, 5 Feb 2012 18:06:48 +0100
+Subject: [PATCH 06/29] MuteLog
 
 ---
  sql/own/auth_mutehistory.sql                       |   11 ++++
@@ -58,29 +58,29 @@ index 6d295a0..bd40ab9 100755
                  // If the account is banned, reject the logon attempt
                  stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BANNED);
 diff --git a/src/server/game/Chat/Commands/Level2.cpp b/src/server/game/Chat/Commands/Level2.cpp
-index e10842c..07558ba 100755
+index e10842c..b171003 100755
 --- a/src/server/game/Chat/Commands/Level2.cpp
 +++ b/src/server/game/Chat/Commands/Level2.cpp
-@@ -75,6 +75,8 @@ bool ChatHandler::HandleMuteCommand(const char* args)
-     // must have strong lesser security level
+@@ -76,6 +76,8 @@ bool ChatHandler::HandleMuteCommand(const char* args)
      if (HasLowerSecurity (target, target_guid, true))
          return false;
-+
-+    sWorld->MuteAccount(accountId, notspeaktime*60, mutereasonstr.c_str(), m_session ? m_session->GetPlayerName() : "");
  
++    sWorld->MuteAccount(accountId, notspeaktime*60, mutereasonstr.c_str(), m_session ? m_session->GetPlayerName() : "");
++
      PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
  
-@@ -145,6 +147,8 @@ bool ChatHandler::HandleUnmuteCommand(const char* args)
-     stmt->setUInt32(1, accountId);
+     if (target)
+@@ -146,6 +148,8 @@ bool ChatHandler::HandleUnmuteCommand(const char* args)
  
      LoginDatabase.Execute(stmt);
-+
-+    sWorld->RemoveMuteAccount(accountId);
  
++    sWorld->RemoveMuteAccount(accountId);
++
      if (target)
          ChatHandler(target).PSendSysMessage(LANG_YOUR_CHAT_ENABLED);
+ 
 diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
-index cb3eb82..a19a3e9 100755
+index cb3eb82..0812952 100755
 --- a/src/server/game/Chat/Commands/Level3.cpp
 +++ b/src/server/game/Chat/Commands/Level3.cpp
 @@ -3157,26 +3157,44 @@ bool ChatHandler::HandleBanInfoCharacterCommand(const char *args)

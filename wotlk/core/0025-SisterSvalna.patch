@@ -1,14 +1,14 @@
-From debdb32d639b9dc2b2b7ca7a5e647f562954054b Mon Sep 17 00:00:00 2001
+From 6270e78509ad479c7c0e0f701ebd1e231f3e0cfb Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:34:01 +0100
-Subject: [PATCH 25/26] SisterSvalna
+Date: Sun, 5 Feb 2012 18:06:51 +0100
+Subject: [PATCH 25/29] SisterSvalna
 
 ---
  .../Northrend/IcecrownCitadel/icecrown_citadel.cpp |    4 ++++
  1 files changed, 4 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
-index 6bd8f3c..08a7eb5 100644
+index d02d8f3..258f398 100644
 --- a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
 +++ b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
 @@ -885,6 +885,10 @@ class boss_sister_svalna : public CreatureScript

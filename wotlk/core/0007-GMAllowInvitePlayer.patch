@@ -1,7 +1,7 @@
-From 939dafa00cfea1bea9213a451a765577a4b9da00 Mon Sep 17 00:00:00 2001
+From c010df63a03ca372deff89f4c53f84920209d486 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:32:42 +0100
-Subject: [PATCH 07/26] GMAllowInvitePlayer
+Date: Sun, 5 Feb 2012 18:06:49 +0100
+Subject: [PATCH 07/29] GMAllowInvitePlayer
 
 ---
  src/server/game/Chat/Commands/Level1.cpp     |    6 +++---

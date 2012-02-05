@@ -1,14 +1,14 @@
-From 7483da9fdbfeff9cc6275852e7fbd0187f9f9c66 Mon Sep 17 00:00:00 2001
+From 938ac8fa48578a79815b7d50b8351c3fd0345288 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:34:01 +0100
-Subject: [PATCH 26/26] AmphitheaterofAnguish
+Date: Sun, 5 Feb 2012 18:06:51 +0100
+Subject: [PATCH 26/29] AmphitheaterofAnguish
 
 ---
  src/server/scripts/Northrend/zuldrak.cpp |   15 +++++++++++++++
  1 files changed, 15 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/scripts/Northrend/zuldrak.cpp b/src/server/scripts/Northrend/zuldrak.cpp
-index 2b73d57..cd72937 100644
+index 0af8234..c8f4acd 100644
 --- a/src/server/scripts/Northrend/zuldrak.cpp
 +++ b/src/server/scripts/Northrend/zuldrak.cpp
 @@ -248,7 +248,9 @@ enum eGurgthock
@@ -57,3 +57,4 @@ index 2b73d57..cd72937 100644
          creature->AI()->SetGUID(player->GetGUID());
 -- 
 1.7.5.4
+

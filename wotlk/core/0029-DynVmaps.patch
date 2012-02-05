@@ -1,3 +1,73 @@
+From e76a4d223bb5097cae05f38435930fa43586ede3 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Sun, 5 Feb 2012 18:06:51 +0100
+Subject: [PATCH 29/29] DynVmaps
+
+---
+ src/server/collision/BoundingIntervalHierarchy.h   |   22 +-
+ .../collision/BoundingIntervalHierarchyWrapper.h   |  109 ++++++
+ src/server/collision/CMakeLists.txt                |   27 ++
+ src/server/collision/DynamicTree.cpp               |  205 +++++++++++
+ src/server/collision/DynamicTree.h                 |   60 +++
+ src/server/collision/Maps/TileAssembler.cpp        |  388 ++++++++++----------
+ src/server/collision/Maps/TileAssembler.h          |   29 ++
+ src/server/collision/Models/GameObjectModel.cpp    |  175 +++++++++
+ src/server/collision/Models/GameObjectModel.h      |   69 ++++
+ src/server/collision/Models/WorldModel.h           |    2 +-
+ src/server/collision/RegularGrid.h                 |  218 +++++++++++
+ src/server/collision/VMapDefinitions.h             |    2 +
+ src/server/game/CMakeLists.txt                     |    2 +
+ src/server/game/DataStores/DBCStructure.h          |    2 +-
+ src/server/game/DataStores/DBCfmt.h                |    2 +-
+ src/server/game/Entities/Creature/Creature.cpp     |    2 +-
+ src/server/game/Entities/GameObject/GameObject.cpp |   88 ++++-
+ src/server/game/Entities/GameObject/GameObject.h   |   10 +-
+ src/server/game/Entities/Object/Object.cpp         |   29 +-
+ src/server/game/Entities/Transport/Transport.cpp   |    2 +-
+ src/server/game/Handlers/QueryHandler.cpp          |    2 +-
+ src/server/game/Maps/Map.cpp                       |   16 +-
+ src/server/game/Maps/Map.h                         |    9 +-
+ src/server/game/Movement/MotionMaster.cpp          |    4 +-
+ .../FleeingMovementGenerator.cpp                   |    6 +-
+ .../MovementGenerators/RandomMovementGenerator.cpp |    8 +-
+ src/server/game/Spells/Spell.cpp                   |    2 +-
+ src/server/game/World/World.cpp                    |    5 +
+ src/server/scripts/CMakeLists.txt                  |    1 +
+ src/server/scripts/Commands/cs_debug.cpp           |    8 +
+ src/server/scripts/Commands/cs_gps.cpp             |    4 +-
+ .../BattleForMountHyjal/hyjal_trash.cpp            |    4 +-
+ .../IcecrownCitadel/boss_blood_prince_council.cpp  |    4 +-
+ .../IcecrownCitadel/boss_professor_putricide.cpp   |    2 +-
+ .../IcecrownCitadel/boss_the_lich_king.cpp         |    2 +-
+ .../Northrend/IcecrownCitadel/icecrown_citadel.cpp |    2 +-
+ .../Ulduar/Ulduar/boss_flame_leviathan.cpp         |    2 +-
+ .../Outland/BlackTemple/boss_teron_gorefiend.cpp   |    2 +-
+ src/server/worldserver/CMakeLists.txt              |    1 +
+ src/tools/vmap3_assembler/CMakeLists.txt           |    1 +
+ src/tools/vmap3_extractor/adtfile.cpp              |   69 +++--
+ src/tools/vmap3_extractor/adtfile.h                |   22 ++
+ src/tools/vmap3_extractor/dbcfile.cpp              |   18 +
+ src/tools/vmap3_extractor/dbcfile.h                |   24 +-
+ src/tools/vmap3_extractor/gameobject_extract.cpp   |   99 +++++
+ src/tools/vmap3_extractor/loadlib/loadlib.h        |   20 +-
+ src/tools/vmap3_extractor/model.cpp                |   38 ++-
+ src/tools/vmap3_extractor/model.h                  |   29 ++-
+ src/tools/vmap3_extractor/modelheaders.h           |   18 +
+ src/tools/vmap3_extractor/mpq_libmpq04.h           |   13 +-
+ src/tools/vmap3_extractor/vmapexport.cpp           |  234 +++++++------
+ src/tools/vmap3_extractor/vmapexport.h             |   33 ++-
+ src/tools/vmap3_extractor/wdtfile.cpp              |   18 +
+ src/tools/vmap3_extractor/wmo.cpp                  |   20 +-
+ src/tools/vmap3_extractor/wmo.h                    |   18 +
+ 55 files changed, 1787 insertions(+), 414 deletions(-)
+ create mode 100644 src/server/collision/BoundingIntervalHierarchyWrapper.h
+ create mode 100644 src/server/collision/DynamicTree.cpp
+ create mode 100644 src/server/collision/DynamicTree.h
+ create mode 100644 src/server/collision/Models/GameObjectModel.cpp
+ create mode 100644 src/server/collision/Models/GameObjectModel.h
+ create mode 100644 src/server/collision/RegularGrid.h
+ create mode 100644 src/tools/vmap3_extractor/gameobject_extract.cpp
+
 diff --git a/src/server/collision/BoundingIntervalHierarchy.h b/src/server/collision/BoundingIntervalHierarchy.h
 index b0c3523..ea70fc3 100755
 --- a/src/server/collision/BoundingIntervalHierarchy.h
@@ -1525,10 +1595,10 @@ index f7d6f0d..b98d01c 100644
      // defined in TileAssembler.cpp currently...
      bool readChunk(FILE* rf, char *dest, const char *compare, uint32 len);
 diff --git a/src/server/game/CMakeLists.txt b/src/server/game/CMakeLists.txt
-index ac1bb9e..cf24c92 100644
+index f7439c3..78333b7 100644
 --- a/src/server/game/CMakeLists.txt
 +++ b/src/server/game/CMakeLists.txt
-@@ -110,6 +110,8 @@ include_directories(
+@@ -112,6 +112,8 @@ include_directories(
    ${CMAKE_SOURCE_DIR}/dep/zlib
    ${CMAKE_SOURCE_DIR}/src/server/collision
    ${CMAKE_SOURCE_DIR}/src/server/collision/Management
@@ -1564,10 +1634,10 @@ index c55fb79..150159f 100755
  const char GlyphPropertiesfmt[]="niii";
  const char GlyphSlotfmt[]="nii";
 diff --git a/src/server/game/Entities/Creature/Creature.cpp b/src/server/game/Entities/Creature/Creature.cpp
-index 23865dd..7f767ea 100755
+index f8190c3..8250a64 100755
 --- a/src/server/game/Entities/Creature/Creature.cpp
 +++ b/src/server/game/Entities/Creature/Creature.cpp
-@@ -1289,7 +1289,7 @@ bool Creature::LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap)
+@@ -1304,7 +1304,7 @@ bool Creature::LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap)
          m_deathState = DEAD;
          if (canFly())
          {
@@ -1793,7 +1863,7 @@ index f677d48..3c9baa4 100755
          //! Object distance/size - overridden from Object::_IsWithinDist. Needs to take in account proper GO size.
          bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool /*is3D*/) const
 diff --git a/src/server/game/Entities/Object/Object.cpp b/src/server/game/Entities/Object/Object.cpp
-index 732171d..7113fe8 100755
+index 1a8eb8f..9034b3c 100755
 --- a/src/server/game/Entities/Object/Object.cpp
 +++ b/src/server/game/Entities/Object/Object.cpp
 @@ -46,6 +46,7 @@
@@ -1921,7 +1991,7 @@ index 5702eef..c907620 100755
              }
          }
 diff --git a/src/server/game/Maps/Map.cpp b/src/server/game/Maps/Map.cpp
-index df5ec54..71fc2ef 100755
+index 634e8c2..f2d6c71 100755
 --- a/src/server/game/Maps/Map.cpp
 +++ b/src/server/game/Maps/Map.cpp
 @@ -31,6 +31,7 @@
@@ -2010,7 +2080,7 @@ index f3b45bd..4f5a62a 100755
          MapRefManager m_mapRefManager;
          MapRefManager::iterator m_mapRefIter;
 diff --git a/src/server/game/Movement/MotionMaster.cpp b/src/server/game/Movement/MotionMaster.cpp
-index 8975a2d..adb7b5c 100755
+index 4945ae2..c7cf9be 100755
 --- a/src/server/game/Movement/MotionMaster.cpp
 +++ b/src/server/game/Movement/MotionMaster.cpp
 @@ -374,7 +374,7 @@ void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float spee
@@ -2032,7 +2102,7 @@ index 8975a2d..adb7b5c 100755
      init.Launch();
      Mutate(new EffectMovementGenerator(id), MOTION_SLOT_CONTROLLED);
 diff --git a/src/server/game/Movement/MovementGenerators/FleeingMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/FleeingMovementGenerator.cpp
-index 458e6f9..1a628ae 100755
+index ed5b73d..216afbb 100755
 --- a/src/server/game/Movement/MovementGenerators/FleeingMovementGenerator.cpp
 +++ b/src/server/game/Movement/MovementGenerators/FleeingMovementGenerator.cpp
 @@ -157,7 +157,7 @@ FleeingMovementGenerator<T>::_getPoint(T &owner, float &x, float &y, float &z)
@@ -2056,7 +2126,7 @@ index 458e6f9..1a628ae 100755
                  {
                      x = temp_x;
 diff --git a/src/server/game/Movement/MovementGenerators/RandomMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/RandomMovementGenerator.cpp
-index 0205b73..7270bbb 100755
+index 22adc7b..054f87d 100755
 --- a/src/server/game/Movement/MovementGenerators/RandomMovementGenerator.cpp
 +++ b/src/server/game/Movement/MovementGenerators/RandomMovementGenerator.cpp
 @@ -33,7 +33,7 @@
@@ -2090,10 +2160,10 @@ index 0205b73..7270bbb 100755
                  // let's forget this bad coords where a z cannot be find and retry at next tick
                  if (fabs(destZ - respZ) > travelDistZ)
 diff --git a/src/server/game/Spells/Spell.cpp b/src/server/game/Spells/Spell.cpp
-index 3c73edb..042aa68 100755
+index dc804d7..70f5a44 100755
 --- a/src/server/game/Spells/Spell.cpp
 +++ b/src/server/game/Spells/Spell.cpp
-@@ -5299,7 +5299,7 @@ SpellCastResult Spell::CheckCast(bool strict)
+@@ -5303,7 +5303,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                      {
                          float x, y, z;
                          m_caster->GetPosition(x, y, z);
@@ -2103,10 +2173,10 @@ index 3c73edb..042aa68 100755
                              return SPELL_FAILED_DONT_REPORT;
                          break;
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 426a93f..d87da4c 100755
+index 6bbc504..2ccbb66 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -1192,6 +1192,8 @@ void World::LoadConfigSettings(bool reload)
+@@ -1201,6 +1201,8 @@ void World::LoadConfigSettings(bool reload)
      sScriptMgr->OnConfigLoad(reload);
  }
  
@@ -2115,7 +2185,7 @@ index 426a93f..d87da4c 100755
  /// Initialize the World
  void World::SetInitialWorldSettings()
  {
-@@ -1270,6 +1272,9 @@ void World::SetInitialWorldSettings()
+@@ -1279,6 +1281,9 @@ void World::SetInitialWorldSettings()
      sLog->outString("Loading spell custom attributes...");
      sSpellMgr->LoadSpellCustomAttr();
  
@@ -2126,7 +2196,7 @@ index 426a93f..d87da4c 100755
      sObjectMgr->LoadScriptNames();
  
 diff --git a/src/server/scripts/CMakeLists.txt b/src/server/scripts/CMakeLists.txt
-index 56e63af..b33f533 100644
+index 9e361c9..476a2dd 100644
 --- a/src/server/scripts/CMakeLists.txt
 +++ b/src/server/scripts/CMakeLists.txt
 @@ -52,6 +52,7 @@ message("")
@@ -2201,7 +2271,7 @@ index 6466780..3a96e64 100644
              me->SetPosition(x, y, z, 0);
              hyjal_trashAI::JustDied(victim);
 diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp
-index 94a3da2..62b1666 100644
+index f5e207a..70b07c6 100644
 --- a/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp
 +++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp
 @@ -892,7 +892,7 @@ class boss_prince_valanar_icc : public CreatureScript
@@ -2223,7 +2293,7 @@ index 94a3da2..62b1666 100644
  
              void DoAction(int32 const action)
 diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
-index cf22338..6eda383 100755
+index 28964a2..8623fcf 100755
 --- a/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
 +++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
 @@ -948,7 +948,7 @@ class spell_putricide_ooze_summon : public SpellScriptLoader
@@ -2236,7 +2306,7 @@ index cf22338..6eda383 100755
                      y += 10.0f * sinf(caster->GetOrientation());
                      caster->CastSpell(x, y, z, triggerSpellId, true, NULL, NULL, GetCasterGUID());
 diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
-index 5029dbc..6cac58e 100644
+index 34d20b3..0d8eec5 100644
 --- a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
 +++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
 @@ -504,7 +504,7 @@ class boss_the_lich_king : public CreatureScript
@@ -2249,10 +2319,10 @@ index 5029dbc..6cac58e 100644
                      return;
  
 diff --git a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
-index 6bd8f3c..bae1ec3 100644
+index 258f398..26a7f57 100644
 --- a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
 +++ b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
-@@ -1921,7 +1921,7 @@ class spell_svalna_revive_champion : public SpellScriptLoader
+@@ -1925,7 +1925,7 @@ class spell_svalna_revive_champion : public SpellScriptLoader
                  Position pos;
                  caster->GetPosition(&pos);
                  caster->GetNearPosition(pos, 5.0f, 0.0f);
@@ -2262,7 +2332,7 @@ index 6bd8f3c..bae1ec3 100644
                  caster->SetHomePosition(pos);
                  caster->GetMotionMaster()->MovePoint(POINT_LAND, pos);
 diff --git a/src/server/scripts/Northrend/Ulduar/Ulduar/boss_flame_leviathan.cpp b/src/server/scripts/Northrend/Ulduar/Ulduar/boss_flame_leviathan.cpp
-index d96790c..a5adeb1 100644
+index 47f74b1..2bc2284 100644
 --- a/src/server/scripts/Northrend/Ulduar/Ulduar/boss_flame_leviathan.cpp
 +++ b/src/server/scripts/Northrend/Ulduar/Ulduar/boss_flame_leviathan.cpp
 @@ -755,7 +755,7 @@ class boss_flame_leviathan_safety_container : public CreatureScript
@@ -3343,3 +3413,6 @@ index 12979bc..d1f7b82 100644
  #ifndef WMO_H
  #define WMO_H
  #define TILESIZE (533.33333f)
+-- 
+1.7.5.4
+

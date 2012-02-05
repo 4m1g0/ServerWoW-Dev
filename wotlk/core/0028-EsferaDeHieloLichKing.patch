@@ -1,19 +1,14 @@
-From 439b815ee36378e9b4d13716d48b8fada14729c0 Mon Sep 17 00:00:00 2001
+From 2088465ca536ee55bfd80e2a0ad10a6337a7737a Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 2 Feb 2012 17:19:15 +0100
-Subject: [PATCH] =?UTF-8?q?Core/ICC:=20A=C3=B1adido=20hack=20para=20permitir?=
- =?UTF-8?q?=20que=20las=20bolas=20del=20rey=20exanime=20sigan=20a=20los=20pl?=
- =?UTF-8?q?ayers?=
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Date: Sun, 5 Feb 2012 18:06:51 +0100
+Subject: [PATCH 28/29] EsferaDeHieloLichKing
 
 ---
  .../TargetedMovementGenerator.cpp                  |    2 +-
  1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp
-index 0d2982a..08947c0 100755
+index 964b440..06dbf7d 100755
 --- a/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp
 +++ b/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp
 @@ -132,7 +132,7 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_

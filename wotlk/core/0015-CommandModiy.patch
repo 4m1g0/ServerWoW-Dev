@@ -1,7 +1,7 @@
-From e5a0da9e6c8c9dbe93c2a55c98177fb3f69f6fc3 Mon Sep 17 00:00:00 2001
+From 05ed9ca2cba3f2ff5bb7c8284c59c63b03fdfe08 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:32:43 +0100
-Subject: [PATCH 15/26] CommandModiy
+Date: Sun, 5 Feb 2012 18:06:49 +0100
+Subject: [PATCH 15/29] CommandModiy
 
 ---
  src/server/scripts/Commands/cs_gm.cpp     |    4 +-

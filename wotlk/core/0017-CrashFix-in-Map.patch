@@ -1,7 +1,7 @@
-From facecfa34d46aed890a257193c2c7b4a8bbb5f31 Mon Sep 17 00:00:00 2001
+From 3cdc0074d507c5c8ff2b306d01d425651eeb818e Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 31 Jan 2012 18:32:43 +0100
-Subject: [PATCH 17/26] CrashFix-in-Map
+Date: Sun, 5 Feb 2012 18:06:50 +0100
+Subject: [PATCH 17/29] CrashFix-in-Map
 
 ---
  src/server/game/Maps/Map.cpp |    2 +-
