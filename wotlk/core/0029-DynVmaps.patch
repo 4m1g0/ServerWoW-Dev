@@ -1,0 +1,3345 @@
+diff --git a/src/server/collision/BoundingIntervalHierarchy.h b/src/server/collision/BoundingIntervalHierarchy.h
+index b0c3523..ea70fc3 100755
+--- a/src/server/collision/BoundingIntervalHierarchy.h
++++ b/src/server/collision/BoundingIntervalHierarchy.h
+@@ -81,13 +81,25 @@ struct AABound
+ 
+ class BIH
+ {
++    private:
++        void init_empty()
++        {
++            tree.clear();
++            objects.clear();
++            // create space for the first node
++            tree.push_back(3 << 30); // dummy leaf
++            tree.insert(tree.end(), 2, 0);
++        }
+     public:
+-        BIH() {};
+-        template< class T, class BoundsFunc >
+-        void build(const std::vector<T> &primitives, BoundsFunc &getBounds, uint32 leafSize = 3, bool printStats=false)
++        BIH() { init_empty(); }
++        template< class BoundsFunc, class PrimArray >
++        void build(const PrimArray &primitives, BoundsFunc &getBounds, uint32 leafSize = 3, bool printStats=false)
+         {
+-            if (primitives.empty())
++            if (primitives.size() == 0)
++            {
++                init_empty();
+                 return;
++            }
+ 
+             buildData dat;
+             dat.maxPrims = leafSize;
+@@ -397,4 +409,4 @@ class BIH
+         void subdivide(int left, int right, std::vector<uint32> &tempTree, buildData &dat, AABound &gridBox, AABound &nodeBox, int nodeIndex, int depth, BuildStats &stats);
+ };
+ 
+-#endif // _BIH_H
++#endif // _BIH_H
+\ No newline at end of file
+diff --git a/src/server/collision/BoundingIntervalHierarchyWrapper.h b/src/server/collision/BoundingIntervalHierarchyWrapper.h
+new file mode 100644
+index 0000000..020e0c3
+--- /dev/null
++++ b/src/server/collision/BoundingIntervalHierarchyWrapper.h
+@@ -0,0 +1,109 @@
++/*
++ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
++ * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#ifndef _BIH_WRAP
++#define _BIH_WRAP
++
++#include "G3D/Table.h"
++#include "G3D/Array.h"
++#include "G3D/Set.h"
++#include "BoundingIntervalHierarchy.h"
++
++
++template<class T, class BoundsFunc = BoundsTrait<T>>
++class BIHWrap
++{
++    template<class RayCallback>
++    struct MDLCallback
++    {
++        const T* const* objects;
++        RayCallback& _callback;
++
++        MDLCallback(RayCallback& callback, const T* const* objects_array ) : _callback(callback), objects(objects_array){}
++
++        bool operator() (const Ray& ray, uint32 Idx, float& MaxDist, bool /*stopAtFirst*/)
++        {
++            if (const T* obj = objects[Idx])
++                return _callback(ray, *obj, MaxDist/*, stopAtFirst*/);
++            return false;
++        }
++
++        void operator() (const Vector3& p, uint32 Idx)
++        {
++            if (const T* obj = objects[Idx])
++                _callback(p, *obj);
++        }
++    };
++
++    typedef G3D::Array<const T*> ObjArray;
++
++    BIH m_tree;
++    ObjArray m_objects;
++    G3D::Table<const T*, uint32> m_obj2Idx;
++    G3D::Set<const T*> m_objects_to_push;
++    int unbalanced_times;
++
++public:
++    BIHWrap() : unbalanced_times(0) {}
++
++    void insert(const T& obj)
++    {
++        ++unbalanced_times;
++        m_objects_to_push.insert(&obj);
++    }
++
++    void remove(const T& obj)
++    {
++        ++unbalanced_times;
++        uint32 Idx = 0;
++        const T * temp;
++        if (m_obj2Idx.getRemove(&obj, temp, Idx))
++            m_objects[Idx] = NULL;
++        else
++            m_objects_to_push.remove(&obj);
++    }
++
++    void balance()
++    {
++        if (unbalanced_times == 0)
++            return;
++
++        unbalanced_times = 0;
++        m_objects.fastClear();
++        m_obj2Idx.getKeys(m_objects);
++        m_objects_to_push.getMembers(m_objects);
++
++        m_tree.build(m_objects, BoundsFunc::getBounds2);
++    }
++
++    template<typename RayCallback>
++    void intersectRay(const Ray& ray, RayCallback& intersectCallback, float& maxDist) const
++    {
++        MDLCallback<RayCallback> temp_cb(intersectCallback, m_objects.getCArray());
++        m_tree.intersectRay(ray, temp_cb, maxDist, true);
++    }
++
++    template<typename IsectCallback>
++    void intersectPoint(const Vector3& point, IsectCallback& intersectCallback) const
++    {
++        MDLCallback<IsectCallback> callback(intersectCallback, m_objects.getCArray());
++        m_tree.intersectPoint(point, callback);
++    }
++};
++
++#endif // _BIH_WRAP
+\ No newline at end of file
+diff --git a/src/server/collision/CMakeLists.txt b/src/server/collision/CMakeLists.txt
+index e2e1826..9fc696a 100644
+--- a/src/server/collision/CMakeLists.txt
++++ b/src/server/collision/CMakeLists.txt
+@@ -39,9 +39,36 @@ include_directories(
+   ${CMAKE_SOURCE_DIR}/src/server/shared/Database
+   ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
+   ${CMAKE_SOURCE_DIR}/src/server/shared/Dynamic
++  ${CMAKE_SOURCE_DIR}/src/server/shared/Dynamic/LinkedReference
+   ${CMAKE_SOURCE_DIR}/src/server/shared/Logging
+   ${CMAKE_SOURCE_DIR}/src/server/shared/Threading
++  ${CMAKE_SOURCE_DIR}/src/server/shared/Packets
++  ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
++  ${CMAKE_SOURCE_DIR}/src/server/shared/DataStores
++  ${CMAKE_SOURCE_DIR}/src/server/game/Addons
+   ${CMAKE_SOURCE_DIR}/src/server/game/Conditions
++  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Item
++  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/GameObject
++  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Creature
++  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Object
++  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Object/Updates
++  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Unit
++  ${CMAKE_SOURCE_DIR}/src/server/game/Combat
++  ${CMAKE_SOURCE_DIR}/src/server/game/Loot
++  ${CMAKE_SOURCE_DIR}/src/server/game/Miscellaneous
++  ${CMAKE_SOURCE_DIR}/src/server/game/Grids
++  ${CMAKE_SOURCE_DIR}/src/server/game/Grids/Cells
++  ${CMAKE_SOURCE_DIR}/src/server/game/Grids/Notifiers
++  ${CMAKE_SOURCE_DIR}/src/server/game/Maps
++  ${CMAKE_SOURCE_DIR}/src/server/game/DataStores
++  ${CMAKE_SOURCE_DIR}/src/server/game/Movement/Waypoints
++  ${CMAKE_SOURCE_DIR}/src/server/game/Movement/Spline
++  ${CMAKE_SOURCE_DIR}/src/server/game/Movement
++  ${CMAKE_SOURCE_DIR}/src/server/game/Server
++  ${CMAKE_SOURCE_DIR}/src/server/game/Server/Protocol
++  ${CMAKE_SOURCE_DIR}/src/server/game/World
++  ${CMAKE_SOURCE_DIR}/src/server/game/Spells
++  ${CMAKE_SOURCE_DIR}/src/server/game/Spells/Auras
+   ${CMAKE_CURRENT_SOURCE_DIR}
+   ${CMAKE_CURRENT_SOURCE_DIR}/Management
+   ${CMAKE_CURRENT_SOURCE_DIR}/Maps
+diff --git a/src/server/collision/DynamicTree.cpp b/src/server/collision/DynamicTree.cpp
+new file mode 100644
+index 0000000..6de9647
+--- /dev/null
++++ b/src/server/collision/DynamicTree.cpp
+@@ -0,0 +1,205 @@
++/*
++ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
++ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include "DynamicTree.h"
++//#include "QuadTree.h"
++//#include "RegularGrid.h"
++#include "BoundingIntervalHierarchyWrapper.h"
++
++#include "Log.h"
++#include "RegularGrid.h"
++#include "Timer.h"
++#include "GameobjectModel.h"
++
++using VMAP::ModelInstance;
++using G3D::Ray;
++
++template<> struct HashTrait< ModelInstance_Overriden>{
++    static size_t hashCode(const ModelInstance_Overriden& g) { return (size_t)(void*)&g; }
++};
++
++template<> struct PositionTrait< ModelInstance_Overriden> {
++    static void getPosition(const ModelInstance_Overriden& g, Vector3& p) { p = g.getPosition(); }
++};
++
++template<> struct BoundsTrait< ModelInstance_Overriden> {
++    static void getBounds(const ModelInstance_Overriden& g, G3D::AABox& out) { out = g.getBounds();}
++    static void getBounds2(const ModelInstance_Overriden* g, G3D::AABox& out) { out = g->getBounds();}
++};
++
++static bool operator == (const ModelInstance_Overriden& mdl, const ModelInstance_Overriden& mdl2){
++    return &mdl == &mdl2;
++}
++
++
++int valuesPerNode = 5, numMeanSplits = 3;
++
++int UNBALANCED_TIMES_LIMIT = 5;
++int CHECK_TREE_PERIOD = 20000;
++
++typedef RegularGrid2D<ModelInstance_Overriden, BIHWrap<ModelInstance_Overriden> > ParentTree;
++
++struct DynTreeImpl : public ParentTree/*, public Intersectable*/
++{
++    typedef ModelInstance_Overriden Model;
++    typedef ParentTree base;
++
++    DynTreeImpl() :
++        rebalance_timer(CHECK_TREE_PERIOD),
++        unbalanced_times(0)
++    {
++    }
++
++    void insert(const Model& mdl)
++    {
++        base::insert(mdl);
++        ++unbalanced_times;
++    }
++
++    void remove(const Model& mdl)
++    {
++        base::remove(mdl);
++        ++unbalanced_times;
++    }
++
++    void balance()
++    {
++        base::balance();
++        unbalanced_times = 0;
++    }
++
++    void update(uint32 difftime)
++    {
++        if (!size())
++            return;
++
++        rebalance_timer.Update(difftime);
++        if (rebalance_timer.Passed())
++        {
++            rebalance_timer.Reset(CHECK_TREE_PERIOD);
++            if (unbalanced_times > 0)
++                balance();
++        }
++    }
++
++    TimeTrackerSmall rebalance_timer;
++    int unbalanced_times;
++};
++
++DynamicMapTree::DynamicMapTree() : impl(*new DynTreeImpl())
++{
++}
++
++DynamicMapTree::~DynamicMapTree()
++{
++    delete &impl;
++}
++
++void DynamicMapTree::insert(const ModelInstance_Overriden& mdl)
++{
++    impl.insert(mdl);
++}
++
++void DynamicMapTree::remove(const ModelInstance_Overriden& mdl)
++{
++    impl.remove(mdl);
++}
++
++bool DynamicMapTree::contains(const ModelInstance_Overriden& mdl) const
++{
++    return impl.contains(mdl);
++}
++
++void DynamicMapTree::balance()
++{
++    impl.balance();
++}
++
++int DynamicMapTree::size() const
++{
++    return impl.size();
++}
++
++void DynamicMapTree::update(uint32 t_diff)
++{
++    impl.update(t_diff);
++}
++
++struct DynamicTreeIntersectionCallback
++{
++    bool did_hit;
++    uint32 phase_mask;
++    DynamicTreeIntersectionCallback(uint32 phasemask) : did_hit(false), phase_mask(phasemask) {}
++    bool operator()(const Ray& r, const ModelInstance_Overriden& obj, float& distance)
++    {
++        did_hit = obj.intersectRay(r, distance, true, phase_mask);
++        return did_hit;
++    }
++    bool didHit() const { return did_hit;}
++};
++
++struct DynamicTreeIntersectionCallback_WithLogger
++{
++    bool did_hit;
++    uint32 phase_mask;
++    DynamicTreeIntersectionCallback_WithLogger(uint32 phasemask) : did_hit(false), phase_mask(phasemask)
++    {
++        sLog->outDebug(LOG_FILTER_MAPS, "Dynamic Intersection log");
++    }
++    bool operator()(const Ray& r, const ModelInstance_Overriden& obj, float& distance)
++    {
++        sLog->outDebug(LOG_FILTER_MAPS, "testing intersection with %s", obj.name.c_str());
++        bool hit = obj.intersectRay(r, distance, true, phase_mask);
++        if (hit)
++        {
++            did_hit = true;
++            sLog->outDebug(LOG_FILTER_MAPS, "result: intersects");
++        }
++        return hit;
++    }
++    bool didHit() const { return did_hit;}
++};
++
++bool DynamicMapTree::isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const
++{
++    Vector3 v1(x1,y1,z1), v2(x2,y2,z2);
++
++    float maxDist = (v2 - v1).magnitude();
++
++    if (!G3D::fuzzyGt(maxDist, 0) )
++        return true;
++
++    Ray r(v1, (v2-v1) / maxDist);
++    DynamicTreeIntersectionCallback callback(phasemask);
++    impl.intersectRay(r, callback, maxDist, v2);
++
++    return !callback.did_hit;
++}
++
++float DynamicMapTree::getHeight(float x, float y, float z, float maxSearchDist, uint32 phasemask) const
++{
++    Vector3 v(x,y,z);
++    Ray r(v, Vector3(0,0,-1));
++    DynamicTreeIntersectionCallback callback(phasemask);
++    impl.intersectZAllignedRay(r, callback, maxSearchDist);
++
++    if (callback.didHit())
++        return v.z - maxSearchDist;
++    else
++        return -G3D::inf();
++}
+\ No newline at end of file
+diff --git a/src/server/collision/DynamicTree.h b/src/server/collision/DynamicTree.h
+new file mode 100644
+index 0000000..90b7128
+--- /dev/null
++++ b/src/server/collision/DynamicTree.h
+@@ -0,0 +1,60 @@
++/*
++ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
++ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++ 
++#ifndef _DYNTREE_H
++#define _DYNTREE_H
++
++#include <G3D/Matrix3.h>
++#include <G3D/Vector3.h>
++#include <G3D/AABox.h>
++#include <G3D/Ray.h>
++
++//#include "ModelInstance.h"
++#include "Define.h"
++//#include "GameObjectModel.h"
++
++namespace G3D
++{
++    class Vector3;
++}
++
++using G3D::Vector3;
++class ModelInstance_Overriden;
++
++class DynamicMapTree
++{
++    struct DynTreeImpl& impl;
++public:
++
++    DynamicMapTree();
++    ~DynamicMapTree();
++
++    bool isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
++    float getHeight(float x, float y, float z, float maxSearchDist, uint32 phasemask) const;
++
++    void insert(const ModelInstance_Overriden&);
++    void remove(const ModelInstance_Overriden&);
++    bool contains(const ModelInstance_Overriden&) const;
++    int size() const;
++
++    void balance();
++    void update(uint32 diff);
++};
++
++#endif // _DYNTREE_H
+diff --git a/src/server/collision/Maps/TileAssembler.cpp b/src/server/collision/Maps/TileAssembler.cpp
+index 355ef6b..62968e4 100644
+--- a/src/server/collision/Maps/TileAssembler.cpp
++++ b/src/server/collision/Maps/TileAssembler.cpp
+@@ -16,7 +16,6 @@
+  * with this program. If not, see <http://www.gnu.org/licenses/>.
+  */
+ 
+-#include "WorldModel.h"
+ #include "TileAssembler.h"
+ #include "MapTree.h"
+ #include "BoundingIntervalHierarchy.h"
+@@ -71,7 +70,6 @@ namespace VMAP
+ 
+     bool TileAssembler::convertWorld2()
+     {
+-        std::set<std::string> spawnedModelFiles;
+         bool success = readMapSpawns();
+         if (!success)
+             return false;
+@@ -178,6 +176,8 @@ namespace VMAP
+             // break; //test, extract only first map; TODO: remvoe this line
+         }
+ 
++        // add an object models, listed in temp_gameobject_models file
++        exportGameobjectModels();
+         // export objects
+         std::cout << "\nConverting Model Files" << std::endl;
+         for (std::set<std::string>::iterator mfile = spawnedModelFiles.begin(); mfile != spawnedModelFiles.end(); ++mfile)
+@@ -251,99 +251,40 @@ namespace VMAP
+         modelPosition.iScale = spawn.iScale;
+         modelPosition.init();
+ 
+-        FILE* rf = fopen(modelFilename.c_str(), "rb");
+-        if (!rf)
+-        {
+-            printf("ERROR: Can't open model file: %s\n", modelFilename.c_str());
++        WorldModel_Raw raw_model;
++        if (!raw_model.Read(modelFilename.c_str()))
+             return false;
+-        }
+ 
++        uint32 groups = raw_model.groupsArray.size();
++        if (groups != 1)
++            printf("Warning: '%s' does not seem to be a M2 model!\n", modelFilename.c_str());
++            
+         AABox modelBound;
+         bool boundEmpty=true;
+-        char ident[8];
+-
+-        int readOperation = 1;
+-
+-        // temporary use defines to simplify read/check code (close file and return at fail)
+-        #define READ_OR_RETURN(V, S) if (fread((V), (S), 1, rf) != 1) { \
+-                                        fclose(rf); printf("readfail, op = %i\n", readOperation); return(false); }readOperation++;
+-        // only use this for array deletes
+-        #define READ_OR_RETURN_WITH_DELETE(V, S) if (fread((V), (S), 1, rf) != 1) { \
+-                                        fclose(rf); printf("readfail, op = %i\n", readOperation); delete[] V; return(false); }readOperation++;
+-
+-        #define CMP_OR_RETURN(V, S)  if (strcmp((V), (S)) != 0)        { \
+-                                        fclose(rf); printf("cmpfail, %s!=%s\n", V, S);return(false); }
+-
+-        READ_OR_RETURN(&ident, 8);
+-        CMP_OR_RETURN(ident, "VMAP003");
+-
+-        // we have to read one int. This is needed during the export and we have to skip it here
+-        uint32 tempNVectors;
+-        READ_OR_RETURN(&tempNVectors, sizeof(tempNVectors));
+-
+-        uint32 groups, wmoRootId;
+-        char blockId[5];
+-        blockId[4] = 0;
+-        int blocksize;
+-        float *vectorarray = 0;
+-
+-        READ_OR_RETURN(&groups, sizeof(uint32));
+-        READ_OR_RETURN(&wmoRootId, sizeof(uint32));
+-        if (groups != 1) printf("Warning: '%s' does not seem to be a M2 model!\n", modelFilename.c_str());
+ 
+         for (uint32 g=0; g<groups; ++g) // should be only one for M2 files...
+         {
+-            fseek(rf, 3*sizeof(uint32) + 6*sizeof(float), SEEK_CUR);
+-
+-            READ_OR_RETURN(&blockId, 4);
+-            CMP_OR_RETURN(blockId, "GRP ");
+-            READ_OR_RETURN(&blocksize, sizeof(int));
+-            fseek(rf, blocksize, SEEK_CUR);
+-
+-            // ---- indexes
+-            READ_OR_RETURN(&blockId, 4);
+-            CMP_OR_RETURN(blockId, "INDX");
+-            READ_OR_RETURN(&blocksize, sizeof(int));
+-            fseek(rf, blocksize, SEEK_CUR);
+-
+-            // ---- vectors
+-            READ_OR_RETURN(&blockId, 4);
+-            CMP_OR_RETURN(blockId, "VERT");
+-            READ_OR_RETURN(&blocksize, sizeof(int));
+-            uint32 nvectors;
+-            READ_OR_RETURN(&nvectors, sizeof(uint32));
++            std::vector<Vector3>& vertices = raw_model.groupsArray[g].vertexArray;
+ 
+-            if (nvectors >0)
+-            {
+-                vectorarray = new float[nvectors*3];
+-                READ_OR_RETURN_WITH_DELETE(vectorarray, nvectors*sizeof(float)*3);
+-            }
+-            else
++            if (vertices.empty())
+             {
+                 std::cout << "error: model '" << spawn.name << "' has no geometry!" << std::endl;
+-                fclose(rf);
+-                return false;
++                continue;
+             }
+ 
+-            for (uint32 i=0, indexNo=0; indexNo<nvectors; indexNo++, i+=3)
++            uint32 nvectors = vertices.size();
++            for (uint32 i = 0; i < nvectors; ++i)
+             {
+-                Vector3 v = Vector3(vectorarray[i+0], vectorarray[i+1], vectorarray[i+2]);
+-                v = modelPosition.transform(v);
++                Vector3 v = modelPosition.transform(vertices[i]);
+ 
+                 if (boundEmpty)
+                     modelBound = AABox(v, v), boundEmpty=false;
+                 else
+                     modelBound.merge(v);
+             }
+-            delete[] vectorarray;
+-            // drop of temporary use defines
+-            #undef READ_OR_RETURN
+-            #undef READ_OR_RETURN_WITH_DELETE
+-            #undef CMP_OR_RETURN
+         }
+         spawn.iBound = modelBound + spawn.iPos;
+         spawn.flags |= MOD_HAS_BOUND;
+-        fclose(rf);
+         return true;
+     }
+ 
+@@ -363,150 +304,221 @@ namespace VMAP
+         if (filename.length() >0)
+             filename.push_back('/');
+         filename.append(pModelFilename);
+-        FILE* rf = fopen(filename.c_str(), "rb");
+ 
+-        if (!rf)
+-        {
+-            printf("ERROR: Can't open model file in form: %s", pModelFilename.c_str());
+-            printf("...                          or form: %s", filename.c_str() );
++        WorldModel_Raw raw_model;
++        if (!raw_model.Read(filename.c_str()))
+             return false;
++            
++        // write WorldModel
++        WorldModel model;
++        model.setRootWmoID(raw_model.RootWMOID);
++        if (raw_model.groupsArray.size())
++        {
++            std::vector<GroupModel> groupsArray;
++
++            uint32 groups = raw_model.groupsArray.size();
++            for (uint32 g = 0; g < groups; ++g)
++            {
++                GroupModel_Raw& raw_group = raw_model.groupsArray[g];
++                groupsArray.push_back(GroupModel(raw_group.mogpflags, raw_group.GroupWMOID, raw_group.bounds ));
++                groupsArray.back().setMeshData(raw_group.vertexArray, raw_group.triangles);
++                groupsArray.back().setLiquidData(raw_group.liquid);
++            }
++
++            model.setGroupModels(groupsArray);
+         }
++        
++        success = model.writeFile(iDestDir + "/" + pModelFilename + ".vmo");
++        //std::cout << "readRawFile2: '" << pModelFilename << "' tris: " << nElements << " nodes: " << nNodes << std::endl;
++        return success;
++    }
++    
++    void TileAssembler::exportGameobjectModels()
++    {
++        FILE* model_list = fopen((iSrcDir + "/" + GAMEOBJECT_MODELS).c_str(), "rb");
++        FILE* model_list_copy = fopen((iDestDir + "/" + GAMEOBJECT_MODELS).c_str(), "wb");
++        if (!model_list || !model_list_copy)
++            return;
++
++        uint32 name_length, displayId;
++        char buff[500];
++        while (!feof(model_list))
++        {
++            fread(&displayId,sizeof(uint32),1,model_list);
++            fread(&name_length,sizeof(uint32),1,model_list);
+ 
+-        char ident[8];
++            if (name_length >= sizeof(buff))
++            {
++                std::cout << "\nFile 'temp_gameobject_models' seems to be corrupted" << std::endl;
++                break;
++            }
++
++            fread(&buff,sizeof(char),name_length,model_list);
++            std::string model_name(buff, name_length);
++
++            WorldModel_Raw raw_model;
++            if ( !raw_model.Read((iSrcDir + "/" + model_name).c_str()) )
++                continue;
+ 
+-        int readOperation = 1;
++            spawnedModelFiles.insert(model_name);
++            AABox bounds;
++            bool boundEmpty = true;
++            for (uint32 g = 0; g < raw_model.groupsArray.size(); ++g)
++            {
++                std::vector<Vector3>& vertices = raw_model.groupsArray[g].vertexArray;
++
++                uint32 nvectors = vertices.size();
++                for (uint32 i = 0; i < nvectors; ++i)
++                {
++                    Vector3& v = vertices[i];
++                    if (boundEmpty)
++                        bounds = AABox(v, v), boundEmpty = false;
++                    else
++                        bounds.merge(v);
++                }
++            }
++
++            fwrite(&displayId,sizeof(uint32),1,model_list_copy);
++            fwrite(&name_length,sizeof(uint32),1,model_list_copy);
++            fwrite(&buff,sizeof(char),name_length,model_list_copy);
++            fwrite(&bounds.low(),sizeof(Vector3),1,model_list_copy);
++            fwrite(&bounds.high(),sizeof(Vector3),1,model_list_copy);
++        }
+ 
++        fclose(model_list);
++        fclose(model_list_copy);
++    }
+         // temporary use defines to simplify read/check code (close file and return at fail)
+         #define READ_OR_RETURN(V, S) if (fread((V), (S), 1, rf) != 1) { \
+-                                        fclose(rf); printf("readfail, op = %i\n", readOperation); return(false); }readOperation++;
++                                        fclose(rf); printf("readfail, op = %i\n", readOperation); return(false); }
+         #define READ_OR_RETURN_WITH_DELETE(V, S) if (fread((V), (S), 1, rf) != 1) { \
+-                                        fclose(rf); printf("readfail, op = %i\n", readOperation); delete[] V; return(false); }readOperation++;
++                                        fclose(rf); printf("readfail, op = %i\n", readOperation); delete[] V; return(false); };
+         #define CMP_OR_RETURN(V, S)  if (strcmp((V), (S)) != 0)        { \
+                                         fclose(rf); printf("cmpfail, %s!=%s\n", V, S);return(false); }
+ 
+-        READ_OR_RETURN(&ident, 8);
+-        CMP_OR_RETURN(ident, "VMAP003");
+-
+-        // we have to read one int. This is needed during the export and we have to skip it here
+-        uint32 tempNVectors;
+-        READ_OR_RETURN(&tempNVectors, sizeof(tempNVectors));
+-
+-        uint32 groups;
+-        uint32 RootWMOID;
++    bool GroupModel_Raw::Read(FILE* rf)
++    {
+         char blockId[5];
+         blockId[4] = 0;
+         int blocksize;
+-
+-        READ_OR_RETURN(&groups, sizeof(uint32));
+-        READ_OR_RETURN(&RootWMOID, sizeof(uint32));
+-
+-        std::vector<GroupModel> groupsArray;
+-
+-        for (uint32 g=0; g<groups; ++g)
++        int readOperation = 0;
++
++        READ_OR_RETURN(&mogpflags, sizeof(uint32));
++        READ_OR_RETURN(&GroupWMOID, sizeof(uint32));
++
++            
++        Vector3 vec1, vec2;
++        READ_OR_RETURN(&vec1, sizeof(Vector3));
++
++        READ_OR_RETURN(&vec2, sizeof(Vector3));
++        bounds.set(vec1, vec2);
++        
++        READ_OR_RETURN(&liquidflags, sizeof(uint32));
++
++        // will this ever be used? what is it good for anyway??
++        uint32 branches;
++        READ_OR_RETURN(&blockId, 4);
++        CMP_OR_RETURN(blockId, "GRP ");
++        READ_OR_RETURN(&blocksize, sizeof(int));
++        READ_OR_RETURN(&branches, sizeof(uint32));
++        for (uint32 b=0; b<branches; ++b)
+         {
+-            std::vector<MeshTriangle> triangles;
+-            std::vector<Vector3> vertexArray;
++            uint32 indexes;
++            // indexes for each branch (not used jet)
++            READ_OR_RETURN(&indexes, sizeof(uint32));
++        }
+ 
+-            uint32 mogpflags, GroupWMOID;
+-            READ_OR_RETURN(&mogpflags, sizeof(uint32));
+-            READ_OR_RETURN(&GroupWMOID, sizeof(uint32));
++        // ---- indexes
++        READ_OR_RETURN(&blockId, 4);
++        CMP_OR_RETURN(blockId, "INDX");
++        READ_OR_RETURN(&blocksize, sizeof(int));
++        uint32 nindexes;
++        READ_OR_RETURN(&nindexes, sizeof(uint32));
++        if (nindexes >0)
++        {
++            uint16 *indexarray = new uint16[nindexes];
++            READ_OR_RETURN_WITH_DELETE(indexarray, nindexes*sizeof(uint16));
++            triangles.reserve(nindexes / 3);
++            for (uint32 i=0; i<nindexes; i+=3)
++                triangles.push_back(MeshTriangle(indexarray[i], indexarray[i+1], indexarray[i+2]));
+ 
+-            float bbox1[3], bbox2[3];
+-            READ_OR_RETURN(bbox1, sizeof(float)*3);
+-            READ_OR_RETURN(bbox2, sizeof(float)*3);
++            delete[] indexarray;
++        }
+ 
+-            uint32 liquidflags;
+-            READ_OR_RETURN(&liquidflags, sizeof(uint32));
++        // ---- vectors
++        READ_OR_RETURN(&blockId, 4);
++        CMP_OR_RETURN(blockId, "VERT");
++        READ_OR_RETURN(&blocksize, sizeof(int));
++        uint32 nvectors;
++        READ_OR_RETURN(&nvectors, sizeof(uint32));
+ 
+-            // will this ever be used? what is it good for anyway??
+-            uint32 branches;
+-            READ_OR_RETURN(&blockId, 4);
+-            CMP_OR_RETURN(blockId, "GRP ");
+-            READ_OR_RETURN(&blocksize, sizeof(int));
+-            READ_OR_RETURN(&branches, sizeof(uint32));
+-            for (uint32 b=0; b<branches; ++b)
+-            {
+-                uint32 indexes;
+-                // indexes for each branch (not used jet)
+-                READ_OR_RETURN(&indexes, sizeof(uint32));
+-            }
+-
+-            // ---- indexes
+-            READ_OR_RETURN(&blockId, 4);
+-            CMP_OR_RETURN(blockId, "INDX");
+-            READ_OR_RETURN(&blocksize, sizeof(int));
+-            uint32 nindexes;
+-            READ_OR_RETURN(&nindexes, sizeof(uint32));
+-            if (nindexes >0)
+-            {
+-                uint16 *indexarray = new uint16[nindexes];
+-                READ_OR_RETURN_WITH_DELETE(indexarray, nindexes*sizeof(uint16));
+-                for (uint32 i=0; i<nindexes; i+=3)
+-                {
+-                    triangles.push_back(MeshTriangle(indexarray[i], indexarray[i+1], indexarray[i+2]));
+-                }
+-                delete[] indexarray;
+-            }
++        if (nvectors >0)
++        {
++            float *vectorarray = new float[nvectors*3];
++            READ_OR_RETURN_WITH_DELETE(vectorarray, nvectors*sizeof(float)*3);
++            for (uint32 i=0; i<nvectors; ++i)
++                vertexArray.push_back( Vector3(vectorarray + 3*i) );
+ 
+-            // ---- vectors
++            delete[] vectorarray;
++        }
++        // ----- liquid
++        liquid = 0;
++        if (liquidflags& 1)
++        {
++            WMOLiquidHeader hlq;
+             READ_OR_RETURN(&blockId, 4);
+-            CMP_OR_RETURN(blockId, "VERT");
++            CMP_OR_RETURN(blockId, "LIQU");
+             READ_OR_RETURN(&blocksize, sizeof(int));
+-            uint32 nvectors;
+-            READ_OR_RETURN(&nvectors, sizeof(uint32));
++            READ_OR_RETURN(&hlq, sizeof(WMOLiquidHeader));
++            liquid = new WmoLiquid(hlq.xtiles, hlq.ytiles, Vector3(hlq.pos_x, hlq.pos_y, hlq.pos_z), hlq.type);
++            uint32 size = hlq.xverts*hlq.yverts;
++            READ_OR_RETURN(liquid->GetHeightStorage(), size*sizeof(float));
++            size = hlq.xtiles*hlq.ytiles;
++            READ_OR_RETURN(liquid->GetFlagsStorage(), size);
++        }
++     
++        return true;
++    }
+ 
+-            if (nvectors >0)
+-            {
+-                float *vectorarray = new float[nvectors*3];
+-                READ_OR_RETURN_WITH_DELETE(vectorarray, nvectors*sizeof(float)*3);
+-                for (uint32 i=0; i<nvectors; ++i)
+-                {
+-                    vertexArray.push_back( Vector3(vectorarray + 3*i) );
+-                }
+-                delete[] vectorarray;
+-            }
+-            // ----- liquid
+-            WmoLiquid* liquid = 0;
+-            if (liquidflags& 1)
+-            {
+-                WMOLiquidHeader hlq;
+-                READ_OR_RETURN(&blockId, 4);
+-                CMP_OR_RETURN(blockId, "LIQU");
+-                READ_OR_RETURN(&blocksize, sizeof(int));
+-                READ_OR_RETURN(&hlq, sizeof(WMOLiquidHeader));
+-                liquid = new WmoLiquid(hlq.xtiles, hlq.ytiles, Vector3(hlq.pos_x, hlq.pos_y, hlq.pos_z), hlq.type);
+-                uint32 size = hlq.xverts*hlq.yverts;
+-                READ_OR_RETURN(liquid->GetHeightStorage(), size*sizeof(float));
+-                size = hlq.xtiles*hlq.ytiles;
+-                READ_OR_RETURN(liquid->GetFlagsStorage(), size);
+-            }
+ 
+-            groupsArray.push_back(GroupModel(mogpflags, GroupWMOID, AABox(Vector3(bbox1), Vector3(bbox2))));
+-            groupsArray.back().setMeshData(vertexArray, triangles);
+-            groupsArray.back().setLiquidData(liquid);
++    GroupModel_Raw::~GroupModel_Raw()
++    {
++        delete liquid;
++    }
++    
++    bool WorldModel_Raw::Read(const char * path)
++    {
++        FILE* rf = fopen(path, "rb");
++        if (!rf)
++        {
++            printf("ERROR: Can't open raw model file: %s\n", path);
++            return false;
++        }
++        
++        char ident[8];
++        int readOperation = 0;
+ 
+-            // drop of temporary use defines
+-            #undef READ_OR_RETURN
+-            #undef READ_OR_RETURN_WITH_DELETE
+-            #undef CMP_OR_RETURN
++        READ_OR_RETURN(&ident, 8);
++        CMP_OR_RETURN(ident, RAW_VMAP_MAGIC);
+ 
+-        }
+-        fclose(rf);
++        // we have to read one int. This is needed during the export and we have to skip it here
++        uint32 tempNVectors;
++        READ_OR_RETURN(&tempNVectors, sizeof(tempNVectors));
+ 
+-        // write WorldModel
+-        WorldModel model;
+-        model.setRootWmoID(RootWMOID);
+-        if (!groupsArray.empty())
+-        {
+-            model.setGroupModels(groupsArray);
++        uint32 groups;
++        READ_OR_RETURN(&groups, sizeof(uint32));
++        READ_OR_RETURN(&RootWMOID, sizeof(uint32));
+ 
+-            std::string worldModelFileName(iDestDir);
+-            worldModelFileName.push_back('/');
+-            worldModelFileName.append(pModelFilename).append(".vmo");
+-            success = model.writeFile(worldModelFileName);
+-        }
++        groupsArray.resize(groups);
++        bool succeed = true;
++        for (uint32 g = 0; g < groups && succeed; ++g)
++            succeed = groupsArray[g].Read(rf);
+ 
+-        //std::cout << "readRawFile2: '" << pModelFilename << "' tris: " << nElements << " nodes: " << nNodes << std::endl;
+-        return success;
++        fclose(rf);
++        return succeed;
+     }
++
++    // drop of temporary use defines
++    #undef READ_OR_RETURN
++    #undef CMP_OR_RETURN
+ }
+diff --git a/src/server/collision/Maps/TileAssembler.h b/src/server/collision/Maps/TileAssembler.h
+index 6128a0d..554940a 100755
+--- a/src/server/collision/Maps/TileAssembler.h
++++ b/src/server/collision/Maps/TileAssembler.h
+@@ -22,8 +22,10 @@
+ #include <G3D/Vector3.h>
+ #include <G3D/Matrix3.h>
+ #include <map>
++#include <set>
+ 
+ #include "ModelInstance.h"
++#include "WorldModel.h"
+ 
+ namespace VMAP
+ {
+@@ -61,6 +63,31 @@ namespace VMAP
+     typedef std::map<uint32, MapSpawns*> MapData;
+     //===============================================
+ 
++    struct GroupModel_Raw
++    {
++        uint32 mogpflags;
++        uint32 GroupWMOID;
++
++        G3D::AABox bounds;
++        uint32 liquidflags;
++        std::vector<MeshTriangle> triangles;
++        std::vector<G3D::Vector3> vertexArray;
++        class WmoLiquid *liquid;
++
++        GroupModel_Raw() : liquid(0) {}
++        ~GroupModel_Raw();
++
++        bool Read(FILE * f);
++    };
++
++    struct WorldModel_Raw
++    {
++        uint32 RootWMOID;
++        std::vector<GroupModel_Raw> groupsArray;
++
++        bool Read(const char * path);
++    };
++
+     class TileAssembler
+     {
+         private:
+@@ -70,6 +97,7 @@ namespace VMAP
+             G3D::Table<std::string, unsigned int > iUniqueNameIds;
+             unsigned int iCurrentUniqueNameId;
+             MapData mapData;
++            std::set<std::string> spawnedModelFiles;
+ 
+         public:
+             TileAssembler(const std::string& pSrcDirName, const std::string& pDestDirName);
+@@ -78,6 +106,7 @@ namespace VMAP
+             bool convertWorld2();
+             bool readMapSpawns();
+             bool calculateTransformedBound(ModelSpawn &spawn);
++            void exportGameobjectModels();
+ 
+             bool convertRawFile(const std::string& pModelFilename);
+             void setModelNameFilterMethod(bool (*pFilterMethod)(char *pName)) { iFilterMethod = pFilterMethod; }
+diff --git a/src/server/collision/Models/GameObjectModel.cpp b/src/server/collision/Models/GameObjectModel.cpp
+new file mode 100644
+index 0000000..4130a9c
+--- /dev/null
++++ b/src/server/collision/Models/GameObjectModel.cpp
+@@ -0,0 +1,175 @@
++/*
++ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
++ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++ 
++#include "VMapFactory.h"
++#include "VMapManager2.h"
++#include "VMapDefinitions.h"
++#include "WorldModel.h"
++
++#include "GameobjectModel.h"
++#include "Log.h"
++#include "GameObject.h"
++#include "Creature.h"
++#include "TemporarySummon.h"
++#include "Object.h"
++#include "DBCStores.h"
++
++using G3D::Vector3;
++using G3D::Ray;
++using G3D::AABox;
++
++struct GameobjectModelData
++{
++    GameobjectModelData(const std::string& name_, const AABox& box) :
++        name(name_), bound(box) {}
++
++    AABox bound;
++    std::string name;
++};
++
++typedef UNORDERED_MAP<uint32, GameobjectModelData> ModelList;
++ModelList model_list;
++
++void LoadGameObjectModelList()
++{
++    FILE* model_list_file = fopen((sWorld->GetDataPath() + "vmaps/" + VMAP::GAMEOBJECT_MODELS).c_str(), "rb");
++    if (!model_list_file)
++        return;
++
++    uint32 name_length, displayId;
++    char buff[500];
++    while (!feof(model_list_file))
++    {
++        fread(&displayId,sizeof(uint32),1,model_list_file);
++        fread(&name_length,sizeof(uint32),1,model_list_file);
++
++        if (name_length >= sizeof(buff))
++        {
++            printf("\nFile '%s' seems to be corrupted", VMAP::GAMEOBJECT_MODELS);
++            break;
++        }
++
++        fread(&buff, sizeof(char), name_length,model_list_file);
++        Vector3 v1, v2;
++        fread(&v1, sizeof(Vector3), 1, model_list_file);
++        fread(&v2, sizeof(Vector3), 1, model_list_file);
++
++        model_list.insert
++        (
++            ModelList::value_type( displayId, GameobjectModelData(std::string(buff,name_length),AABox(v1,v2)) )
++        );
++    }
++    fclose(model_list_file);
++}
++
++ModelInstance_Overriden::~ModelInstance_Overriden()
++{
++    if (iModel)
++        ((VMAP::VMapManager2*)VMAP::VMapFactory::createOrGetVMapManager())->releaseModelInstance(name);
++}
++
++bool ModelInstance_Overriden::initialize(const GameObject& go, const GameObjectDisplayInfoEntry& info)
++{
++    ModelList::const_iterator it = model_list.find(info.Displayid);
++    if (it == model_list.end())
++        return false;
++
++    G3D::AABox mdl_box(it->second.bound);
++    // ignore models with no bounds
++    if (mdl_box == G3D::AABox::zero())
++    {
++        std::cout << "Model " << it->second.name << " has zero bounds, loading skipped" << std::endl;
++        return false;
++    }
++
++    iModel = ((VMAP::VMapManager2*)VMAP::VMapFactory::createOrGetVMapManager())->acquireModelInstance(sWorld->GetDataPath() + "vmaps/", it->second.name);
++
++    if (!iModel)
++        return false;
++
++    name = it->second.name;
++    //flags = VMAP::MOD_M2;
++    //adtId = 0;
++    //ID = 0;
++    iPos = Vector3(go.GetPositionX(), go.GetPositionY(), go.GetPositionZ());
++    phasemask = go.GetPhaseMask();
++    iScale = go.GetFloatValue(OBJECT_FIELD_SCALE_X);
++    iInvScale = 1.f / iScale;
++
++    G3D::Matrix3 iRotation = G3D::Matrix3::fromEulerAnglesZYX(go.GetOrientation(), 0, 0);
++    iInvRot = iRotation.inverse();
++    // transform bounding box:
++    mdl_box = AABox(mdl_box.low() * iScale, mdl_box.high() * iScale);
++    AABox rotated_bounds;
++    for (int i = 0; i < 8; ++i)
++        rotated_bounds.merge(iRotation * mdl_box.corner(i));
++
++    this->iBound = rotated_bounds + iPos;
++#ifdef SPAWN_CORNERS
++    // test:
++    for (int i = 0; i < 8; ++i)
++    {
++        Vector3 pos(iBound.corner(i));
++        if (Creature* c = const_cast<GameObject&>(go).SummonCreature(24440, pos.x, pos.y, pos.z, 0, TEMPSUMMON_MANUAL_DESPAWN))
++        {
++            c->setFaction(35);
++            c->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.1f);
++        }
++    }
++#endif
++
++    return true;
++}
++
++ModelInstance_Overriden* ModelInstance_Overriden::construct(const GameObject & go)
++{
++    const GameObjectDisplayInfoEntry* info = sGameObjectDisplayInfoStore.LookupEntry(go.GetGOInfo()->displayId);
++    if (!info)
++        return NULL;
++
++    ModelInstance_Overriden* mdl = new ModelInstance_Overriden();
++    if (!mdl->initialize(go, *info))
++    {
++        delete mdl;
++        return NULL;
++    }
++
++    return mdl;
++}
++
++bool ModelInstance_Overriden::intersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const
++{
++    if (!(phasemask & ph_mask))
++        return false;
++
++    float time = ray.intersectionTime(iBound);
++    if (time == G3D::inf())
++        return false;
++
++    // child bounds are defined in object space:
++    Vector3 p = iInvRot * (ray.origin() - iPos) * iInvScale;
++    Ray modRay(p, iInvRot * ray.direction());
++    float distance = MaxDist * iInvScale;
++    bool hit = iModel->IntersectRay(modRay, distance, StopAtFirstHit);
++    if(hit)
++    {
++        distance *= iScale;
++        MaxDist = distance;
++    }
++    return hit;
++}
+\ No newline at end of file
+diff --git a/src/server/collision/Models/GameObjectModel.h b/src/server/collision/Models/GameObjectModel.h
+new file mode 100644
+index 0000000..2e37963
+--- /dev/null
++++ b/src/server/collision/Models/GameObjectModel.h
+@@ -0,0 +1,69 @@
++/*
++ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
++ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++ 
++#ifndef _GAMEOBJECT_MODEL_H
++#define _GAMEOBJECT_MODEL_H
++
++#include <G3D/Matrix3.h>
++#include <G3D/Vector3.h>
++#include <G3D/AABox.h>
++#include <G3D/Ray.h>
++
++#include "Define.h"
++
++namespace VMAP
++{
++    class WorldModel;
++}
++
++class GameObject;
++struct GameObjectDisplayInfoEntry;
++
++class ModelInstance_Overriden /*, public Intersectable*/
++{
++    uint32 phasemask;
++    G3D::AABox iBound;
++    G3D::Matrix3 iInvRot;
++    G3D::Vector3 iPos;
++    //G3D::Vector3 iRot;
++    float iInvScale;
++    float iScale;
++    VMAP::WorldModel* iModel;
++
++    ModelInstance_Overriden() : phasemask(0), iModel(NULL) {}
++    bool initialize(const GameObject& go, const GameObjectDisplayInfoEntry& info);
++
++public:
++    std::string name;
++
++    const G3D::AABox& getBounds() const { return iBound; }
++
++    ~ModelInstance_Overriden();
++
++    const G3D::Vector3& getPosition() const { return iPos;}
++
++    /**	Enables\disables collision. */
++    void disable() { phasemask = 0;}
++    void enable(uint32 ph_mask) { phasemask = ph_mask;}
++
++    bool intersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const;
++
++    static ModelInstance_Overriden* construct(const GameObject& go);
++};
++
++#endif // _GAMEOBJECT_MODEL_H
+\ No newline at end of file
+diff --git a/src/server/collision/Models/WorldModel.h b/src/server/collision/Models/WorldModel.h
+index 52ecf49..ebf828e 100755
+--- a/src/server/collision/Models/WorldModel.h
++++ b/src/server/collision/Models/WorldModel.h
+@@ -80,7 +80,7 @@ namespace VMAP
+ 
+             //! pass mesh data to object and create BIH. Passed vectors get get swapped with old geometry!
+             void setMeshData(std::vector<Vector3> &vert, std::vector<MeshTriangle> &tri);
+-            void setLiquidData(WmoLiquid* liquid) { iLiquid = liquid; }
++            void setLiquidData(WmoLiquid*& liquid) { iLiquid = liquid; liquid = NULL; }
+             bool IntersectRay(const G3D::Ray &ray, float &distance, bool stopAtFirstHit) const;
+             bool IsInsideObject(const Vector3 &pos, const Vector3 &down, float &z_dist) const;
+             bool GetLiquidLevel(const Vector3 &pos, float &liqHeight) const;
+diff --git a/src/server/collision/RegularGrid.h b/src/server/collision/RegularGrid.h
+new file mode 100644
+index 0000000..bebf508
+--- /dev/null
++++ b/src/server/collision/RegularGrid.h
+@@ -0,0 +1,218 @@
++#ifndef _REGULAR_GRID_H
++#define _REGULAR_GRID_H
++
++
++#include <G3D/Ray.h>
++#include <G3D/AABox.h>
++#include <G3D/Table.h>
++#include <G3D/BoundsTrait.h>
++#include <G3D/PositionTrait.h>
++
++#include "Errors.h"
++
++using G3D::Vector2;
++using G3D::Vector3;
++using G3D::AABox;
++using G3D::Ray;
++
++template<class Node>
++struct NodeCreator{
++    static Node * makeNode(int x, int y) { return new Node();}
++};
++
++template<class T,
++class Node,
++class NodeCreatorFunc = NodeCreator<Node>,
++    /*class BoundsFunc = BoundsTrait<T>,*/
++class PositionFunc = PositionTrait<T>
++>
++class RegularGrid2D
++{
++public:
++
++    enum{
++        CELL_NUMBER = 64,
++    };
++
++    #define HGRID_MAP_SIZE  (533.33333f * 64.f)     // shouldn't be changed
++    #define CELL_SIZE       float(HGRID_MAP_SIZE/(float)CELL_NUMBER)
++
++    typedef G3D::Table<const T*, Node*> MemberTable;
++
++    MemberTable memberTable;
++    Node* nodes[CELL_NUMBER][CELL_NUMBER];
++
++    RegularGrid2D(){
++        memset(nodes, 0, sizeof(nodes));
++    }
++
++    ~RegularGrid2D(){
++        for (int x = 0; x < CELL_NUMBER; ++x)
++            for (int y = 0; y < CELL_NUMBER; ++y)
++                delete nodes[x][y];
++    }
++
++    void insert(const T& value)
++    {
++        Vector3 pos;
++        PositionFunc::getPosition(value, pos);
++        Node& node = getGridFor(pos.x, pos.y);
++        node.insert(value);
++        memberTable.set(&value, &node);
++    }
++
++    void remove(const T& value)
++    {
++        memberTable[&value]->remove(value);
++        // Remove the member
++        memberTable.remove(&value);
++    }
++
++    void balance()
++    {
++        for (int x = 0; x < CELL_NUMBER; ++x)
++            for (int y = 0; y < CELL_NUMBER; ++y)
++                if (Node* n = nodes[x][y])
++                    n->balance();
++    }
++
++    bool contains(const T& value) const { return memberTable.containsKey(&value); }
++    int size() const { return memberTable.size(); }
++
++    struct Cell
++    {
++        int x, y;
++        bool operator == (const Cell& c2) const { return x == c2.x && y == c2.y;}
++
++        static Cell ComputeCell(float fx, float fy)
++        {
++            Cell c = {fx * (1.f/CELL_SIZE) + (CELL_NUMBER/2), fy * (1.f/CELL_SIZE) + (CELL_NUMBER/2)};
++            return c;
++        }
++
++        bool isValid() const { return x >= 0 && x < CELL_NUMBER && y >= 0 && y < CELL_NUMBER;}
++    };
++
++
++    Node& getGridFor(float fx, float fy)
++    {
++        Cell c = Cell::ComputeCell(fx, fy);
++        return getGrid(c.x, c.y);
++    }
++
++    Node& getGrid(int x, int y)
++    {
++        ASSERT(x < CELL_NUMBER && y < CELL_NUMBER);
++        if (!nodes[x][y])
++            nodes[x][y] = NodeCreatorFunc::makeNode(x,y);
++        return *nodes[x][y];
++    }
++
++    template<typename RayCallback>
++    void intersectRay(const Ray& ray, RayCallback& intersectCallback, float max_dist)
++    {
++        intersectRay(ray, intersectCallback, max_dist, ray.origin() + ray.direction() * max_dist);
++    }
++
++    template<typename RayCallback>
++    void intersectRay(const Ray& ray, RayCallback& intersectCallback, float& max_dist, const Vector3& end)
++    {
++        Cell cell = Cell::ComputeCell(ray.origin().x, ray.origin().y);
++        if (!cell.isValid())
++            return;
++
++        Cell last_cell = Cell::ComputeCell(end.x, end.y);
++
++        if (cell == last_cell)
++        {
++            if (Node* node = nodes[cell.x][cell.y])
++                node->intersectRay(ray, intersectCallback, max_dist);
++            return;
++        }
++
++        float voxel = (float)CELL_SIZE;
++        float kx_inv = ray.invDirection().x, bx = ray.origin().x;
++        float ky_inv = ray.invDirection().y, by = ray.origin().y;
++
++        int stepX, stepY;
++        float tMaxX, tMaxY; 
++        if (kx_inv >= 0)
++        {
++            stepX = 1;
++            float x_border = (cell.x+1) * voxel;
++            tMaxX = (x_border - bx) * kx_inv;
++        }
++        else
++        {
++            stepX = -1;
++            float x_border = (cell.x-1) * voxel;
++            tMaxX = (x_border - bx) * kx_inv;
++        }
++
++        if (ky_inv >= 0)
++        {
++            stepY = 1;
++            float y_border = (cell.y+1) * voxel;
++            tMaxY = (y_border - by) * ky_inv;
++        }
++        else
++        {
++            stepY = -1;
++            float y_border = (cell.y-1) * voxel;
++            tMaxY = (y_border - by) * ky_inv;
++        }
++
++        //int Cycles = std::max((int)ceilf(max_dist/tMaxX),(int)ceilf(max_dist/tMaxY));
++        //int i = 0;
++
++        float tDeltaX = voxel * fabs(kx_inv);
++        float tDeltaY = voxel * fabs(ky_inv);
++        do
++        {
++            if (Node* node = nodes[cell.x][cell.y])
++            {
++                //float enterdist = max_dist;
++                node->intersectRay(ray, intersectCallback, max_dist);
++            }
++            if (cell == last_cell)
++                break;
++            if(tMaxX < tMaxY)
++            {
++                tMaxX += tDeltaX;
++                cell.x += stepX;
++            }
++            else
++            {
++                tMaxY += tDeltaY;
++                cell.y += stepY;
++            }
++            //++i;
++        } while (cell.isValid());
++    }
++
++    template<typename IsectCallback>
++    void intersectPoint(const Vector3& p, IsectCallback& intersectCallback)
++    {
++        Cell c = Cell::ComputeCell(p.x, p.y);
++        if (!cell.isValid())
++            return;
++        if (Node * node = nodes[c.x][c.y])
++            node->intersectPoint(p, intersectCallback);
++    }
++
++    // Optimized verson of intersectRay function for rays with vertical directions
++    template<typename RayCallback>
++    void intersectZAllignedRay(const Ray& ray, RayCallback& intersectCallback, float& max_dist)
++    {
++        Cell cell = Cell::ComputeCell(ray.origin().x, ray.origin().y);
++        if (!cell.isValid())
++            return;
++        if (Node* node = nodes[cell.x][cell.y])
++            node->intersectRay(ray, intersectCallback, max_dist);
++    }
++};
++
++#undef CELL_SIZE
++#undef HGRID_MAP_SIZE
++
++#endif 
+\ No newline at end of file
+diff --git a/src/server/collision/VMapDefinitions.h b/src/server/collision/VMapDefinitions.h
+index f7d6f0d..b98d01c 100644
+--- a/src/server/collision/VMapDefinitions.h
++++ b/src/server/collision/VMapDefinitions.h
+@@ -25,6 +25,8 @@
+ namespace VMAP
+ {
+     const char VMAP_MAGIC[] = "VMAP_3.0";
++    const char RAW_VMAP_MAGIC[] = "VMAP003";                // used in extracted vmap files with raw data
++    const char GAMEOBJECT_MODELS[] = "temp_gameobject_models";
+ 
+     // defined in TileAssembler.cpp currently...
+     bool readChunk(FILE* rf, char *dest, const char *compare, uint32 len);
+diff --git a/src/server/game/CMakeLists.txt b/src/server/game/CMakeLists.txt
+index ac1bb9e..cf24c92 100644
+--- a/src/server/game/CMakeLists.txt
++++ b/src/server/game/CMakeLists.txt
+@@ -110,6 +110,8 @@ include_directories(
+   ${CMAKE_SOURCE_DIR}/dep/zlib
+   ${CMAKE_SOURCE_DIR}/src/server/collision
+   ${CMAKE_SOURCE_DIR}/src/server/collision/Management
++  ${CMAKE_SOURCE_DIR}/src/server/collision/Models
++  ${CMAKE_SOURCE_DIR}/src/server/collision/Maps
+   ${CMAKE_SOURCE_DIR}/src/server/shared
+   ${CMAKE_SOURCE_DIR}/src/server/shared/Configuration
+   ${CMAKE_SOURCE_DIR}/src/server/shared/Cryptography
+diff --git a/src/server/game/DataStores/DBCStructure.h b/src/server/game/DataStores/DBCStructure.h
+index 15408ad..adb7f0a 100755
+--- a/src/server/game/DataStores/DBCStructure.h
++++ b/src/server/game/DataStores/DBCStructure.h
+@@ -955,7 +955,7 @@ struct FactionTemplateEntry
+ struct GameObjectDisplayInfoEntry
+ {
+     uint32      Displayid;                                  // 0        m_ID
+-    // char* filename;                                      // 1
++    char* filename;                                      // 1
+     //uint32  unk1[10];   //2-11
+     float   minX;
+     float   minY;
+diff --git a/src/server/game/DataStores/DBCfmt.h b/src/server/game/DataStores/DBCfmt.h
+index c55fb79..150159f 100755
+--- a/src/server/game/DataStores/DBCfmt.h
++++ b/src/server/game/DataStores/DBCfmt.h
+@@ -52,7 +52,7 @@ const char EmotesEntryfmt[]="nxxiiix";
+ const char EmotesTextEntryfmt[]="nxixxxxxxxxxxxxxxxx";
+ const char FactionEntryfmt[]="niiiiiiiiiiiiiiiiiiffixssssssssssssssssxxxxxxxxxxxxxxxxxx";
+ const char FactionTemplateEntryfmt[]="niiiiiiiiiiiii";
+-const char GameObjectDisplayInfofmt[]="nxxxxxxxxxxxffffffx";
++const char GameObjectDisplayInfofmt[]="nsxxxxxxxxxxffffffx";
+ const char GemPropertiesEntryfmt[]="nixxi";
+ const char GlyphPropertiesfmt[]="niii";
+ const char GlyphSlotfmt[]="nii";
+diff --git a/src/server/game/Entities/Creature/Creature.cpp b/src/server/game/Entities/Creature/Creature.cpp
+index 23865dd..7f767ea 100755
+--- a/src/server/game/Entities/Creature/Creature.cpp
++++ b/src/server/game/Entities/Creature/Creature.cpp
+@@ -1289,7 +1289,7 @@ bool Creature::LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap)
+         m_deathState = DEAD;
+         if (canFly())
+         {
+-            float tz = map->GetHeight(data->posX, data->posY, data->posZ, false);
++            float tz = map->GetHeight(GetPhaseMask(), data->posX, data->posY, data->posZ, false);
+             if (data->posZ - tz > 0.1f)
+                 Relocate(data->posX, data->posY, tz);
+         }
+diff --git a/src/server/game/Entities/GameObject/GameObject.cpp b/src/server/game/Entities/GameObject/GameObject.cpp
+index 3548ef3..db2430c 100755
+--- a/src/server/game/Entities/GameObject/GameObject.cpp
++++ b/src/server/game/Entities/GameObject/GameObject.cpp
+@@ -30,7 +30,10 @@
+ #include "CreatureAISelector.h"
+ #include "Group.h"
+ 
+-GameObject::GameObject() : WorldObject(false), m_goValue(new GameObjectValue), m_AI(NULL)
++#include "GameobjectModel.h"
++#include "DynamicTree.h"
++
++GameObject::GameObject() : WorldObject(false), m_goValue(new GameObjectValue), m_AI(NULL), m_model(NULL)
+ {
+     m_objectType |= TYPEMASK_GAMEOBJECT;
+     m_objectTypeId = TYPEID_GAMEOBJECT;
+@@ -62,6 +65,7 @@ GameObject::~GameObject()
+ {
+     delete m_goValue;
+     delete m_AI;
++    delete m_model;
+     //if (m_uint32Values)                                      // field array can be not exist if GameOBject not loaded
+     //    CleanupsBeforeDelete();
+ }
+@@ -127,6 +131,8 @@ void GameObject::AddToWorld()
+             m_zoneScript->OnGameObjectCreate(this);
+ 
+         sObjectAccessor->AddObject(this);
++        if (m_model && (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? !GetGOInfo()->door.startOpen : true))
++            GetMap()->Insert(*m_model);
+         WorldObject::AddToWorld();
+     }
+ }
+@@ -140,6 +146,9 @@ void GameObject::RemoveFromWorld()
+             m_zoneScript->OnGameObjectRemove(this);
+ 
+         RemoveFromOwner();
++        if (m_model)
++            if (GetMap()->Contains(*m_model))
++                GetMap()->Remove(*m_model);
+         WorldObject::RemoveFromWorld();
+         sObjectAccessor->RemoveObject(this);
+     }
+@@ -199,7 +208,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
+     // set name for logs usage, doesn't affect anything ingame
+     SetName(goinfo->name);
+ 
+-    SetUInt32Value(GAMEOBJECT_DISPLAYID, goinfo->displayId);
++    SetDisplayId(goinfo->displayId);
+ 
+     // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
+     SetGoState(go_state);
+@@ -207,6 +216,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
+ 
+     SetGoArtKit(0);                                         // unknown what this is
+     SetByteValue(GAMEOBJECT_BYTES_1, 2, artKit);
++    
++    m_model = ModelInstance_Overriden::construct(*this);
+ 
+     switch (goinfo->type)
+     {
+@@ -1779,7 +1790,7 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
+     {
+         case GO_DESTRUCTIBLE_INTACT:
+             RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_DESTROYED);
+-            SetUInt32Value(GAMEOBJECT_DISPLAYID, m_goInfo->displayId);
++            SetDisplayId(m_goInfo->displayId);
+             if (setHealth)
+             {
+                 m_goValue->Building.Health = m_goValue->Building.MaxHealth;
+@@ -1801,7 +1812,7 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
+             if (DestructibleModelDataEntry const* modelData = sDestructibleModelDataStore.LookupEntry(m_goInfo->building.destructibleData))
+                 if (modelData->DamagedDisplayId)
+                     modelId = modelData->DamagedDisplayId;
+-            SetUInt32Value(GAMEOBJECT_DISPLAYID, modelId);
++            SetDisplayId(modelId);
+ 
+             if (setHealth)
+             {
+@@ -1834,7 +1845,7 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
+             if (DestructibleModelDataEntry const* modelData = sDestructibleModelDataStore.LookupEntry(m_goInfo->building.destructibleData))
+                 if (modelData->DestroyedDisplayId)
+                     modelId = modelData->DestroyedDisplayId;
+-            SetUInt32Value(GAMEOBJECT_DISPLAYID, modelId);
++            SetDisplayId(modelId);
+ 
+             if (setHealth)
+             {
+@@ -1852,7 +1863,7 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
+             if (DestructibleModelDataEntry const* modelData = sDestructibleModelDataStore.LookupEntry(m_goInfo->building.destructibleData))
+                 if (modelData->RebuildingDisplayId)
+                     modelId = modelData->RebuildingDisplayId;
+-            SetUInt32Value(GAMEOBJECT_DISPLAYID, modelId);
++            SetDisplayId(modelId);
+ 
+             // restores to full health
+             if (setHealth)
+@@ -1865,8 +1876,67 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
+     }
+ }
+ 
+-void GameObject::SetLootState(LootState s, Unit* unit)
++void GameObject::SetLootState(LootState state, Unit* unit)
++{
++    m_lootState = state;
++    AI()->OnStateChanged(state, unit);
++    if (m_model)
++    {
++        // startOpen determines whether we are going to add or remove the LoS on activation
++        bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
++        if (state == GO_ACTIVATED)
++            EnableCollision(startOpen);
++        else if (state == GO_READY)
++            EnableCollision(!startOpen);
++    }
++}
++
++void GameObject::SetGoState(GOState state)
+ {
+-    m_lootState = s;
+-    AI()->OnStateChanged(s, unit);
++    SetByteValue(GAMEOBJECT_BYTES_1, 0, state);
++    if (m_model)
++    {
++        // startOpen determines whether we are going to add or remove the LoS on activation
++        bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
++        if (state == GO_STATE_ACTIVE)
++            EnableCollision(startOpen);
++        else if (state == GO_STATE_READY)
++            EnableCollision(!startOpen);
++    }
++}
++
++void GameObject::SetDisplayId(uint32 displayid)
++{
++    SetUInt32Value(GAMEOBJECT_DISPLAYID, displayid);
++    UpdateModel();
+ }
++
++void GameObject::SetPhaseMask(uint32 newPhaseMask, bool update)
++{
++    WorldObject::SetPhaseMask(newPhaseMask, update);
++    EnableCollision(true);
++}
++
++void GameObject::EnableCollision(bool enable)
++{
++    if (!m_model)
++        return;
++    
++    if (enable && !GetMap()->Contains(*m_model))
++        GetMap()->Insert(*m_model);
++
++    m_model->enable(enable ? GetPhaseMask() : 0);
++}
++
++void GameObject::UpdateModel()
++{
++    if (!IsInWorld())
++        return;
++    if (m_model)
++        if (GetMap()->Contains(*m_model))
++            GetMap()->Remove(*m_model);
++    delete m_model;
++    m_model = ModelInstance_Overriden::construct(*this);
++    if (m_model)
++        GetMap()->Insert(*m_model);
++}
+\ No newline at end of file
+diff --git a/src/server/game/Entities/GameObject/GameObject.h b/src/server/game/Entities/GameObject/GameObject.h
+index f677d48..3c9baa4 100755
+--- a/src/server/game/Entities/GameObject/GameObject.h
++++ b/src/server/game/Entities/GameObject/GameObject.h
+@@ -609,6 +609,7 @@ enum LootState
+ };
+ 
+ class Unit;
++class ModelInstance_Overriden;
+ 
+ // 5 sec for bobber catch
+ #define FISHING_BOBBER_READY_TIME 5
+@@ -703,12 +704,15 @@ class GameObject : public WorldObject, public GridObject<GameObject>
+         GameobjectTypes GetGoType() const { return GameobjectTypes(GetByteValue(GAMEOBJECT_BYTES_1, 1)); }
+         void SetGoType(GameobjectTypes type) { SetByteValue(GAMEOBJECT_BYTES_1, 1, type); }
+         GOState GetGoState() const { return GOState(GetByteValue(GAMEOBJECT_BYTES_1, 0)); }
+-        void SetGoState(GOState state) { SetByteValue(GAMEOBJECT_BYTES_1, 0, state); }
++        void SetGoState(GOState state);
+         uint8 GetGoArtKit() const { return GetByteValue(GAMEOBJECT_BYTES_1, 2); }
+         void SetGoArtKit(uint8 artkit);
+         uint8 GetGoAnimProgress() const { return GetByteValue(GAMEOBJECT_BYTES_1, 3); }
+         void SetGoAnimProgress(uint8 animprogress) { SetByteValue(GAMEOBJECT_BYTES_1, 3, animprogress); }
+         static void SetGoArtKit(uint8 artkit, GameObject* go, uint32 lowguid = 0);
++        
++        void SetPhaseMask(uint32 newPhaseMask, bool update);
++        void EnableCollision(bool enable);
+ 
+         void Use(Unit* user);
+ 
+@@ -790,6 +794,9 @@ class GameObject : public WorldObject, public GridObject<GameObject>
+         GameObjectAI* AI() const { return m_AI; }
+ 
+         std::string GetAIName() const;
++        void SetDisplayId(uint32 displayid);
++        
++        ModelInstance_Overriden * m_model;
+     protected:
+         bool AIM_Initialize();
+         uint32      m_spellId;
+@@ -819,6 +826,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>
+     private:
+         void RemoveFromOwner();
+         void SwitchDoorOrButton(bool activate, bool alternative = false);
++        void UpdateModel();                                 // updates model in case displayId were changed
+ 
+         //! Object distance/size - overridden from Object::_IsWithinDist. Needs to take in account proper GO size.
+         bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool /*is3D*/) const
+diff --git a/src/server/game/Entities/Object/Object.cpp b/src/server/game/Entities/Object/Object.cpp
+index 732171d..7113fe8 100755
+--- a/src/server/game/Entities/Object/Object.cpp
++++ b/src/server/game/Entities/Object/Object.cpp
+@@ -46,6 +46,7 @@
+ #include "Totem.h"
+ #include "OutdoorPvPMgr.h"
+ #include "MovementPacketBuilder.h"
++#include "DynamicTree.h"
+ 
+ uint32 GuidHigh2TypeId(uint32 guid_hi)
+ {
+@@ -1300,15 +1301,19 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
+ 
+     float ox, oy, oz;
+     obj->GetPosition(ox, oy, oz);
+-    return(IsWithinLOS(ox, oy, oz));
++    return IsWithinLOS(ox, oy, oz);
+ }
+ 
+ bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
+ {
+-    float x, y, z;
++    /*float x, y, z;
+     GetPosition(x, y, z);
+     VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+-    return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);
++    return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);*/
++    if (IsInWorld())
++        return GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ()+2.f, ox, oy, oz+2.f, GetPhaseMask());
++
++    return true;
+ }
+ 
+ bool WorldObject::GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D /* = true */) const
+@@ -1530,7 +1535,7 @@ void WorldObject::GetRandomPoint(const Position &pos, float distance, float &ran
+ 
+ void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
+ {
+-    float new_z = GetBaseMap()->GetHeight(x, y, z, true);
++    float new_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
+     if (new_z > INVALID_HEIGHT)
+         z = new_z+ 0.05f;                                   // just to be sure that we are not a few pixel under the surface
+ }
+@@ -1549,7 +1554,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
+                 float ground_z = z;
+                 float max_z = canSwim
+                     ? GetBaseMap()->GetWaterOrGroundLevel(x, y, z, &ground_z, !ToUnit()->HasAuraType(SPELL_AURA_WATER_WALK))
+-                    : ((ground_z = GetBaseMap()->GetHeight(x, y, z, true)));
++                    : ((ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true)));
+                 if (max_z > INVALID_HEIGHT)
+                 {
+                     if (z > max_z)
+@@ -1560,7 +1565,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
+             }
+             else
+             {
+-                float ground_z = GetBaseMap()->GetHeight(x, y, z, true);
++                float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
+                 if (z < ground_z)
+                     z = ground_z;
+             }
+@@ -1583,7 +1588,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
+             }
+             else
+             {
+-                float ground_z = GetBaseMap()->GetHeight(x, y, z, true);
++                float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
+                 if (z < ground_z)
+                     z = ground_z;
+             }
+@@ -1591,7 +1596,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
+         }
+         default:
+         {
+-            float ground_z = GetBaseMap()->GetHeight(x, y, z, true);
++            float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
+             if(ground_z > INVALID_HEIGHT)
+                 z = ground_z;
+             break;
+@@ -2665,8 +2670,8 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float
+ 
+     destx = pos.m_positionX + dist * cos(angle);
+     desty = pos.m_positionY + dist * sin(angle);
+-    ground = GetMap()->GetHeight(destx, desty, MAX_HEIGHT, true);
+-    floor = GetMap()->GetHeight(destx, desty, pos.m_positionZ, true);
++    ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
++    floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);
+     destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
+ 
+     bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+0.5f, destx, desty, destz+0.5f, destx, desty, destz, -0.5f);
+@@ -2689,8 +2694,8 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float
+         {
+             destx -= step * cos(angle);
+             desty -= step * sin(angle);
+-            ground = GetMap()->GetHeight(destx, desty, MAX_HEIGHT, true);
+-            floor = GetMap()->GetHeight(destx, desty, pos.m_positionZ, true);
++            ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
++            floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);
+             destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
+         }
+         // we have correct destz now
+diff --git a/src/server/game/Entities/Transport/Transport.cpp b/src/server/game/Entities/Transport/Transport.cpp
+index 67d1636..891cf6b 100755
+--- a/src/server/game/Entities/Transport/Transport.cpp
++++ b/src/server/game/Entities/Transport/Transport.cpp
+@@ -222,7 +222,7 @@ bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, floa
+     SetUInt32Value(GAMEOBJECT_LEVEL, m_period);
+     SetEntry(goinfo->entry);
+ 
+-    SetUInt32Value(GAMEOBJECT_DISPLAYID, goinfo->displayId);
++    SetDisplayId(goinfo->displayId);
+ 
+     SetGoState(GO_STATE_READY);
+     SetGoType(GameobjectTypes(goinfo->type));
+diff --git a/src/server/game/Handlers/QueryHandler.cpp b/src/server/game/Handlers/QueryHandler.cpp
+index 5702eef..c907620 100755
+--- a/src/server/game/Handlers/QueryHandler.cpp
++++ b/src/server/game/Handlers/QueryHandler.cpp
+@@ -251,7 +251,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
+                     mapid = corpseMapEntry->entrance_map;
+                     x = corpseMapEntry->entrance_x;
+                     y = corpseMapEntry->entrance_y;
+-                    z = entranceMap->GetHeight(x, y, MAX_HEIGHT);
++                    z = entranceMap->GetHeight(GetPlayer()->GetPhaseMask(), x, y, MAX_HEIGHT);
+                 }
+             }
+         }
+diff --git a/src/server/game/Maps/Map.cpp b/src/server/game/Maps/Map.cpp
+index df5ec54..71fc2ef 100755
+--- a/src/server/game/Maps/Map.cpp
++++ b/src/server/game/Maps/Map.cpp
+@@ -31,6 +31,7 @@
+ #include "ObjectMgr.h"
+ #include "Group.h"
+ #include "LFGMgr.h"
++#include "DynamicTree.h"
+ 
+ union u_map_magic
+ {
+@@ -368,6 +369,7 @@ bool Map::EnsureGridLoaded(const Cell &cell)
+ 
+         // Add resurrectable corpses to world object list in grid
+         sObjectAccessor->AddCorpsesToGrid(GridCoord(cell.GridX(), cell.GridY()), grid->GetGridType(cell.CellX(), cell.CellY()), this);
++        Balance();
+         return true;
+     }
+ 
+@@ -498,6 +500,7 @@ void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Trinity::Obj
+ 
+ void Map::Update(const uint32 t_diff)
+ {
++    m_dyn_tree.update(t_diff);
+     /// update worldsessions for existing players
+     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
+     {
+@@ -1544,7 +1547,7 @@ float Map::GetWaterOrGroundLevel(float x, float y, float z, float* ground /*= NU
+     if (const_cast<Map*>(this)->GetGrid(x, y))
+     {
+         // we need ground level (including grid height version) for proper return water level in point
+-        float ground_z = GetHeight(x, y, z, true, 50.0f);
++        float ground_z = GetHeight(PHASEMASK_NORMAL, x, y, z, true, 50.0f);
+         if (ground)
+             *ground = ground_z;
+ 
+@@ -1793,6 +1796,17 @@ void Map::GetZoneAndAreaIdByAreaFlag(uint32& zoneid, uint32& areaid, uint16 area
+     zoneid = entry ? ((entry->zone != 0) ? entry->zone : entry->ID) : 0;
+ }
+ 
++bool Map::isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const
++{
++    return VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(GetId(), x1, y1, z1, x2, y2, z2)
++        && m_dyn_tree.isInLineOfSight(x1, y1, z1, x2, y2, z2, phasemask);
++}
++
++float Map::GetHeight(uint32 phasemask, float x, float y, float z, bool vmap/*=true*/, float maxSearchDist/*=DEFAULT_HEIGHT_SEARCH*/) const
++{
++    return std::max<float>(GetHeight(x, y, z, vmap, maxSearchDist), m_dyn_tree.getHeight(x, y, z, maxSearchDist, phasemask));
++}
++
+ bool Map::IsInWater(float x, float y, float pZ, LiquidData* data) const
+ {
+     // Check surface in x, y point for liquid
+diff --git a/src/server/game/Maps/Map.h b/src/server/game/Maps/Map.h
+index f3b45bd..4f5a62a 100755
+--- a/src/server/game/Maps/Map.h
++++ b/src/server/game/Maps/Map.h
+@@ -30,6 +30,7 @@
+ #include "SharedDefines.h"
+ #include "GridRefManager.h"
+ #include "MapRefManager.h"
++#include "DynamicTree.h"
+ 
+ #include <bitset>
+ #include <list>
+@@ -425,7 +426,12 @@ class Map : public GridRefManager<NGridType>
+         InstanceMap* ToInstanceMap(){ if (IsDungeon())  return reinterpret_cast<InstanceMap*>(this); else return NULL;  }
+         const InstanceMap* ToInstanceMap() const { if (IsDungeon())  return (const InstanceMap*)((InstanceMap*)this); else return NULL;  }
+         float GetWaterOrGroundLevel(float x, float y, float z, float* ground = NULL, bool swim = false) const;
+-
++        float GetHeight(uint32 phasemask, float x, float y, float z, bool vmap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
++        bool isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
++        void Balance() { m_dyn_tree.balance(); }
++        void Remove(const ModelInstance_Overriden& mdl) { m_dyn_tree.remove(mdl); }
++        void Insert(const ModelInstance_Overriden& mdl) { m_dyn_tree.insert(mdl); }
++        bool Contains(const ModelInstance_Overriden& mdl) const { return m_dyn_tree.contains(mdl);}
+     private:
+         void LoadMapAndVMap(int gx, int gy);
+         void LoadVMap(int gx, int gy);
+@@ -481,6 +487,7 @@ class Map : public GridRefManager<NGridType>
+         uint32 i_InstanceId;
+         uint32 m_unloadTimer;
+         float m_VisibleDistance;
++        DynamicMapTree m_dyn_tree;
+ 
+         MapRefManager m_mapRefManager;
+         MapRefManager::iterator m_mapRefIter;
+diff --git a/src/server/game/Movement/MotionMaster.cpp b/src/server/game/Movement/MotionMaster.cpp
+index 8975a2d..adb7b5c 100755
+--- a/src/server/game/Movement/MotionMaster.cpp
++++ b/src/server/game/Movement/MotionMaster.cpp
+@@ -374,7 +374,7 @@ void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float spee
+ void MotionMaster::MoveFall(uint32 id/*=0*/)
+ {
+     // use larger distance for vmap height search than in most other cases
+-    float tz = i_owner->GetMap()->GetHeight(i_owner->GetPositionX(), i_owner->GetPositionY(), i_owner->GetPositionZ(), true, MAX_FALL_DISTANCE);
++    float tz = i_owner->GetMap()->GetHeight(i_owner->GetPhaseMask(), i_owner->GetPositionX(), i_owner->GetPositionY(), i_owner->GetPositionZ(), true, MAX_FALL_DISTANCE);
+     if (tz <= INVALID_HEIGHT)
+     {
+         sLog->outStaticDebug("MotionMaster::MoveFall: unable retrive a proper height at map %u (x: %f, y: %f, z: %f).",
+@@ -387,7 +387,7 @@ void MotionMaster::MoveFall(uint32 id/*=0*/)
+         return;
+ 
+     Movement::MoveSplineInit init(*i_owner);
+-    init.MoveTo(i_owner->GetPositionX(),i_owner->GetPositionY(),tz);
++    init.MoveTo(i_owner->GetPositionX(), i_owner->GetPositionY(), tz);
+     init.SetFall();
+     init.Launch();
+     Mutate(new EffectMovementGenerator(id), MOTION_SLOT_CONTROLLED);
+diff --git a/src/server/game/Movement/MovementGenerators/FleeingMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/FleeingMovementGenerator.cpp
+index 458e6f9..1a628ae 100755
+--- a/src/server/game/Movement/MovementGenerators/FleeingMovementGenerator.cpp
++++ b/src/server/game/Movement/MovementGenerators/FleeingMovementGenerator.cpp
+@@ -157,7 +157,7 @@ FleeingMovementGenerator<T>::_getPoint(T &owner, float &x, float &y, float &z)
+                 y = temp_y;
+                 return true;
+             }
+-            float new_z = _map->GetHeight(temp_x, temp_y, z, true);
++            float new_z = _map->GetHeight(owner.GetPhaseMask(), temp_x, temp_y, z, true);
+ 
+             if (new_z <= INVALID_HEIGHT)
+                 continue;
+@@ -169,8 +169,8 @@ FleeingMovementGenerator<T>::_getPoint(T &owner, float &x, float &y, float &z)
+ 
+             if (!(new_z - z) || distance / fabs(new_z - z) > 1.0f)
+             {
+-                float new_z_left = _map->GetHeight(temp_x + 1.0f*cos(angle+static_cast<float>(M_PI/2)),temp_y + 1.0f*sin(angle+static_cast<float>(M_PI/2)),z,true);
+-                float new_z_right = _map->GetHeight(temp_x + 1.0f*cos(angle-static_cast<float>(M_PI/2)),temp_y + 1.0f*sin(angle-static_cast<float>(M_PI/2)),z,true);
++                float new_z_left = _map->GetHeight(owner.GetPhaseMask(), temp_x + 1.0f*cos(angle+static_cast<float>(M_PI/2)),temp_y + 1.0f*sin(angle+static_cast<float>(M_PI/2)),z,true);
++                float new_z_right = _map->GetHeight(owner.GetPhaseMask(), temp_x + 1.0f*cos(angle-static_cast<float>(M_PI/2)),temp_y + 1.0f*sin(angle-static_cast<float>(M_PI/2)),z,true);
+                 if (fabs(new_z_left - new_z) < 1.2f && fabs(new_z_right - new_z) < 1.2f)
+                 {
+                     x = temp_x;
+diff --git a/src/server/game/Movement/MovementGenerators/RandomMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/RandomMovementGenerator.cpp
+index 0205b73..7270bbb 100755
+--- a/src/server/game/Movement/MovementGenerators/RandomMovementGenerator.cpp
++++ b/src/server/game/Movement/MovementGenerators/RandomMovementGenerator.cpp
+@@ -33,7 +33,7 @@
+ #endif
+ 
+ template<>
+-void RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
++void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
+ {
+     float respX, respY, respZ, respO, currZ, destX, destY, destZ, travelDistZ;
+     creature.GetHomePosition(respX, respY, respZ, respO);
+@@ -78,17 +78,17 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
+ 
+         // The fastest way to get an accurate result 90% of the time.
+         // Better result can be obtained like 99% accuracy with a ray light, but the cost is too high and the code is too long.
+-        destZ = map->GetHeight(destX, destY, respZ+travelDistZ-2.0f, false);
++        destZ = map->GetHeight(creature.GetPhaseMask(), destX, destY, respZ+travelDistZ-2.0f, false);
+ 
+         if (fabs(destZ - respZ) > travelDistZ)              // Map check
+         {
+             // Vmap Horizontal or above
+-            destZ = map->GetHeight(destX, destY, respZ - 2.0f, true);
++            destZ = map->GetHeight(creature.GetPhaseMask(), destX, destY, respZ - 2.0f, true);
+ 
+             if (fabs(destZ - respZ) > travelDistZ)
+             {
+                 // Vmap Higher
+-                destZ = map->GetHeight(destX, destY, respZ+travelDistZ-2.0f, true);
++                destZ = map->GetHeight(creature.GetPhaseMask(), destX, destY, respZ+travelDistZ-2.0f, true);
+ 
+                 // let's forget this bad coords where a z cannot be find and retry at next tick
+                 if (fabs(destZ - respZ) > travelDistZ)
+diff --git a/src/server/game/Spells/Spell.cpp b/src/server/game/Spells/Spell.cpp
+index 3c73edb..042aa68 100755
+--- a/src/server/game/Spells/Spell.cpp
++++ b/src/server/game/Spells/Spell.cpp
+@@ -5299,7 +5299,7 @@ SpellCastResult Spell::CheckCast(bool strict)
+                     {
+                         float x, y, z;
+                         m_caster->GetPosition(x, y, z);
+-                        float ground_Z = m_caster->GetMap()->GetHeight(x, y, z);
++                        float ground_Z = m_caster->GetMap()->GetHeight(m_caster->GetPhaseMask(), x, y, z);
+                         if (fabs(ground_Z - z) < 0.1f)
+                             return SPELL_FAILED_DONT_REPORT;
+                         break;
+diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
+index 426a93f..d87da4c 100755
+--- a/src/server/game/World/World.cpp
++++ b/src/server/game/World/World.cpp
+@@ -1192,6 +1192,8 @@ void World::LoadConfigSettings(bool reload)
+     sScriptMgr->OnConfigLoad(reload);
+ }
+ 
++extern void LoadGameObjectModelList();
++
+ /// Initialize the World
+ void World::SetInitialWorldSettings()
+ {
+@@ -1270,6 +1272,9 @@ void World::SetInitialWorldSettings()
+     sLog->outString("Loading spell custom attributes...");
+     sSpellMgr->LoadSpellCustomAttr();
+ 
++    sLog->outString("Loading GameObject models...");
++    LoadGameObjectModelList();
++    
+     sLog->outString("Loading Script Names...");
+     sObjectMgr->LoadScriptNames();
+ 
+diff --git a/src/server/scripts/CMakeLists.txt b/src/server/scripts/CMakeLists.txt
+index 56e63af..b33f533 100644
+--- a/src/server/scripts/CMakeLists.txt
++++ b/src/server/scripts/CMakeLists.txt
+@@ -52,6 +52,7 @@ message("")
+ 
+ include_directories(
+   ${CMAKE_BINARY_DIR}
++  ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
+   ${CMAKE_SOURCE_DIR}/dep/SFMT
+   ${CMAKE_SOURCE_DIR}/dep/mersennetwister
+   ${CMAKE_SOURCE_DIR}/dep/zlib
+diff --git a/src/server/scripts/Commands/cs_debug.cpp b/src/server/scripts/Commands/cs_debug.cpp
+index 311c658..73e6b0a 100644
+--- a/src/server/scripts/Commands/cs_debug.cpp
++++ b/src/server/scripts/Commands/cs_debug.cpp
+@@ -88,6 +88,7 @@ public:
+             { "update",         SEC_ADMINISTRATOR,  false, &HandleDebugUpdateCommand,          "", NULL },
+             { "itemexpire",     SEC_ADMINISTRATOR,  false, &HandleDebugItemExpireCommand,      "", NULL },
+             { "areatriggers",   SEC_ADMINISTRATOR,  false, &HandleDebugAreaTriggersCommand,    "", NULL },
++            { "los",            SEC_MODERATOR,      false, &HandleDebugLoSCommand,             "", NULL },
+             { NULL,             0,                  false, NULL,                               "", NULL }
+         };
+         static ChatCommand commandTable[] =
+@@ -1040,6 +1041,13 @@ public:
+         handler->GetSession()->GetPlayer()->HandleEmoteCommand(animId);
+         return true;
+     }
++    
++    static bool HandleDebugLoSCommand(ChatHandler* handler, char const* args)
++    {
++        if (Unit* unit = handler->getSelectedUnit())
++            handler->PSendSysMessage("Unit %s (GuidLow: %u) is %sin LoS", unit->GetName(), unit->GetGUIDLow(), handler->GetSession()->GetPlayer()->IsWithinLOSInMap(unit) ? "" : "not ");
++        return true;
++    }
+ 
+     static bool HandleDebugSetAuraStateCommand(ChatHandler* handler, char const* args)
+     {
+diff --git a/src/server/scripts/Commands/cs_gps.cpp b/src/server/scripts/Commands/cs_gps.cpp
+index 8f15f8c..589ed4a 100644
+--- a/src/server/scripts/Commands/cs_gps.cpp
++++ b/src/server/scripts/Commands/cs_gps.cpp
+@@ -87,8 +87,8 @@ public:
+         Map2ZoneCoordinates(zoneX, zoneY, zoneId);
+ 
+         Map const* map = object->GetMap();
+-        float groundZ = map->GetHeight(object->GetPositionX(), object->GetPositionY(), MAX_HEIGHT);
+-        float floorZ = map->GetHeight(object->GetPositionX(), object->GetPositionY(), object->GetPositionZ());
++        float groundZ = map->GetHeight(object->GetPhaseMask(), object->GetPositionX(), object->GetPositionY(), MAX_HEIGHT);
++        float floorZ = map->GetHeight(object->GetPhaseMask(), object->GetPositionX(), object->GetPositionY(), object->GetPositionZ());
+ 
+         GridCoord gridCoord = Trinity::ComputeGridCoord(object->GetPositionX(), object->GetPositionY());
+ 
+diff --git a/src/server/scripts/Kalimdor/CavernsOfTime/BattleForMountHyjal/hyjal_trash.cpp b/src/server/scripts/Kalimdor/CavernsOfTime/BattleForMountHyjal/hyjal_trash.cpp
+index 6466780..3a96e64 100644
+--- a/src/server/scripts/Kalimdor/CavernsOfTime/BattleForMountHyjal/hyjal_trash.cpp
++++ b/src/server/scripts/Kalimdor/CavernsOfTime/BattleForMountHyjal/hyjal_trash.cpp
+@@ -1200,7 +1200,7 @@ public:
+ 
+             float x, y, z;
+             me->GetPosition(x, y, z);
+-            z = me->GetMap()->GetHeight(x, y, z);
++            z = me->GetMap()->GetHeight(me->GetPhaseMask(), x, y, z);
+             me->GetMotionMaster()->MovePoint(0, x, y, z);
+             me->SetPosition(x, y, z, 0);
+         }
+@@ -1319,7 +1319,7 @@ public:
+         {
+             float x, y, z;
+             me->GetPosition(x, y, z);
+-            z = me->GetMap()->GetHeight(x, y, z);
++            z = me->GetMap()->GetHeight(me->GetPhaseMask(), x, y, z);
+             me->GetMotionMaster()->MovePoint(0, x, y, z);
+             me->SetPosition(x, y, z, 0);
+             hyjal_trashAI::JustDied(victim);
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp
+index 94a3da2..62b1666 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp
+@@ -892,7 +892,7 @@ class boss_prince_valanar_icc : public CreatureScript
+                     {
+                         float x, y, z;
+                         summon->GetPosition(x, y, z);
+-                        float ground_Z = summon->GetMap()->GetHeight(x, y, z, true, 500.0f);
++                        float ground_Z = summon->GetMap()->GetHeight(summon->GetPhaseMask(), x, y, z, true, 500.0f);
+                         summon->GetMotionMaster()->MovePoint(POINT_KINETIC_BOMB_IMPACT, x, y, ground_Z);
+                         break;
+                     }
+@@ -1238,7 +1238,7 @@ class npc_kinetic_bomb : public CreatureScript
+                 me->SetReactState(REACT_PASSIVE);
+                 me->SetSpeed(MOVE_FLIGHT, IsHeroic() ? 0.3f : 0.15f, true);
+                 me->GetPosition(_x, _y, _groundZ);
+-                _groundZ = me->GetMap()->GetHeight(_x, _y, _groundZ, true, 500.0f);
++                _groundZ = me->GetMap()->GetHeight(me->GetPhaseMask(), _x, _y, _groundZ, true, 500.0f);
+             }
+ 
+             void DoAction(int32 const action)
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
+index cf22338..6eda383 100755
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
+@@ -948,7 +948,7 @@ class spell_putricide_ooze_summon : public SpellScriptLoader
+                     uint32 triggerSpellId = GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell;
+                     float x, y, z;
+                     GetTarget()->GetPosition(x, y, z);
+-                    z = GetTarget()->GetMap()->GetHeight(x, y, z, true, 25.0f);
++                    z = GetTarget()->GetMap()->GetHeight(GetTarget()->GetPhaseMask(), x, y, z, true, 25.0f);
+                     x += 10.0f * cosf(caster->GetOrientation());
+                     y += 10.0f * sinf(caster->GetOrientation());
+                     caster->CastSpell(x, y, z, triggerSpellId, true, NULL, NULL, GetCasterGUID());
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
+index 5029dbc..6cac58e 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
+@@ -504,7 +504,7 @@ class boss_the_lich_king : public CreatureScript
+                 float x, y, z;
+                 me->GetPosition(x, y, z);
+                 // use larger distance for vmap height search than in most other cases
+-                float ground_Z = me->GetMap()->GetHeight(x, y, z, true, MAX_FALL_DISTANCE);
++                float ground_Z = me->GetMap()->GetHeight(me->GetPhaseMask(), x, y, z, true, MAX_FALL_DISTANCE);
+                 if (fabs(ground_Z - z) < 0.1f)
+                     return;
+ 
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
+index 6bd8f3c..bae1ec3 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
+@@ -1921,7 +1921,7 @@ class spell_svalna_revive_champion : public SpellScriptLoader
+                 Position pos;
+                 caster->GetPosition(&pos);
+                 caster->GetNearPosition(pos, 5.0f, 0.0f);
+-                pos.m_positionZ = caster->GetBaseMap()->GetHeight(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), true, 20.0f);
++                pos.m_positionZ = caster->GetBaseMap()->GetHeight(caster->GetPhaseMask(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), true, 20.0f);
+                 pos.m_positionZ += 0.05f;
+                 caster->SetHomePosition(pos);
+                 caster->GetMotionMaster()->MovePoint(POINT_LAND, pos);
+diff --git a/src/server/scripts/Northrend/Ulduar/Ulduar/boss_flame_leviathan.cpp b/src/server/scripts/Northrend/Ulduar/Ulduar/boss_flame_leviathan.cpp
+index d96790c..a5adeb1 100644
+--- a/src/server/scripts/Northrend/Ulduar/Ulduar/boss_flame_leviathan.cpp
++++ b/src/server/scripts/Northrend/Ulduar/Ulduar/boss_flame_leviathan.cpp
+@@ -755,7 +755,7 @@ class boss_flame_leviathan_safety_container : public CreatureScript
+             {
+                 float x, y, z;
+                 me->GetPosition(x, y, z);
+-                z = me->GetMap()->GetHeight(x, y, z);
++                z = me->GetMap()->GetHeight(me->GetPhaseMask(), x, y, z);
+                 me->GetMotionMaster()->MovePoint(0, x, y, z);
+                 me->SetPosition(x, y, z, 0);
+             }
+diff --git a/src/server/scripts/Outland/BlackTemple/boss_teron_gorefiend.cpp b/src/server/scripts/Outland/BlackTemple/boss_teron_gorefiend.cpp
+index 15c7cdb..278488e 100644
+--- a/src/server/scripts/Outland/BlackTemple/boss_teron_gorefiend.cpp
++++ b/src/server/scripts/Outland/BlackTemple/boss_teron_gorefiend.cpp
+@@ -435,7 +435,7 @@ public:
+                     float X = CalculateRandomLocation(target->GetPositionX(), 20);
+                     float Y = CalculateRandomLocation(target->GetPositionY(), 20);
+                     float Z = target->GetPositionZ();
+-                    Z = me->GetMap()->GetHeight(X, Y, Z);
++                    Z = me->GetMap()->GetHeight(me->GetPhaseMask(), X, Y, Z);
+                     Creature* DoomBlossom = me->SummonCreature(CREATURE_DOOM_BLOSSOM, X, Y, Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000);
+                     if (DoomBlossom)
+                     {
+diff --git a/src/server/worldserver/CMakeLists.txt b/src/server/worldserver/CMakeLists.txt
+index 191bbbf..e0adc2b 100644
+--- a/src/server/worldserver/CMakeLists.txt
++++ b/src/server/worldserver/CMakeLists.txt
+@@ -44,6 +44,7 @@ endif()
+ 
+ include_directories(
+   ${CMAKE_BINARY_DIR}
++  ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
+   ${CMAKE_SOURCE_DIR}/dep/gsoap
+   ${CMAKE_SOURCE_DIR}/dep/sockets/include
+   ${CMAKE_SOURCE_DIR}/dep/SFMT
+diff --git a/src/tools/vmap3_assembler/CMakeLists.txt b/src/tools/vmap3_assembler/CMakeLists.txt
+index ba5d164..42ffc74 100644
+--- a/src/tools/vmap3_assembler/CMakeLists.txt
++++ b/src/tools/vmap3_assembler/CMakeLists.txt
+@@ -13,6 +13,7 @@ include_directories(
+   ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
+   ${CMAKE_SOURCE_DIR}/src/server/shared
+   ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
++  ${CMAKE_SOURCE_DIR}/src/server/collision
+   ${CMAKE_SOURCE_DIR}/src/server/collision/Maps
+   ${CMAKE_SOURCE_DIR}/src/server/collision/Models
+   ${ACE_INCLUDE_DIR}
+diff --git a/src/tools/vmap3_extractor/adtfile.cpp b/src/tools/vmap3_extractor/adtfile.cpp
+index 58c1bb9..a966172 100644
+--- a/src/tools/vmap3_extractor/adtfile.cpp
++++ b/src/tools/vmap3_extractor/adtfile.cpp
+@@ -1,13 +1,40 @@
++/*
++ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
+ #include "vmapexport.h"
+ #include "adtfile.h"
+ 
+ #include <algorithm>
+ #include <cstdio>
+ 
+-#ifdef _WIN32
++#ifdef WIN32
+ #define snprintf _snprintf
+ #endif
+ 
++const char * GetPlainName(const char * FileName)
++{
++    const char * szTemp;
++
++    if((szTemp = strrchr(FileName, '\\')) != NULL)
++        FileName = szTemp + 1;
++    return FileName;
++}
++
+ char * GetPlainName(char * FileName)
+ {
+     char * szTemp;
+@@ -43,6 +70,14 @@ void fixname2(char *name, size_t len)
+     }
+ }
+ 
++char * GetExtension(char * FileName)
++{
++    char * szTemp;
++    if((szTemp = strrchr(FileName, '.')) != NULL)
++        return szTemp;
++    return NULL;
++}
++
+ ADTFile::ADTFile(char* filename): ADT(filename)
+ {
+     Adtfilename.append(filename);
+@@ -107,35 +142,15 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY)
+                 while (p<buf+size)
+                 {
+                     fixnamen(p,strlen(p));
+-                    string path(p);
+-                    char* s=GetPlainName(p);
++                    char* s = GetPlainName(p);
+                     fixname2(s,strlen(s));
+-                    p=p+strlen(p)+1;
++
+                     ModelInstansName[t++] = s;
+ 
+-                    // < 3.1.0 ADT MMDX section store filename.mdx filenames for corresponded .m2 file
+-                    std::string ext3 = path.size() >= 4 ? path.substr(path.size()-4,4) : "";
+-                    std::transform( ext3.begin(), ext3.end(), ext3.begin(), ::tolower );
+-                    if(ext3 == ".mdx")
+-                    {
+-                        // replace .mdx -> .m2
+-                        path.erase(path.length()-2,2);
+-                        path.append("2");
+-                    }
+-                    // >= 3.1.0 ADT MMDX section store filename.m2 filenames for corresponded .m2 file
+-                    // nothing do
+-
+-                    char szLocalFile[1024];
+-                    snprintf(szLocalFile, 1024, "%s/%s", szWorkDirWmo, s);
+-                    FILE * output = fopen(szLocalFile,"rb");
+-                    if(!output)
+-                    {
+-                        Model m2(path);
+-                        if(m2.open())
+-                            m2.ConvertToVMAPModel(szLocalFile);
+-                    }
+-                    else
+-                        fclose(output);
++                    string path(p);
++                    ExtractSingleModel(path);
++
++                    p = p+strlen(p)+1;
+                 }
+                 delete[] buf;
+             }
+diff --git a/src/tools/vmap3_extractor/adtfile.h b/src/tools/vmap3_extractor/adtfile.h
+index eaf09a9..0881499 100644
+--- a/src/tools/vmap3_extractor/adtfile.h
++++ b/src/tools/vmap3_extractor/adtfile.h
+@@ -1,3 +1,21 @@
++/*
++ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
+ #ifndef ADT_H
+ #define ADT_H
+ 
+@@ -115,7 +133,11 @@ private:
+     string Adtfilename;
+ };
+ 
++const char * GetPlainName(const char * FileName);
++char * GetPlainName(char * FileName);
++char * GetExtension(char * FileName);
+ void fixnamen(char *name, size_t len);
++void fixname2(char *name, size_t len);
+ //void fixMapNamen(char *name, size_t len);
+ 
+ #endif
+diff --git a/src/tools/vmap3_extractor/dbcfile.cpp b/src/tools/vmap3_extractor/dbcfile.cpp
+index 8b8afe9..2474cea 100644
+--- a/src/tools/vmap3_extractor/dbcfile.cpp
++++ b/src/tools/vmap3_extractor/dbcfile.cpp
+@@ -1,3 +1,21 @@
++/*
++ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
+ #include "dbcfile.h"
+ #include "mpq_libmpq04.h"
+ #undef min
+diff --git a/src/tools/vmap3_extractor/dbcfile.h b/src/tools/vmap3_extractor/dbcfile.h
+index d405d6f..56cce9a 100644
+--- a/src/tools/vmap3_extractor/dbcfile.h
++++ b/src/tools/vmap3_extractor/dbcfile.h
+@@ -1,19 +1,19 @@
+ /*
+- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+- * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
++ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
+  *
+- * This program is free software; you can redistribute it and/or modify it
+- * under the terms of the GNU General Public License as published by the
+- * Free Software Foundation; either version 2 of the License, or (at your
+- * option) any later version.
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
+  *
+- * This program is distributed in the hope that it will be useful, but WITHOUT
+- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+- * more details.
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
+  *
+- * You should have received a copy of the GNU General Public License along
+- * with this program. If not, see <http://www.gnu.org/licenses/>.
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  */
+ 
+ #ifndef DBCFILE_H
+diff --git a/src/tools/vmap3_extractor/gameobject_extract.cpp b/src/tools/vmap3_extractor/gameobject_extract.cpp
+new file mode 100644
+index 0000000..8a1f67c
+--- /dev/null
++++ b/src/tools/vmap3_extractor/gameobject_extract.cpp
+@@ -0,0 +1,99 @@
++#include "model.h"
++#include "dbcfile.h"
++#include "adtfile.h"
++#include "vmapexport.h"
++
++#include <algorithm>
++#include <stdio.h>
++
++bool ExtractSingleModel(std::string& fname)
++{
++    char * name = GetPlainName((char*)fname.c_str());
++    char * ext = GetExtension(name);
++
++    // < 3.1.0 ADT MMDX section store filename.mdx filenames for corresponded .m2 file
++    if (!strcmp(ext, ".mdx"))
++    {
++        // replace .mdx -> .m2
++        fname.erase(fname.length()-2,2);
++        fname.append("2");
++    }
++    // >= 3.1.0 ADT MMDX section store filename.m2 filenames for corresponded .m2 file
++    // nothing do
++
++    std::string output(szWorkDirWmo);
++    output += "/";
++    output += name;
++
++    if (FileExists(output.c_str()))
++        return true;
++
++    Model mdl(fname);
++    if (!mdl.open())
++        return false;
++
++    return mdl.ConvertToVMAPModel(output.c_str());
++}
++
++void ExtractGameobjectModels()
++{
++    printf("Extracting GameObject models...");
++    DBCFile dbc("DBFilesClient\\GameObjectDisplayInfo.dbc");
++    if(!dbc.open())
++    {
++        printf("Fatal error: Invalid GameObjectDisplayInfo.dbc file format!\n");
++        exit(1);
++    }
++
++    std::string basepath = szWorkDirWmo;
++    basepath += "/";
++    std::string path;
++
++    FILE * model_list = fopen((basepath + "temp_gameobject_models").c_str(), "wb");
++
++    for (DBCFile::Iterator it = dbc.begin(); it != dbc.end(); ++it)
++    {
++        path = it->getString(1);
++
++        if (path.length() < 4)
++            continue;
++
++        fixnamen((char*)path.c_str(), path.size());
++        char * name = GetPlainName((char*)path.c_str());
++        fixname2(name, strlen(name));
++
++        char * ch_ext = GetExtension(name);
++        if (!ch_ext)
++            continue;
++
++        strToLower(ch_ext);
++
++        bool result = false;
++        if (!strcmp(ch_ext, ".wmo"))
++        {
++            result = ExtractSingleWmo(path);
++        }
++        else if (!strcmp(ch_ext, ".mdl"))
++        {
++            // TODO: extract .mdl files, if needed
++            continue;
++        }
++        else //if (!strcmp(ch_ext, ".mdx") || !strcmp(ch_ext, ".m2"))
++        {
++            result = ExtractSingleModel(path);
++        }
++
++        if (result)
++        {
++            uint32 displayId = it->getUInt(0);
++            uint32 path_length = strlen(name);
++            fwrite(&displayId, sizeof(uint32), 1, model_list);
++            fwrite(&path_length, sizeof(uint32), 1, model_list);
++            fwrite(name, sizeof(char), path_length, model_list);
++        }
++    }
++
++    fclose(model_list);
++
++    printf("Done!\n");
++}
+diff --git a/src/tools/vmap3_extractor/loadlib/loadlib.h b/src/tools/vmap3_extractor/loadlib/loadlib.h
+index bf6c070..61865c4 100644
+--- a/src/tools/vmap3_extractor/loadlib/loadlib.h
++++ b/src/tools/vmap3_extractor/loadlib/loadlib.h
+@@ -1,7 +1,25 @@
++/*
++ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
+ #ifndef LOAD_LIB_H
+ #define LOAD_LIB_H
+ 
+-#ifdef _WIN32
++#ifdef WIN32
+ typedef __int64            int64;
+ typedef __int32            int32;
+ typedef __int16            int16;
+diff --git a/src/tools/vmap3_extractor/model.cpp b/src/tools/vmap3_extractor/model.cpp
+index 81e2762..117c594 100644
+--- a/src/tools/vmap3_extractor/model.cpp
++++ b/src/tools/vmap3_extractor/model.cpp
+@@ -1,3 +1,21 @@
++/*
++ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
+ #include "vmapexport.h"
+ #include "model.h"
+ #include "wmo.h"
+@@ -6,7 +24,7 @@
+ #include <algorithm>
+ #include <cstdio>
+ 
+-Model::Model(std::string &filename) : filename(filename)
++Model::Model(std::string &filename) : filename(filename), vertices(0), indices(0)
+ {
+ }
+ 
+@@ -23,6 +41,8 @@ bool Model::open()
+         return false;
+     }
+ 
++    _unload();
++
+     memcpy(&header, f.getBuffer(), sizeof(ModelHeader));
+     if(header.nBoundingTriangles > 0)
+     {
+@@ -49,7 +69,7 @@ bool Model::open()
+     return true;
+ }
+ 
+-bool Model::ConvertToVMAPModel(char * outfilename)
++bool Model::ConvertToVMAPModel(const char * outfilename)
+ {
+     int N[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+     FILE * output=fopen(outfilename,"wb");
+@@ -58,7 +78,7 @@ bool Model::ConvertToVMAPModel(char * outfilename)
+         printf("Can't create the output file '%s'\n",outfilename);
+         return false;
+     }
+-    fwrite("VMAP003",8,1,output);
++    fwrite(szRawVMAPMagic,8,1,output);
+     uint32 nVertices = 0;
+     nVertices = header.nBoundingVertices;
+     fwrite(&nVertices, sizeof(int), 1, output);
+@@ -92,24 +112,16 @@ bool Model::ConvertToVMAPModel(char * outfilename)
+     {
+         for(uint32 vpos=0; vpos <nVertices; ++vpos)
+         {
+-            float sy = vertices[vpos].y;
+-            vertices[vpos].y = vertices[vpos].z;
+-            vertices[vpos].z = sy;
++            std::swap(vertices[vpos].y, vertices[vpos].z);
+         }
+         fwrite(vertices, sizeof(float)*3, nVertices, output);
+     }
+ 
+-    delete[] vertices;
+-    delete[] indices;
+-
+     fclose(output);
+ 
+     return true;
+ }
+ 
+-Model::~Model()
+-{
+-}
+ 
+ Vec3D fixCoordSystem(Vec3D v)
+ {
+@@ -154,7 +166,7 @@ ModelInstance::ModelInstance(MPQFile &f,const char* ModelInstName, uint32 mapID,
+ 
+     uint16 adtId = 0;// not used for models
+     uint32 flags = MOD_M2;
+-    if(tileX == 65 && tileY == 65) flags |= MOD_WORLDSPAWN;
++	if(tileX == 65 && tileY == 65) flags |= MOD_WORLDSPAWN;
+     //write mapID, tileX, tileY, Flags, ID, Pos, Rot, Scale, name
+     fwrite(&mapID, sizeof(uint32), 1, pDirfile);
+     fwrite(&tileX, sizeof(uint32), 1, pDirfile);
+diff --git a/src/tools/vmap3_extractor/model.h b/src/tools/vmap3_extractor/model.h
+index c131645..a6f4e27 100644
+--- a/src/tools/vmap3_extractor/model.h
++++ b/src/tools/vmap3_extractor/model.h
+@@ -1,3 +1,21 @@
++/*
++ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
+ #ifndef MODEL_H
+ #define MODEL_H
+ 
+@@ -23,14 +41,21 @@ public:
+     size_t nIndices;
+ 
+     bool open();
+-    bool ConvertToVMAPModel(char * outfilename);
++    bool ConvertToVMAPModel(const char * outfilename);
+ 
+     bool ok;
+ 
+     Model(std::string &filename);
+-    ~Model();
++    ~Model() {_unload();}
+ 
+ private:
++    void _unload()
++    {
++        delete[] vertices;
++        delete[] indices;
++        vertices = NULL;
++        indices = NULL;
++    }
+     std::string filename;
+     char outfilename;
+ };
+diff --git a/src/tools/vmap3_extractor/modelheaders.h b/src/tools/vmap3_extractor/modelheaders.h
+index 776a981..d859fd3 100644
+--- a/src/tools/vmap3_extractor/modelheaders.h
++++ b/src/tools/vmap3_extractor/modelheaders.h
+@@ -1,3 +1,21 @@
++/*
++ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
+ #ifndef MODELHEADERS_H
+ #define MODELHEADERS_H
+ 
+diff --git a/src/tools/vmap3_extractor/mpq_libmpq04.h b/src/tools/vmap3_extractor/mpq_libmpq04.h
+index f32f09b..4b0a246 100644
+--- a/src/tools/vmap3_extractor/mpq_libmpq04.h
++++ b/src/tools/vmap3_extractor/mpq_libmpq04.h
+@@ -1,3 +1,6 @@
++#define _CRT_SECURE_NO_DEPRECATE
++#define _CRT_SECURE_NO_WARNINGS
++
+ #ifndef MPQ_H
+ #define MPQ_H
+ 
+@@ -21,14 +24,14 @@ public:
+     void close();
+ 
+     void GetFileListTo(vector<string>& filelist) {
+-        uint32 filenum;
+-        if(libmpq__file_number(mpq_a, "(listfile)", &filenum)) return;
+-        libmpq__off_t size, transferred;
+-        libmpq__file_unpacked_size(mpq_a, filenum, &size);
++    	uint32 filenum;
++    	if(libmpq__file_number(mpq_a, "(listfile)", &filenum)) return;
++    	libmpq__off_t size, transferred;
++		libmpq__file_unpacked_size(mpq_a, filenum, &size);
+ 
+         char *buffer = new char[size];
+ 
+-        libmpq__file_read(mpq_a, filenum, (unsigned char*)buffer, size, &transferred);
++		libmpq__file_read(mpq_a, filenum, (unsigned char*)buffer, size, &transferred);
+ 
+         char seps[] = "\n";
+         char *token;
+diff --git a/src/tools/vmap3_extractor/vmapexport.cpp b/src/tools/vmap3_extractor/vmapexport.cpp
+index 689691e..91e50b9 100644
+--- a/src/tools/vmap3_extractor/vmapexport.cpp
++++ b/src/tools/vmap3_extractor/vmapexport.cpp
+@@ -1,3 +1,21 @@
++/*
++ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
+ #define _CRT_SECURE_NO_DEPRECATE
+ #include <cstdio>
+ #include <iostream>
+@@ -5,7 +23,7 @@
+ #include <list>
+ #include <errno.h>
+ 
+-#ifdef _WIN32
++#ifdef WIN32
+     #include <Windows.h>
+     #include <sys/stat.h>
+     #include <direct.h>
+@@ -29,6 +47,8 @@
+ #include "wmo.h"
+ #include "mpq_libmpq04.h"
+ 
++#include "vmapexport.h"
++
+ //------------------------------------------------------------------------------
+ // Defines
+ 
+@@ -56,12 +76,18 @@ bool preciseVectorData = false;
+ 
+ //static const char * szWorkDirMaps = ".\\Maps";
+ const char * szWorkDirWmo = "./Buildings";
++const char * szRawVMAPMagic = "VMAP003";
+ 
+ // Local testing functions
+ 
+-static void clreol()
++bool FileExists(const char * file)
+ {
+-    printf("\r                                                                              \r");
++    if (FILE * n = fopen(file, "rb"))
++    {
++        fclose(n);
++        return true;
++    }
++    return false;
+ }
+ 
+ void strToLower(char* str)
+@@ -73,15 +99,6 @@ void strToLower(char* str)
+     }
+ }
+ 
+-static const char * GetPlainName(const char * szFileName)
+-{
+-    const char * szTemp;
+-
+-    if((szTemp = strrchr(szFileName, '\\')) != NULL)
+-        szFileName = szTemp + 1;
+-    return szFileName;
+-}
+-
+ // copied from contrib/extractor/System.cpp
+ void ReadLiquidTypeTableDBC()
+ {
+@@ -104,10 +121,9 @@ void ReadLiquidTypeTableDBC()
+     printf("Done! (%u LiqTypes loaded)\n", (unsigned int)LiqType_count);
+ }
+ 
+-int ExtractWmo()
++bool ExtractWmo()
+ {
+-    char   szLocalFile[1024] = "";
+-    bool success=true;
++    bool success = true;
+ 
+     //const char* ParsArchiveNames[] = {"patch-2.MPQ", "patch.MPQ", "common.MPQ", "expansion.MPQ"};
+ 
+@@ -116,99 +132,98 @@ int ExtractWmo()
+         vector<string> filelist;
+ 
+         (*ar_itr)->GetFileListTo(filelist);
+-        for (vector<string>::iterator fname=filelist.begin(); fname != filelist.end() && success; ++fname)
++        for (vector<string>::iterator fname = filelist.begin(); fname != filelist.end() && success; ++fname)
+         {
+-            bool file_ok=true;
+             if (fname->find(".wmo") != string::npos)
+-            {
+-                // Copy files from archive
+-                //std::cout << "found *.wmo file " << *fname << std::endl;
+-                sprintf(szLocalFile, "%s/%s", szWorkDirWmo, GetPlainName(fname->c_str()));
+-                fixnamen(szLocalFile,strlen(szLocalFile));
+-                FILE * n;
+-                if ((n = fopen(szLocalFile, "rb"))== NULL)
+-                {
+-                    int p = 0;
+-                    //Select root wmo files
+-                    const char * rchr = strrchr(GetPlainName(fname->c_str()),0x5f);
+-                    if(rchr != NULL)
+-                    {
+-                        char cpy[4];
+-                        strncpy((char*)cpy,rchr,4);
+-                        for (int i=0;i<4; ++i)
+-                        {
+-                            int m = cpy[i];
+-                            if(isdigit(m))
+-                                p++;
+-                        }
+-                    }
+-                    if(p != 3)
+-                    {
+-                        std::cout << "Extracting " << *fname << std::endl;
+-                        WMORoot * froot = new WMORoot(*fname);
+-                        if(!froot->open())
+-                        {
+-                            printf("Couldn't open RootWmo!!!\n");
+-                            delete froot;
+-                            continue;
+-                        }
+-                        FILE *output=fopen(szLocalFile,"wb");
+-                        if(!output)
+-                        {
+-                            printf("couldn't open %s for writing!\n", szLocalFile);
+-                            success=false;
+-                        }
+-                        froot->ConvertToVMAPRootWmo(output);
+-                        int Wmo_nVertices = 0;
+-                        //printf("root has %d groups\n", froot->nGroups);
+-                        if(froot->nGroups !=0)
+-                        {
+-                            for (uint32 i=0; i<froot->nGroups; ++i)
+-                            {
+-                                char temp[1024];
+-                                strcpy(temp, fname->c_str());
+-                                temp[fname->length()-4] = 0;
+-                                char groupFileName[1024];
+-                                sprintf(groupFileName,"%s_%03d.wmo",temp, i);
+-                                //printf("Trying to open groupfile %s\n",groupFileName);
+-                                string s = groupFileName;
+-                                WMOGroup * fgroup = new WMOGroup(s);
+-                                if(!fgroup->open())
+-                                {
+-                                    printf("Could not open all Group file for: %s\n",GetPlainName(fname->c_str()));
+-                                    file_ok=false;
+-                                    break;
+-                                }
+-
+-                                Wmo_nVertices += fgroup->ConvertToVMAPGroupWmo(output, froot, preciseVectorData);
+-                                delete fgroup;
+-                            }
+-                        }
+-                        fseek(output, 8, SEEK_SET); // store the correct no of vertices
+-                        fwrite(&Wmo_nVertices,sizeof(int),1,output);
+-                        fclose(output);
+-                        delete froot;
+-                    }
+-                }
+-                else
+-                {
+-                    fclose(n);
+-                }
+-            }
+-            // Delete the extracted file in the case of an error
+-            if(!file_ok)
+-                remove(szLocalFile);
++                success = ExtractSingleWmo(*fname);
+         }
+     }
+ 
+-    if(success)
++    if (success)
+         printf("\nExtract wmo complete (No (fatal) errors)\n");
+ 
+     return success;
+ }
+ 
+-void ExtractMapsFromMpq()
++bool ExtractSingleWmo(std::string& fname)
+ {
++    // Copy files from archive
++
++    char szLocalFile[1024];
++    const char * plain_name = GetPlainName(fname.c_str());
++    sprintf(szLocalFile, "%s/%s", szWorkDirWmo, plain_name);
++    fixnamen(szLocalFile,strlen(szLocalFile));
++
++    if (FileExists(szLocalFile))
++        return true;
++
++    int p = 0;
++    //Select root wmo files
++    const char * rchr = strrchr(plain_name, '_');
++    if(rchr != NULL)
++    {
++        char cpy[4];
++        strncpy((char*)cpy,rchr,4);
++        for (int i=0;i < 4; ++i)
++        {
++            int m = cpy[i];
++            if(isdigit(m))
++                p++;
++        }
++    }
++
++    if (p == 3)
++        return true;
++
++    bool file_ok = true;
++    std::cout << "Extracting " << fname << std::endl;
++    WMORoot froot(fname);
++    if(!froot.open())
++    {
++        printf("Couldn't open RootWmo!!!\n");
++        return true;
++    }
++    FILE *output = fopen(szLocalFile,"wb");
++    if(!output)
++    {
++        printf("couldn't open %s for writing!\n", szLocalFile);
++        return false;
++    }
++    froot.ConvertToVMAPRootWmo(output);
++    int Wmo_nVertices = 0;
++    //printf("root has %d groups\n", froot->nGroups);
++    if (froot.nGroups !=0)
++    {
++        for (uint32 i = 0; i < froot.nGroups; ++i)
++        {
++            char temp[1024];
++            strcpy(temp, fname.c_str());
++            temp[fname.length()-4] = 0;
++            char groupFileName[1024];
++            sprintf(groupFileName,"%s_%03d.wmo",temp, i);
++            //printf("Trying to open groupfile %s\n",groupFileName);
++
++            string s = groupFileName;
++            WMOGroup fgroup(s);
++            if(!fgroup.open())
++            {
++                printf("Could not open all Group file for: %s\n", plain_name);
++                file_ok = false;
++                break;
++            }
++
++            Wmo_nVertices += fgroup.ConvertToVMAPGroupWmo(output, &froot, preciseVectorData);
++        }
++    }
++
++    fseek(output, 8, SEEK_SET); // store the correct no of vertices
++    fwrite(&Wmo_nVertices,sizeof(int),1,output);
++    fclose(output);
++
++    // Delete the extracted file in the case of an error
++    if (!file_ok)
++        remove(szLocalFile);
++    return true;
+ }
+ 
+ void ParsMapFiles()
+@@ -251,8 +266,9 @@ void getGamePath()
+     LONG l;
+     s = sizeof(input_path);
+     memset(input_path,0,s);
+-    l = RegOpenKeyExA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
+-    l = RegQueryValueExA(key,"InstallPath",0,&t,(LPBYTE)input_path,&s);
++    l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
++    //l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\Burning Crusade Closed Beta",0,KEY_QUERY_VALUE,&key);
++    l = RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)input_path,&s);
+     RegCloseKey(key);
+     if (strlen(input_path) > 0)
+     {
+@@ -379,16 +395,17 @@ bool processArgv(int argc, char ** argv, const char *versionString)
+ {
+     bool result = true;
+     hasInputPathParam = false;
++    bool preciseVectorData = false;
+ 
+-    for (int i=1; i < argc; ++i)
++    for(int i=1; i< argc; ++i)
+     {
+-        if (strcmp("-s", argv[i]) == 0)
++        if(strcmp("-s",argv[i]) == 0)
+         {
+             preciseVectorData = false;
+         }
+-        else if (strcmp("-d", argv[i]) == 0)
++        else if(strcmp("-d",argv[i]) == 0)
+         {
+-            if ((i + 1) < argc)
++            if((i+1)<argc)
+             {
+                 hasInputPathParam = true;
+                 strcpy(input_path, argv[i+1]);
+@@ -401,11 +418,11 @@ bool processArgv(int argc, char ** argv, const char *versionString)
+                 result = false;
+             }
+         }
+-        else if (strcmp("-?", argv[1]) == 0)
++        else if(strcmp("-?",argv[1]) == 0)
+         {
+             result = false;
+         }
+-        else if (strcmp("-l", argv[i]) == 0)
++        else if(strcmp("-l",argv[i]) == 0)
+         {
+             preciseVectorData = true;
+         }
+@@ -427,6 +444,7 @@ bool processArgv(int argc, char ** argv, const char *versionString)
+     return result;
+ }
+ 
++
+ //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ // Main
+ //
+@@ -465,7 +483,7 @@ int main(int argc, char ** argv)
+     //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+     // Create the working directory
+     if(mkdir(szWorkDirWmo
+-#ifdef _XOPEN_UNIX
++#ifdef __linux__
+                     , 0711
+ #endif
+                     ))
+@@ -517,9 +535,11 @@ int main(int argc, char ** argv)
+         ParsMapFiles();
+         delete [] map_ids;
+         //nError = ERROR_SUCCESS;
++        // Extract models, listed in DameObjectDisplayInfo.dbc
++        ExtractGameobjectModels();
+     }
+ 
+-    clreol();
++    printf("\n");
+     if(!success)
+     {
+         printf("ERROR: Extract %s. Work NOT complete.\n   Precise vector data=%d.\nPress any key.\n",versionString, preciseVectorData);
+diff --git a/src/tools/vmap3_extractor/vmapexport.h b/src/tools/vmap3_extractor/vmapexport.h
+index e8a55fb..b407e7a 100644
+--- a/src/tools/vmap3_extractor/vmapexport.h
++++ b/src/tools/vmap3_extractor/vmapexport.h
+@@ -1,13 +1,42 @@
++/*
++ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
+ #ifndef VMAPEXPORT_H
+ #define VMAPEXPORT_H
+ 
++#include <string>
++
+ enum ModelFlags
+ {
+-    MOD_M2 = 1,
+-    MOD_WORLDSPAWN = 1<<1,
++	MOD_M2 = 1,
++	MOD_WORLDSPAWN = 1<<1,
+     MOD_HAS_BOUND = 1<<2
+ };
+ 
+ extern const char * szWorkDirWmo;
++extern const char * szRawVMAPMagic;                         // vmap magic string for extracted raw vmap data
++
++bool FileExists(const char * file);
++void strToLower(char* str);
++
++bool ExtractSingleWmo(std::string& fname);
++bool ExtractSingleModel(std::string& fname);
++
++void ExtractGameobjectModels();
+ 
+ #endif
+diff --git a/src/tools/vmap3_extractor/wdtfile.cpp b/src/tools/vmap3_extractor/wdtfile.cpp
+index cd24ef0..e3ee545 100644
+--- a/src/tools/vmap3_extractor/wdtfile.cpp
++++ b/src/tools/vmap3_extractor/wdtfile.cpp
+@@ -1,3 +1,21 @@
++/*
++ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
+ #include "vmapexport.h"
+ #include "wdtfile.h"
+ #include "adtfile.h"
+diff --git a/src/tools/vmap3_extractor/wmo.cpp b/src/tools/vmap3_extractor/wmo.cpp
+index 216a224..58957e0 100644
+--- a/src/tools/vmap3_extractor/wmo.cpp
++++ b/src/tools/vmap3_extractor/wmo.cpp
+@@ -1,3 +1,21 @@
++/*
++ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
+ #include "vmapexport.h"
+ #include "wmo.h"
+ #include "vec3d.h"
+@@ -106,7 +124,7 @@ bool WMORoot::ConvertToVMAPRootWmo(FILE *pOutfile)
+ {
+     //printf("Convert RootWmo...\n");
+ 
+-    fwrite("VMAP003",1,8,pOutfile);
++    fwrite(szRawVMAPMagic,1,8,pOutfile);
+     unsigned int nVectors = 0;
+     fwrite(&nVectors,sizeof(nVectors),1,pOutfile); // will be filled later
+     fwrite(&nGroups,4,1,pOutfile);
+diff --git a/src/tools/vmap3_extractor/wmo.h b/src/tools/vmap3_extractor/wmo.h
+index 12979bc..d1f7b82 100644
+--- a/src/tools/vmap3_extractor/wmo.h
++++ b/src/tools/vmap3_extractor/wmo.h
+@@ -1,3 +1,21 @@
++/*
++ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
+ #ifndef WMO_H
+ #define WMO_H
+ #define TILESIZE (533.33333f)
