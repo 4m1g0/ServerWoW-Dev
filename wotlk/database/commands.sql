@@ -421,4 +421,5 @@ UPDATE `command`SET `security` = '4' WHERE `name` = 'account set email';
 UPDATE `command`SET `security` = '2' WHERE `name` = 'erasedual';
 insert into `command` (`name`, `security`, `help`) values('account set email','5','Syntax: .account set email $account $email\r\n\r\nSet email for account.');
 insert into `command` (`name`, `security`, `help`) values('erasedual','2','Syntax: .erasedual\r\n\r\nErase the dual especialization from selected player.');
+insert into `command` (`name`, `security`, `help`) values('anticheat player','3','Syntax: .anticheat player $player\r\n\r\nShow anticheat log reports of $player or selected player.');
 
