@@ -1,7 +1,7 @@
-From cf5b263060107a311959473c2f787c67816bcc53 Mon Sep 17 00:00:00 2001
+From 08069e7c2594f7a22f856d8f518e418c7a811b9a Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 5 Feb 2012 18:06:48 +0100
-Subject: [PATCH 05/29] MuteAnnounce
+Date: Sun, 19 Feb 2012 23:21:36 +0100
+Subject: [PATCH 05/27] MuteAnnounce
 
 ---
  sql/own/0005-world_GMAnnounceMute.sql    |    2 ++

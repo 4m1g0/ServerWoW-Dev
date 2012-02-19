@@ -1,7 +1,7 @@
-From 047eea0ab10040d60797685493d648087cb22ebb Mon Sep 17 00:00:00 2001
+From 60a824a5feb1dee8559e0079ed654a73c30a50b4 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 5 Feb 2012 18:06:48 +0100
-Subject: [PATCH 03/29] Uptime
+Date: Sun, 19 Feb 2012 23:21:36 +0100
+Subject: [PATCH 03/27] Uptime
 
 ---
  sql/own/0004-auth_Uptime.sql                       |    3 +++
@@ -20,10 +20,10 @@ index 0000000..5bfa9e2
 +ALTER TABLE `uptime` ADD COLUMN `players` SMALLINT(5) UNSIGNED DEFAULT '0' NOT NULL AFTER `uptime`;
 +ALTER TABLE `uptime` ADD COLUMN `queued` SMALLINT(5) UNSIGNED DEFAULT '0' NOT NULL AFTER `players`;
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index fa47aa8..3c59075 100755
+index 4bdc9e6..60c56f7 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -1942,16 +1942,18 @@ void World::Update(uint32 diff)
+@@ -1964,16 +1964,18 @@ void World::Update(uint32 diff)
      if (m_timers[WUPDATE_UPTIME].Passed())
      {
          uint32 tmpDiff = uint32(m_gameTime - m_startTime);
@@ -47,7 +47,7 @@ index fa47aa8..3c59075 100755
          LoginDatabase.Execute(stmt);
      }
 diff --git a/src/server/shared/Database/Implementation/LoginDatabase.cpp b/src/server/shared/Database/Implementation/LoginDatabase.cpp
-index 7e497c4..4e25c6e 100755
+index 8ef8d3b..767d55d 100755
 --- a/src/server/shared/Database/Implementation/LoginDatabase.cpp
 +++ b/src/server/shared/Database/Implementation/LoginDatabase.cpp
 @@ -57,7 +57,7 @@ void LoginDatabaseConnection::DoPrepareStatements()

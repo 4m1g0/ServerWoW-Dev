@@ -1,7 +1,7 @@
-From c010df63a03ca372deff89f4c53f84920209d486 Mon Sep 17 00:00:00 2001
+From 99f1b909005a00cd93091f401bb1cb53df92897d Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 5 Feb 2012 18:06:49 +0100
-Subject: [PATCH 07/29] GMAllowInvitePlayer
+Date: Sun, 19 Feb 2012 23:21:37 +0100
+Subject: [PATCH 07/27] GMAllowInvitePlayer
 
 ---
  src/server/game/Chat/Commands/Level1.cpp     |    6 +++---
@@ -12,7 +12,7 @@ Subject: [PATCH 07/29] GMAllowInvitePlayer
  5 files changed, 22 insertions(+), 4 deletions(-)
 
 diff --git a/src/server/game/Chat/Commands/Level1.cpp b/src/server/game/Chat/Commands/Level1.cpp
-index f1ea85a..93c3fd1 100755
+index d592b33..73f73ff 100755
 --- a/src/server/game/Chat/Commands/Level1.cpp
 +++ b/src/server/game/Chat/Commands/Level1.cpp
 @@ -201,7 +201,7 @@ bool ChatHandler::HandleSummonCommand(const char* args)
@@ -60,10 +60,10 @@ index 9343a53..b64aa41 100755
  
      // can't group with
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index dbc4c3d..59d0708 100755
+index 2b0db24..c59a7ab 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -870,6 +870,7 @@ void World::LoadConfigSettings(bool reload)
+@@ -872,6 +872,7 @@ void World::LoadConfigSettings(bool reload)
          m_int_configs[CONFIG_START_GM_LEVEL] = MAX_LEVEL;
      }
      m_bool_configs[CONFIG_ALLOW_GM_GROUP]       = ConfigMgr::GetBoolDefault("GM.AllowInvite", false);
@@ -72,7 +72,7 @@ index dbc4c3d..59d0708 100755
      m_bool_configs[CONFIG_GM_LOWER_SECURITY] = ConfigMgr::GetBoolDefault("GM.LowerSecurity", false);
      m_float_configs[CONFIG_CHANCE_OF_GM_SURVEY] = ConfigMgr::GetFloatDefault("GM.TicketSystem.ChanceOfGMSurvey", 50.0f);
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index 7c100e8..2b15682 100755
+index d9c2a94..65f883a 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
 @@ -107,6 +107,7 @@ enum WorldBoolConfigs
@@ -84,10 +84,10 @@ index 7c100e8..2b15682 100755
      CONFIG_GM_LOWER_SECURITY,
      CONFIG_SKILL_PROSPECTING,
 diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
-index 51f55e2..41c955f 100644
+index 930a47c..cbcf971 100644
 --- a/src/server/worldserver/worldserver.conf.dist
 +++ b/src/server/worldserver/worldserver.conf.dist
-@@ -1900,6 +1900,14 @@ GM.StartLevel = 1
+@@ -1994,6 +1994,14 @@ GM.StartLevel = 1
  GM.AllowInvite = 0
  
  #

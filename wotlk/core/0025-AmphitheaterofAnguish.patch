@@ -1,7 +1,7 @@
-From 938ac8fa48578a79815b7d50b8351c3fd0345288 Mon Sep 17 00:00:00 2001
+From 61e99e58515f2c981debe51414495c361c7eed4c Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 5 Feb 2012 18:06:51 +0100
-Subject: [PATCH 26/29] AmphitheaterofAnguish
+Date: Sun, 19 Feb 2012 23:22:30 +0100
+Subject: [PATCH 25/27] AmphitheaterofAnguish
 
 ---
  src/server/scripts/Northrend/zuldrak.cpp |   15 +++++++++++++++

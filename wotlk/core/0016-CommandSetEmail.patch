@@ -1,7 +1,7 @@
-From a077af7411a1988a49d3b25babf105a1ac773a29 Mon Sep 17 00:00:00 2001
+From 8f2605d8fed32648d6b9261bcfcf245cf10a2317 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 5 Feb 2012 18:06:49 +0100
-Subject: [PATCH 16/29] CommandSetEmail
+Date: Sun, 19 Feb 2012 23:22:29 +0100
+Subject: [PATCH 16/27] CommandSetEmail
 
 ---
  sql/own/char_logs.sql                      |   21 ++++++++++

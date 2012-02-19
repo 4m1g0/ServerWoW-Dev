@@ -1,7 +1,7 @@
-From 9ab0785e645200beba73b711c47e482dd71f6e15 Mon Sep 17 00:00:00 2001
+From 83544713d4eeff2750dc01db12a7f6caf2bd75c0 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 5 Feb 2012 18:06:50 +0100
-Subject: [PATCH 21/29] Armory
+Date: Sun, 19 Feb 2012 23:22:30 +0100
+Subject: [PATCH 20/27] Armory
 
 ---
  src/server/game/Achievements/AchievementMgr.cpp |    1 +
@@ -24,7 +24,7 @@ index 271e78a..1f861fc 100755
      ca.date = time(NULL);
      ca.changed = true;
 diff --git a/src/server/game/Entities/Item/Item.cpp b/src/server/game/Entities/Item/Item.cpp
-index 12c2690..f3f51f7 100755
+index 70b8159..4ac4035 100755
 --- a/src/server/game/Entities/Item/Item.cpp
 +++ b/src/server/game/Entities/Item/Item.cpp
 @@ -277,6 +277,13 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
@@ -42,10 +42,10 @@ index 12c2690..f3f51f7 100755
  }
  
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index efc7ecb..41dd733 100755
+index 5503cd0..5b33cab 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
-@@ -4953,6 +4953,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
+@@ -4946,6 +4946,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
              trans->PAppend("DELETE FROM character_queststatus_daily WHERE guid = '%u'", guid);
              trans->PAppend("DELETE FROM character_talent WHERE guid = '%u'", guid);
              trans->PAppend("DELETE FROM character_skills WHERE guid = '%u'", guid);
@@ -54,7 +54,7 @@ index efc7ecb..41dd733 100755
  
              CharacterDatabase.CommitTransaction(trans);
              break;
-@@ -16624,6 +16626,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
+@@ -16618,6 +16620,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
  
          return false;
      }
@@ -63,9 +63,9 @@ index efc7ecb..41dd733 100755
  
      // overwrite possible wrong/corrupted guid
      SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
-@@ -18734,6 +18738,30 @@ void Player::SaveToDB(bool create /*=false*/)
-     // in this way we prevent to spam the db by each report made!
-     // sAnticheatMgr->SavePlayerData(this);
+@@ -18722,6 +18726,30 @@ void Player::SaveToDB(bool create /*=false*/)
+ 
+     CharacterDatabase.CommitTransaction(trans);
  
 +    /* World of Warcraft Armory */
 +    // Place this code AFTER CharacterDatabase.CommitTransaction(); to avoid some character saving errors.
@@ -94,7 +94,7 @@ index efc7ecb..41dd733 100755
      // save pet (hunter pet level and experience and all type pets health/mana).
      if (Pet* pet = GetPet())
          pet->SavePetToDB(PET_SAVE_AS_CURRENT);
-@@ -25124,3 +25152,42 @@ bool Player::IsInWhisperWhiteList(uint64 guid)
+@@ -25091,3 +25119,42 @@ bool Player::IsInWhisperWhiteList(uint64 guid)
      }
      return false;
  }
@@ -139,11 +139,11 @@ index efc7ecb..41dd733 100755
 +}
 \ No newline at end of file
 diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
-index 223d7b9..94e1fb6 100755
+index 82bbd1b..d6501e0 100755
 --- a/src/server/game/Entities/Player/Player.h
 +++ b/src/server/game/Entities/Player/Player.h
-@@ -1077,6 +1077,21 @@ private:
-     uint32 _xp;
+@@ -1057,6 +1057,21 @@ private:
+     bool _isPvP;
  };
  
 +/* World of Warcraft Armory */
@@ -164,7 +164,7 @@ index 223d7b9..94e1fb6 100755
  class Player : public Unit, public GridObject<Player>
  {
      friend class WorldSession;
-@@ -2381,6 +2396,12 @@ class Player : public Unit, public GridObject<Player>
+@@ -2354,6 +2369,12 @@ class Player : public Unit, public GridObject<Player>
          void SendCinematicStart(uint32 CinematicSequenceId);
          void SendMovieStart(uint32 MovieId);
  
@@ -177,7 +177,7 @@ index 223d7b9..94e1fb6 100755
          /*********************************************************/
          /***                 INSTANCE SYSTEM                   ***/
          /*********************************************************/
-@@ -2868,6 +2889,8 @@ class Player : public Unit, public GridObject<Player>
+@@ -2841,6 +2862,8 @@ class Player : public Unit, public GridObject<Player>
          uint32 m_timeSyncTimer;
          uint32 m_timeSyncClient;
          uint32 m_timeSyncServer;
@@ -187,10 +187,10 @@ index 223d7b9..94e1fb6 100755
          InstanceTimeMap _instanceResetTimes;
          uint32 _pendingBindId;
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-index 6ff0fba..9652063 100755
+index d4a702b..5d9a568 100755
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
-@@ -15516,7 +15516,10 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
+@@ -15529,7 +15529,10 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
                  if (instanceMap->IsRaidOrHeroicDungeon())
                  {
                      if (creature->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)

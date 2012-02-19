@@ -1,7 +1,7 @@
-From 2088465ca536ee55bfd80e2a0ad10a6337a7737a Mon Sep 17 00:00:00 2001
+From 57788103ee756ceace0fbf4760b04defdec6c17e Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 5 Feb 2012 18:06:51 +0100
-Subject: [PATCH 28/29] EsferaDeHieloLichKing
+Date: Sun, 19 Feb 2012 23:22:30 +0100
+Subject: [PATCH 27/27] EsferaDeHieloLichKing
 
 ---
  .../TargetedMovementGenerator.cpp                  |    2 +-

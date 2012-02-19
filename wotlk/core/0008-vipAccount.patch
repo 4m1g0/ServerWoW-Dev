@@ -1,15 +1,15 @@
-From 944cc1591b05dd2e4442ec3465e604f748b597b9 Mon Sep 17 00:00:00 2001
+From e08f803b32cf4dff74155e0338d05eb268c0aa78 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 5 Feb 2012 18:06:49 +0100
-Subject: [PATCH 08/29] vipAccount
+Date: Sun, 19 Feb 2012 23:22:28 +0100
+Subject: [PATCH 08/27] vipAccount
 
 ---
  sql/own/logon_vipAccount.sql            |    1 +
  src/server/game/Server/WorldSession.cpp |    4 ++--
  src/server/game/Server/WorldSession.h   |    4 +++-
- src/server/game/Server/WorldSocket.cpp  |    7 +++++--
+ src/server/game/Server/WorldSocket.cpp  |    6 ++++--
  src/server/game/World/World.cpp         |    2 +-
- 5 files changed, 12 insertions(+), 6 deletions(-)
+ 5 files changed, 11 insertions(+), 6 deletions(-)
  create mode 100644 sql/own/logon_vipAccount.sql
 
 diff --git a/sql/own/logon_vipAccount.sql b/sql/own/logon_vipAccount.sql
@@ -20,10 +20,10 @@ index 0000000..a556336
 @@ -0,0 +1 @@
 +ALTER TABLE `account` ADD `vip` tinyint(3) unsigned NOT NULL DEFAULT '0' AFTER `recruiter`;
 diff --git a/src/server/game/Server/WorldSession.cpp b/src/server/game/Server/WorldSession.cpp
-index 6bd09f2..a8d3fce 100755
+index 211ca42..ee1ef00 100755
 --- a/src/server/game/Server/WorldSession.cpp
 +++ b/src/server/game/Server/WorldSession.cpp
-@@ -86,9 +86,9 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
+@@ -88,9 +88,9 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
  }
  
  /// WorldSession constructor
@@ -36,10 +36,10 @@ index 6bd09f2..a8d3fce 100755
  m_playerRecentlyLogout(false), m_playerSave(false),
  m_sessionDbcLocale(sWorld->GetAvailableDbcLocale(locale)),
 diff --git a/src/server/game/Server/WorldSession.h b/src/server/game/Server/WorldSession.h
-index 4dca2f1..6a7cf38 100755
+index e5bd8b4..1f1f3eb 100755
 --- a/src/server/game/Server/WorldSession.h
 +++ b/src/server/game/Server/WorldSession.h
-@@ -211,7 +211,7 @@ class CharacterCreateInfo
+@@ -213,7 +213,7 @@ class CharacterCreateInfo
  class WorldSession
  {
      public:
@@ -48,15 +48,15 @@ index 4dca2f1..6a7cf38 100755
          ~WorldSession();
  
          bool PlayerLoading() const { return m_playerLoading; }
-@@ -240,6 +240,7 @@ class WorldSession
+@@ -242,6 +242,7 @@ class WorldSession
  
          AccountTypes GetSecurity() const { return _security; }
          uint32 GetAccountId() const { return _accountId; }
 +        bool IsVIP() const { return vip; }
          Player* GetPlayer() const { return _player; }
          char const* GetPlayerName() const;
-         void SetSecurity(AccountTypes security) { _security = security; }
-@@ -950,6 +951,7 @@ class WorldSession
+         uint32 GetGuidLow() const;
+@@ -960,6 +961,7 @@ class WorldSession
          AddonsList m_addonsList;
          uint32 recruiterId;
          bool isRecruiter;
@@ -65,42 +65,41 @@ index 4dca2f1..6a7cf38 100755
          time_t timeLastWhoCommand;
  };
 diff --git a/src/server/game/Server/WorldSocket.cpp b/src/server/game/Server/WorldSocket.cpp
-index ac6f116..d5284c8 100755
+index 2c6098f..33afbbb 100755
 --- a/src/server/game/Server/WorldSocket.cpp
 +++ b/src/server/game/Server/WorldSocket.cpp
-@@ -827,7 +827,8 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
-                                 "expansion, "               //6
-                                 "mutetime, "                //7
-                                 "locale, "                  //8
--                                "recruiter "                //9
-+                                "recruiter, "                //9
-+                                "vip "                       //10
-                                 "FROM account "
-                                 "WHERE username = '%s'",
-                                 safe_account.c_str());
-@@ -904,6 +905,8 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
+@@ -817,7 +817,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
+     // No SQL injection, username escaped.
  
+     //                                                 0       1          2       3     4  5      6          7       8         9      10
+-    QueryResult result = LoginDatabase.PQuery ("SELECT id, sessionkey, last_ip, locked, v, s, expansion, mutetime, locale, recruiter, os FROM account "
++    QueryResult result = LoginDatabase.PQuery ("SELECT id, sessionkey, last_ip, locked, v, s, expansion, mutetime, locale, recruiter, vip, os FROM account "
+                                                "WHERE username = '%s'", safe_account.c_str());
+ 
+     // Stop if the account is not found
+@@ -898,6 +898,8 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
      uint32 recruiter = fields[9].GetUInt32();
+     std::string os = fields[10].GetString();
  
 +    bool vip = fields[10].GetBool();
 +
      // Checks gmlevel per Realm
      result =
          LoginDatabase.PQuery ("SELECT "
-@@ -1000,7 +1003,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
+@@ -992,7 +994,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
      LoginDatabase.Execute(stmt);
  
      // NOTE ATM the socket is single-threaded, have this in mind ...
 -    ACE_NEW_RETURN (m_Session, WorldSession (id, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter), -1);
 +    ACE_NEW_RETURN (m_Session, WorldSession (id, this, AccountTypes(security), expansion, vip, mutetime, locale, recruiter, isRecruiter), -1);
  
-     m_Crypt.Init(&K);
+     m_Crypt.Init(&k);
  
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 59d0708..57f500a 100755
+index c59a7ab..27c7fc7 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -260,7 +260,7 @@ World::AddSession_(WorldSession* s)
+@@ -262,7 +262,7 @@ World::AddSession_(WorldSession* s)
      if (decrease_session)
          --Sessions;
  

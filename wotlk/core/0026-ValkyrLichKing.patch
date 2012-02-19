@@ -1,14 +1,14 @@
-From 3aa595cac0dc4aa83c8f5b1f913fbe491bb13f34 Mon Sep 17 00:00:00 2001
+From 9a84917f4e44720c2d016225a5ccdffee6ecf9bf Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 5 Feb 2012 18:06:51 +0100
-Subject: [PATCH 27/29] ValkyrLichKing
+Date: Sun, 19 Feb 2012 23:22:30 +0100
+Subject: [PATCH 26/27] ValkyrLichKing
 
 ---
  .../IcecrownCitadel/boss_the_lich_king.cpp         |    4 +++-
  1 files changed, 3 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
-index 9866d2a..34d20b3 100644
+index fbed870..53176c0 100644
 --- a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
 +++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
 @@ -116,7 +116,7 @@ enum Spells
@@ -20,7 +20,7 @@ index 9866d2a..34d20b3 100644
      SPELL_VALKYR_CARRY                  = 74445,    // removes unselectable flag
      SPELL_LIFE_SIPHON                   = 73488,
      SPELL_LIFE_SIPHON_HEAL              = 73489,
-@@ -1523,6 +1523,8 @@ class npc_valkyr_shadowguard : public CreatureScript
+@@ -1516,6 +1516,8 @@ class npc_valkyr_shadowguard : public CreatureScript
                  {
                      case POINT_DROP_PLAYER:
                          DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);

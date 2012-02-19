@@ -1,7 +1,7 @@
-From 99d0a635ad9c88ac8709471e656e7d5e0f8b19e5 Mon Sep 17 00:00:00 2001
+From 5d5f4949a348e73264f50ba06cae9181f2e5677a Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 5 Feb 2012 18:06:49 +0100
-Subject: [PATCH 13/29] CommandEraseDual
+Date: Sun, 19 Feb 2012 23:22:29 +0100
+Subject: [PATCH 13/27] CommandEraseDual
 
 ---
  src/server/game/Chat/Chat.cpp            |    1 +

@@ -1,7 +1,7 @@
-From e6b28930a48c391ea337a951b90f4bb51062d86e Mon Sep 17 00:00:00 2001
+From 9f839a6e2a3b6fb7ea485888270dd1ea5bf45bfa Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 5 Feb 2012 18:06:49 +0100
-Subject: [PATCH 12/29] CommandDisableResetAll
+Date: Sun, 19 Feb 2012 23:22:29 +0100
+Subject: [PATCH 12/27] CommandDisableResetAll
 
 ---
  src/server/game/Chat/Commands/Level3.cpp |    2 ++

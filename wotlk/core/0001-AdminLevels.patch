@@ -1,7 +1,7 @@
-From 8e087a20f745a2db675991a1e7d9c3ce72972092 Mon Sep 17 00:00:00 2001
+From 5095cd973dac11d7ce5688d77e3de8a5349fa535 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 5 Feb 2012 18:06:48 +0100
-Subject: [PATCH 01/29] AdminLevels
+Date: Sun, 19 Feb 2012 23:21:36 +0100
+Subject: [PATCH 01/27] AdminLevels
 
 ---
  sql/own/0001-world_Announce.sql                 |    3 ++
@@ -21,10 +21,10 @@ index 0000000..77bb028
 +INSERT INTO `trinity_string` VALUES
 +(3,'|cffff0000<%s>|c1f40af20 %s|cffffff00: %s|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 diff --git a/src/server/game/AI/SmartScripts/SmartScript.cpp b/src/server/game/AI/SmartScripts/SmartScript.cpp
-index a6923ea..9794a53 100644
+index 95574e6..a5b5bb0 100644
 --- a/src/server/game/AI/SmartScripts/SmartScript.cpp
 +++ b/src/server/game/AI/SmartScripts/SmartScript.cpp
-@@ -1577,6 +1577,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
+@@ -1586,6 +1586,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
              delete casters;
              break;
          }
@@ -33,7 +33,7 @@ index a6923ea..9794a53 100644
          {
              uint32 actions[SMART_ACTION_PARAM_COUNT];
 diff --git a/src/server/game/Chat/Commands/Level1.cpp b/src/server/game/Chat/Commands/Level1.cpp
-index 57d5e8c..f1ea85a 100755
+index cb42863..d592b33 100755
 --- a/src/server/game/Chat/Commands/Level1.cpp
 +++ b/src/server/game/Chat/Commands/Level1.cpp
 @@ -74,9 +74,33 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)

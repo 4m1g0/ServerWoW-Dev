@@ -1,7 +1,7 @@
-From 6e91d25d2b99e555d8e9d7c7aeac589791bd11d8 Mon Sep 17 00:00:00 2001
+From d258f9d28ec54d7b570f677f95ded3a0eaf20b16 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 5 Feb 2012 18:06:50 +0100
-Subject: [PATCH 20/29] AntiHack_LOS
+Date: Sun, 19 Feb 2012 23:22:29 +0100
+Subject: [PATCH 19/27] AntiHack_LOS
 
 ---
  src/server/game/Entities/Creature/Creature.cpp |   15 +++++++++++++++
@@ -9,7 +9,7 @@ Subject: [PATCH 20/29] AntiHack_LOS
  2 files changed, 16 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/game/Entities/Creature/Creature.cpp b/src/server/game/Entities/Creature/Creature.cpp
-index eb29e68..f8190c3 100755
+index 3dfa1ce..bf0db93 100755
 --- a/src/server/game/Entities/Creature/Creature.cpp
 +++ b/src/server/game/Entities/Creature/Creature.cpp
 @@ -535,6 +535,21 @@ void Creature::Update(uint32 diff)
@@ -35,10 +35,10 @@ index eb29e68..f8190c3 100755
              // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
              if (!isAlive())
 diff --git a/src/server/game/Entities/Creature/Creature.h b/src/server/game/Entities/Creature/Creature.h
-index e622c48..69ad1d5 100755
+index bfe1863..d543711 100755
 --- a/src/server/game/Entities/Creature/Creature.h
 +++ b/src/server/game/Entities/Creature/Creature.h
-@@ -728,6 +728,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
+@@ -727,6 +727,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
          /// Timers
          time_t m_corpseRemoveTime;                          // (msecs)timer for death or corpse disappearance
          time_t m_respawnTime;                               // (secs) time of next respawn
