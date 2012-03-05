@@ -1,6 +1,6 @@
-From 37d99ace1027a09d4a4841c345df4ecc27530ecb Mon Sep 17 00:00:00 2001
+From 025a4eb640e513be6979a6a922c0c2978f760a1f Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 19 Feb 2012 23:21:36 +0100
+Date: Mon, 5 Mar 2012 20:40:20 +0100
 Subject: [PATCH 04/27] OnlineCount
 
 ---
@@ -8,7 +8,7 @@ Subject: [PATCH 04/27] OnlineCount
  1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/game/Handlers/MiscHandler.cpp b/src/server/game/Handlers/MiscHandler.cpp
-index 3b56a07..4e59e25 100755
+index aaa41ec..0c692e7 100755
 --- a/src/server/game/Handlers/MiscHandler.cpp
 +++ b/src/server/game/Handlers/MiscHandler.cpp
 @@ -357,7 +357,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)

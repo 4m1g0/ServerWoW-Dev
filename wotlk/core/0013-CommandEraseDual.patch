@@ -1,6 +1,6 @@
-From 5d5f4949a348e73264f50ba06cae9181f2e5677a Mon Sep 17 00:00:00 2001
+From c58a4a54e58bf81ad871dae651b3074bb1b72e05 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 19 Feb 2012 23:22:29 +0100
+Date: Mon, 5 Mar 2012 20:40:21 +0100
 Subject: [PATCH 13/27] CommandEraseDual
 
 ---
@@ -10,10 +10,10 @@ Subject: [PATCH 13/27] CommandEraseDual
  3 files changed, 25 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/game/Chat/Chat.cpp b/src/server/game/Chat/Chat.cpp
-index 035fbaf..acc38e5 100755
+index a6596de..6f87e9b 100755
 --- a/src/server/game/Chat/Chat.cpp
 +++ b/src/server/game/Chat/Chat.cpp
-@@ -367,6 +367,7 @@ ChatCommand* ChatHandler::getCommandTable()
+@@ -368,6 +368,7 @@ ChatCommand* ChatHandler::getCommandTable()
          { "itemmove",       SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleItemMoveCommand>,            "", NULL },
          { "cooldown",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleCooldownCommand>,            "", NULL },
          { "unlearn",        SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleUnLearnCommand>,             "", NULL },

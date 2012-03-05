@@ -1,6 +1,6 @@
-From 5095cd973dac11d7ce5688d77e3de8a5349fa535 Mon Sep 17 00:00:00 2001
+From bb43e796e819605be2de850f84b252982912e56d Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 19 Feb 2012 23:21:36 +0100
+Date: Mon, 5 Mar 2012 20:40:20 +0100
 Subject: [PATCH 01/27] AdminLevels
 
 ---
@@ -21,10 +21,10 @@ index 0000000..77bb028
 +INSERT INTO `trinity_string` VALUES
 +(3,'|cffff0000<%s>|c1f40af20 %s|cffffff00: %s|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 diff --git a/src/server/game/AI/SmartScripts/SmartScript.cpp b/src/server/game/AI/SmartScripts/SmartScript.cpp
-index 95574e6..a5b5bb0 100644
+index 0523f59..bb0391f 100644
 --- a/src/server/game/AI/SmartScripts/SmartScript.cpp
 +++ b/src/server/game/AI/SmartScripts/SmartScript.cpp
-@@ -1586,6 +1586,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
+@@ -1630,6 +1630,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
              delete casters;
              break;
          }
@@ -74,7 +74,7 @@ index cb42863..d592b33 100755
  }
  
 diff --git a/src/server/shared/Common.h b/src/server/shared/Common.h
-index 57809cc..aced84e 100755
+index 259c60a..a1d7dec 100755
 --- a/src/server/shared/Common.h
 +++ b/src/server/shared/Common.h
 @@ -160,8 +160,11 @@ enum AccountTypes

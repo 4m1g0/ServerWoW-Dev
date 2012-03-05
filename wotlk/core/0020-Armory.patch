@@ -1,6 +1,6 @@
-From 83544713d4eeff2750dc01db12a7f6caf2bd75c0 Mon Sep 17 00:00:00 2001
+From 0fd13736080f0a7e062b8a5e7a8577184e61dd49 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 19 Feb 2012 23:22:30 +0100
+Date: Mon, 5 Mar 2012 20:42:29 +0100
 Subject: [PATCH 20/27] Armory
 
 ---
@@ -8,8 +8,8 @@ Subject: [PATCH 20/27] Armory
  src/server/game/Entities/Item/Item.cpp          |    7 +++
  src/server/game/Entities/Player/Player.cpp      |   67 +++++++++++++++++++++++
  src/server/game/Entities/Player/Player.h        |   23 ++++++++
- src/server/game/Entities/Unit/Unit.cpp          |    3 +
- 5 files changed, 101 insertions(+), 0 deletions(-)
+ src/server/game/Entities/Unit/Unit.cpp          |    3 +-
+ 5 files changed, 100 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/game/Achievements/AchievementMgr.cpp b/src/server/game/Achievements/AchievementMgr.cpp
 index 271e78a..1f861fc 100755
@@ -24,10 +24,10 @@ index 271e78a..1f861fc 100755
      ca.date = time(NULL);
      ca.changed = true;
 diff --git a/src/server/game/Entities/Item/Item.cpp b/src/server/game/Entities/Item/Item.cpp
-index 70b8159..4ac4035 100755
+index 90f6f4a..00e6427 100755
 --- a/src/server/game/Entities/Item/Item.cpp
 +++ b/src/server/game/Entities/Item/Item.cpp
-@@ -277,6 +277,13 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
+@@ -276,6 +276,13 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
  
      SetUInt32Value(ITEM_FIELD_DURATION, abs(itemProto->Duration));
      SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, 0);
@@ -42,10 +42,10 @@ index 70b8159..4ac4035 100755
  }
  
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index 5503cd0..5b33cab 100755
+index 870b6f6..ed26c2f 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
-@@ -4946,6 +4946,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
+@@ -4945,6 +4945,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
              trans->PAppend("DELETE FROM character_queststatus_daily WHERE guid = '%u'", guid);
              trans->PAppend("DELETE FROM character_talent WHERE guid = '%u'", guid);
              trans->PAppend("DELETE FROM character_skills WHERE guid = '%u'", guid);
@@ -54,7 +54,7 @@ index 5503cd0..5b33cab 100755
  
              CharacterDatabase.CommitTransaction(trans);
              break;
-@@ -16618,6 +16620,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
+@@ -16627,6 +16629,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
  
          return false;
      }
@@ -63,7 +63,7 @@ index 5503cd0..5b33cab 100755
  
      // overwrite possible wrong/corrupted guid
      SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
-@@ -18722,6 +18726,30 @@ void Player::SaveToDB(bool create /*=false*/)
+@@ -18741,6 +18745,30 @@ void Player::SaveToDB(bool create /*=false*/)
  
      CharacterDatabase.CommitTransaction(trans);
  
@@ -94,7 +94,7 @@ index 5503cd0..5b33cab 100755
      // save pet (hunter pet level and experience and all type pets health/mana).
      if (Pet* pet = GetPet())
          pet->SavePetToDB(PET_SAVE_AS_CURRENT);
-@@ -25091,3 +25119,42 @@ bool Player::IsInWhisperWhiteList(uint64 guid)
+@@ -25133,3 +25161,42 @@ bool Player::IsInWhisperWhiteList(uint64 guid)
      }
      return false;
  }
@@ -139,7 +139,7 @@ index 5503cd0..5b33cab 100755
 +}
 \ No newline at end of file
 diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
-index 82bbd1b..d6501e0 100755
+index 3d51014..66ce744 100755
 --- a/src/server/game/Entities/Player/Player.h
 +++ b/src/server/game/Entities/Player/Player.h
 @@ -1057,6 +1057,21 @@ private:
@@ -164,7 +164,7 @@ index 82bbd1b..d6501e0 100755
  class Player : public Unit, public GridObject<Player>
  {
      friend class WorldSession;
-@@ -2354,6 +2369,12 @@ class Player : public Unit, public GridObject<Player>
+@@ -2355,6 +2370,12 @@ class Player : public Unit, public GridObject<Player>
          void SendCinematicStart(uint32 CinematicSequenceId);
          void SendMovieStart(uint32 MovieId);
  
@@ -177,7 +177,7 @@ index 82bbd1b..d6501e0 100755
          /*********************************************************/
          /***                 INSTANCE SYSTEM                   ***/
          /*********************************************************/
-@@ -2841,6 +2862,8 @@ class Player : public Unit, public GridObject<Player>
+@@ -2843,6 +2864,8 @@ class Player : public Unit, public GridObject<Player>
          uint32 m_timeSyncTimer;
          uint32 m_timeSyncClient;
          uint32 m_timeSyncServer;
@@ -187,20 +187,26 @@ index 82bbd1b..d6501e0 100755
          InstanceTimeMap _instanceResetTimes;
          uint32 _pendingBindId;
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-index d4a702b..5d9a568 100755
+index 3411d28..b54750f 100755
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
-@@ -15529,7 +15529,10 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
-                 if (instanceMap->IsRaidOrHeroicDungeon())
+@@ -15517,6 +15517,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
                  {
-                     if (creature->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
-+                    {
+                     if (creature->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
                          ((InstanceMap*)instanceMap)->PermBindAllPlayers(creditedPlayer);
-+                        creditedPlayer->CreateWowarmoryFeed(3, creature->GetCreatureInfo()->Entry, 0, 0);
-+                    }
++                    creditedPlayer->CreateWowarmoryFeed(3, creature->GetCreatureInfo()->Entry, 0, 0);
                  }
                  else
                  {
+@@ -16996,7 +16997,7 @@ void Unit::ExitVehicle(Position const* /*exitPosition*/)
+     //! to specify exit coordinates and either store those per passenger, or we need to
+     //! init spline movement based on those coordinates in unapply handlers, and
+     //! relocate exiting passengers based on Unit::moveSpline data. Either way,
+-    //! Coming Soon™
++    //! Coming Soon\99
+ }
+ 
+ void Unit::_ExitVehicle(Position const* exitPosition)
 -- 
 1.7.5.4
 

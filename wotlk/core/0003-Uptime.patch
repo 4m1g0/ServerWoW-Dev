@@ -1,6 +1,6 @@
-From 60a824a5feb1dee8559e0079ed654a73c30a50b4 Mon Sep 17 00:00:00 2001
+From cf9fb2c404110a3fb45f770fe8ce5ae9ee5efc7a Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 19 Feb 2012 23:21:36 +0100
+Date: Mon, 5 Mar 2012 20:40:20 +0100
 Subject: [PATCH 03/27] Uptime
 
 ---
@@ -20,10 +20,10 @@ index 0000000..5bfa9e2
 +ALTER TABLE `uptime` ADD COLUMN `players` SMALLINT(5) UNSIGNED DEFAULT '0' NOT NULL AFTER `uptime`;
 +ALTER TABLE `uptime` ADD COLUMN `queued` SMALLINT(5) UNSIGNED DEFAULT '0' NOT NULL AFTER `players`;
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 4bdc9e6..60c56f7 100755
+index 758c0c6..0475dc3 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -1964,16 +1964,18 @@ void World::Update(uint32 diff)
+@@ -1974,16 +1974,18 @@ void World::Update(uint32 diff)
      if (m_timers[WUPDATE_UPTIME].Passed())
      {
          uint32 tmpDiff = uint32(m_gameTime - m_startTime);

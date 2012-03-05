@@ -1,7 +1,7 @@
-From ade2b8bd3381d3bc12411241df58b6b5ca338891 Mon Sep 17 00:00:00 2001
+From 5a5b738a9aecfd4c50d8076d273aa06200f051c3 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 25 Feb 2012 15:50:19 +0100
-Subject: [PATCH] vipaccount
+Date: Mon, 5 Mar 2012 20:40:21 +0100
+Subject: [PATCH 08/27] vipAccount
 
 ---
  sql/own/logon_vipAccount.sql            |    1 +
@@ -20,7 +20,7 @@ index 0000000..a556336
 @@ -0,0 +1 @@
 +ALTER TABLE `account` ADD `vip` tinyint(3) unsigned NOT NULL DEFAULT '0' AFTER `recruiter`;
 diff --git a/src/server/game/Server/WorldSession.cpp b/src/server/game/Server/WorldSession.cpp
-index 211ca42..ee1ef00 100755
+index 48fa95f..1ea5d7e 100755
 --- a/src/server/game/Server/WorldSession.cpp
 +++ b/src/server/game/Server/WorldSession.cpp
 @@ -88,9 +88,9 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
@@ -36,7 +36,7 @@ index 211ca42..ee1ef00 100755
  m_playerRecentlyLogout(false), m_playerSave(false),
  m_sessionDbcLocale(sWorld->GetAvailableDbcLocale(locale)),
 diff --git a/src/server/game/Server/WorldSession.h b/src/server/game/Server/WorldSession.h
-index 04be83a..aab52fa 100755
+index 912a968..34a4e1a 100755
 --- a/src/server/game/Server/WorldSession.h
 +++ b/src/server/game/Server/WorldSession.h
 @@ -215,7 +215,7 @@ class CharacterCreateInfo
@@ -100,7 +100,7 @@ index 2c6098f..05cd067 100755
      m_Crypt.Init(&k);
  
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 07b1ee2..2b5019d 100755
+index aad4080..5487703 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -263,7 +263,7 @@ World::AddSession_(WorldSession* s)

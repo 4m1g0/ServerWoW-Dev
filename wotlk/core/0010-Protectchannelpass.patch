@@ -1,6 +1,6 @@
-From f2fdd706824336b302bfd0f64d6b9cb7c0481e79 Mon Sep 17 00:00:00 2001
+From c8217a71062668002556e5ed1e47903a5d3823db Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 19 Feb 2012 23:22:28 +0100
+Date: Mon, 5 Mar 2012 20:40:21 +0100
 Subject: [PATCH 10/27] Protectchannelpass
 
 ---
@@ -8,7 +8,7 @@ Subject: [PATCH 10/27] Protectchannelpass
  1 files changed, 4 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/game/Chat/Channels/Channel.cpp b/src/server/game/Chat/Channels/Channel.cpp
-index b6e9dd3..37617bb 100755
+index 92cf4d7..8419e0b 100755
 --- a/src/server/game/Chat/Channels/Channel.cpp
 +++ b/src/server/game/Chat/Channels/Channel.cpp
 @@ -144,6 +144,9 @@ void Channel::CleanOldChannelsInDB()

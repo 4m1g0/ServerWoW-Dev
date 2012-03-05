@@ -1,6 +1,6 @@
-From 8f2605d8fed32648d6b9261bcfcf245cf10a2317 Mon Sep 17 00:00:00 2001
+From eb80b1cb2be1dbb97f57866e7a16810b167b6624 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 19 Feb 2012 23:22:29 +0100
+Date: Mon, 5 Mar 2012 20:40:21 +0100
 Subject: [PATCH 16/27] CommandSetEmail
 
 ---
@@ -82,7 +82,7 @@ index 1b1ecfa..bd8b41d 100755
  
          uint32 GetId(std::string username);
 diff --git a/src/server/scripts/Commands/cs_account.cpp b/src/server/scripts/Commands/cs_account.cpp
-index 7372c92..8feab1c 100644
+index df83fe8..04f4cc6 100644
 --- a/src/server/scripts/Commands/cs_account.cpp
 +++ b/src/server/scripts/Commands/cs_account.cpp
 @@ -38,6 +38,7 @@ public:
@@ -93,7 +93,7 @@ index 7372c92..8feab1c 100644
              { NULL,             0,                  false, NULL,                              "", NULL }
          };
          static ChatCommand accountCommandTable[] =
-@@ -585,6 +586,63 @@ public:
+@@ -586,6 +587,63 @@ public:
  
          return true;
      }

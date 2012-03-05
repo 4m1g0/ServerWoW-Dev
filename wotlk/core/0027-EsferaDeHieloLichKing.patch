@@ -1,6 +1,6 @@
-From 57788103ee756ceace0fbf4760b04defdec6c17e Mon Sep 17 00:00:00 2001
+From c04583e981c2c4ac6b271606294ef6262bbcac89 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 19 Feb 2012 23:22:30 +0100
+Date: Mon, 5 Mar 2012 20:45:57 +0100
 Subject: [PATCH 27/27] EsferaDeHieloLichKing
 
 ---
@@ -8,10 +8,10 @@ Subject: [PATCH 27/27] EsferaDeHieloLichKing
  1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp
-index 964b440..06dbf7d 100755
+index 064a8fc..baea259 100755
 --- a/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp
 +++ b/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp
-@@ -132,7 +132,7 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
+@@ -135,7 +135,7 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
      }
  
      // prevent movement while casting spells with cast time or channel time

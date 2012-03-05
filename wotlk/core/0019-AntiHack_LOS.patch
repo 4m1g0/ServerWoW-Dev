@@ -1,6 +1,6 @@
-From d258f9d28ec54d7b570f677f95ded3a0eaf20b16 Mon Sep 17 00:00:00 2001
+From f84461505c53d59209e784d387c578c43ce1442c Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 19 Feb 2012 23:22:29 +0100
+Date: Mon, 5 Mar 2012 20:40:22 +0100
 Subject: [PATCH 19/27] AntiHack_LOS
 
 ---
@@ -9,7 +9,7 @@ Subject: [PATCH 19/27] AntiHack_LOS
  2 files changed, 16 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/game/Entities/Creature/Creature.cpp b/src/server/game/Entities/Creature/Creature.cpp
-index 3dfa1ce..bf0db93 100755
+index 0fe2016..a1e57fc 100755
 --- a/src/server/game/Entities/Creature/Creature.cpp
 +++ b/src/server/game/Entities/Creature/Creature.cpp
 @@ -535,6 +535,21 @@ void Creature::Update(uint32 diff)
@@ -35,7 +35,7 @@ index 3dfa1ce..bf0db93 100755
              // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
              if (!isAlive())
 diff --git a/src/server/game/Entities/Creature/Creature.h b/src/server/game/Entities/Creature/Creature.h
-index bfe1863..d543711 100755
+index f986e09..0abb317 100755
 --- a/src/server/game/Entities/Creature/Creature.h
 +++ b/src/server/game/Entities/Creature/Creature.h
 @@ -727,6 +727,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature

@@ -1,6 +1,6 @@
-From 9a84917f4e44720c2d016225a5ccdffee6ecf9bf Mon Sep 17 00:00:00 2001
+From 7de89dcd8f3fb8724a6dd1b88424b2e8bd405d1f Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 19 Feb 2012 23:22:30 +0100
+Date: Mon, 5 Mar 2012 20:45:57 +0100
 Subject: [PATCH 26/27] ValkyrLichKing
 
 ---
@@ -8,10 +8,10 @@ Subject: [PATCH 26/27] ValkyrLichKing
  1 files changed, 3 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
-index fbed870..53176c0 100644
+index 19a8e42..04658fb 100644
 --- a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
 +++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
-@@ -116,7 +116,7 @@ enum Spells
+@@ -117,7 +117,7 @@ enum Spells
      SPELL_SOUL_REAPER_BUFF              = 69410,
      SPELL_WINGS_OF_THE_DAMNED           = 74352,
      SPELL_VALKYR_TARGET_SEARCH          = 69030,
@@ -20,7 +20,7 @@ index fbed870..53176c0 100644
      SPELL_VALKYR_CARRY                  = 74445,    // removes unselectable flag
      SPELL_LIFE_SIPHON                   = 73488,
      SPELL_LIFE_SIPHON_HEAL              = 73489,
-@@ -1516,6 +1516,8 @@ class npc_valkyr_shadowguard : public CreatureScript
+@@ -1517,6 +1517,8 @@ class npc_valkyr_shadowguard : public CreatureScript
                  {
                      case POINT_DROP_PLAYER:
                          DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);

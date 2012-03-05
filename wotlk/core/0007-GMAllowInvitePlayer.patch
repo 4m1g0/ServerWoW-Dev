@@ -1,6 +1,6 @@
-From 99f1b909005a00cd93091f401bb1cb53df92897d Mon Sep 17 00:00:00 2001
+From a660818b2ba5f1c466af4aeb100459fc44c644f3 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 19 Feb 2012 23:21:37 +0100
+Date: Mon, 5 Mar 2012 20:40:21 +0100
 Subject: [PATCH 07/27] GMAllowInvitePlayer
 
 ---
@@ -60,10 +60,10 @@ index 9343a53..b64aa41 100755
  
      // can't group with
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 2b0db24..c59a7ab 100755
+index 59b247e..aad4080 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -872,6 +872,7 @@ void World::LoadConfigSettings(bool reload)
+@@ -873,6 +873,7 @@ void World::LoadConfigSettings(bool reload)
          m_int_configs[CONFIG_START_GM_LEVEL] = MAX_LEVEL;
      }
      m_bool_configs[CONFIG_ALLOW_GM_GROUP]       = ConfigMgr::GetBoolDefault("GM.AllowInvite", false);
@@ -84,7 +84,7 @@ index d9c2a94..65f883a 100755
      CONFIG_GM_LOWER_SECURITY,
      CONFIG_SKILL_PROSPECTING,
 diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
-index 930a47c..cbcf971 100644
+index 40fbfcd..41dc65b 100644
 --- a/src/server/worldserver/worldserver.conf.dist
 +++ b/src/server/worldserver/worldserver.conf.dist
 @@ -1994,6 +1994,14 @@ GM.StartLevel = 1

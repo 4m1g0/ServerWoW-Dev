@@ -1,6 +1,6 @@
-From c144448b1b5be4611a51293a03251653c8614dfe Mon Sep 17 00:00:00 2001
+From 9c775d0262d9ea91748836ff09fa2f3b13270520 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 19 Feb 2012 23:21:37 +0100
+Date: Mon, 5 Mar 2012 20:40:20 +0100
 Subject: [PATCH 06/27] MuteLog
 
 ---
@@ -145,7 +145,7 @@ index cb3eb82..0812952 100755
      return true;
  }
 diff --git a/src/server/game/Miscellaneous/Language.h b/src/server/game/Miscellaneous/Language.h
-index e751dbf..8e3078a 100755
+index 547f167..a4824d8 100755
 --- a/src/server/game/Miscellaneous/Language.h
 +++ b/src/server/game/Miscellaneous/Language.h
 @@ -363,6 +363,9 @@ enum TrinityStrings
@@ -159,10 +159,10 @@ index e751dbf..8e3078a 100755
      LANG_BANINFO_NEVER                  = 420,
      LANG_BANINFO_YES                    = 421,
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 60c56f7..2b0db24 100755
+index 0475dc3..59b247e 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -2325,10 +2325,11 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
+@@ -2335,10 +2335,11 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
  
          if (mode != BAN_IP)
          {
@@ -175,7 +175,7 @@ index 60c56f7..2b0db24 100755
              // No SQL injection with prepared statements
              stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT_BANNED);
              stmt->setUInt32(0, account);
-@@ -2448,6 +2449,33 @@ bool World::RemoveBanCharacter(std::string name)
+@@ -2458,6 +2459,33 @@ bool World::RemoveBanCharacter(std::string name)
      return true;
  }
  

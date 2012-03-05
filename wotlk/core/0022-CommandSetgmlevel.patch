@@ -1,14 +1,14 @@
-From 05be6c79331dddc4693e685b8cdd7b8e76800855 Mon Sep 17 00:00:00 2001
+From 7b280702fc3001fc274f9c7ae9679771727e6a12 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sun, 19 Feb 2012 23:22:30 +0100
+Date: Mon, 5 Mar 2012 20:45:57 +0100
 Subject: [PATCH 22/27] CommandSetgmlevel
 
 ---
- src/server/scripts/Commands/cs_account.cpp |   43 +++++++--------------------
- 1 files changed, 11 insertions(+), 32 deletions(-)
+ src/server/scripts/Commands/cs_account.cpp |   44 +++++++---------------------
+ 1 files changed, 11 insertions(+), 33 deletions(-)
 
 diff --git a/src/server/scripts/Commands/cs_account.cpp b/src/server/scripts/Commands/cs_account.cpp
-index 8feab1c..e8bfed5 100644
+index 04f4cc6..1360d2f 100644
 --- a/src/server/scripts/Commands/cs_account.cpp
 +++ b/src/server/scripts/Commands/cs_account.cpp
 @@ -413,10 +413,9 @@ public:
@@ -75,7 +75,7 @@ index 8feab1c..e8bfed5 100644
          {
              handler->SendSysMessage(LANG_INVALID_REALMID);
              handler->SetSentErrorMessage(true);
-@@ -490,19 +477,11 @@ public:
+@@ -490,19 +477,10 @@ public:
          // If gmRealmID is -1, delete all values for the account id, else, insert values for the specific realmID
          PreparedStatement* stmt;
  
@@ -89,16 +89,16 @@ index 8feab1c..e8bfed5 100644
 -        else
 -        {
 -            stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_ACCESS_BY_REALM);
-+        stmt->setUInt32(0, targetAccountId);
-+        stmt->setUInt32(1, realmID);
- 
+-
 -            stmt->setUInt32(0, targetAccountId);
 -            stmt->setUInt32(1, realmID);
 -        }
++        stmt->setUInt32(0, targetAccountId);
++        stmt->setUInt32(1, realmID);
+ 
          LoginDatabase.Execute(stmt);
  
-         if (gm != 0)
-@@ -511,7 +490,7 @@ public:
+@@ -512,7 +490,7 @@ public:
  
              stmt->setUInt32(0, targetAccountId);
              stmt->setUInt8(1, uint8(gm));
