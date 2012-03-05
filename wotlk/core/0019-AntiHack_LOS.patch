@@ -17,7 +17,7 @@ index 0fe2016..a1e57fc 100755
              }
  
 +            // [HACK] Evita que los bosses esten mas de 13 segundos en combate
-+             if (GetCreatureInfo()->rank != CREATURE_ELITE_NORMAL)
++             if (GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL)
 +             {
 +                 if (LOS_timer >= 13000)
 +                 {
