@@ -48,6 +48,8 @@ INSERT IGNORE INTO disables (`sourceType`, `entry`, `flags`, `comment`) VALUES (
 -- Spells que permiten sanacion instantanea, importante en cata
 INSERT INTO disables (`sourceType`, `entry`, `flags`, `comment`) VALUES (0, 65455, 1, '[LCV]Disable: Furia de la naturaleza');
 INSERT INTO disables (`sourceType`, `entry`, `flags`, `comment`) VALUES (0, 80987, 1, '[LCV]Disable: Juego de parches Venaprofunda');
+INSERT INTO disables (`sourceType`, `entry`, `flags`, `comment`) VALUES (0, 86425, 1, '[LCV]Disable: Explosión de macho cabrío');
+
 
 -- Fix critical exploit https://github.com/TrinityCore/TrinityCore/pull/3567
 INSERT INTO `disables` VALUES
