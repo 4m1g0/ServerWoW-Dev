@@ -76,7 +76,7 @@ index a7e4af2..e306ac1 100644
 -
          // Check if provided realmID has a negative value other than -1
 -        if (gmRealmID < -1)
-+        if (gmRealmID < 1)
++        if (RealmID < 1)
          {
              handler->SendSysMessage(LANG_INVALID_REALMID);
              handler->SetSentErrorMessage(true);
