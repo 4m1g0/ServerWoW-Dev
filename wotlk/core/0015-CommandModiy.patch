@@ -1,6 +1,6 @@
-From 2e9224d928f8e2b8940cd39b9a00fb37e7fdf4c7 Mon Sep 17 00:00:00 2001
+From 9839a03cdd767e827782a1743bcc4f82aa5d0ad2 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:40:21 +0100
+Date: Tue, 27 Mar 2012 02:53:13 +0200
 Subject: [PATCH 15/27] CommandModiy
 
 ---
@@ -9,7 +9,7 @@ Subject: [PATCH 15/27] CommandModiy
  2 files changed, 7 insertions(+), 47 deletions(-)
 
 diff --git a/src/server/scripts/Commands/cs_gm.cpp b/src/server/scripts/Commands/cs_gm.cpp
-index 9b9d1cf..c03b4a7 100644
+index d449b36..dc53cf0 100644
 --- a/src/server/scripts/Commands/cs_gm.cpp
 +++ b/src/server/scripts/Commands/cs_gm.cpp
 @@ -92,9 +92,9 @@ public:
@@ -25,10 +25,10 @@ index 9b9d1cf..c03b4a7 100644
          WorldPacket data(12);
          if (strncmp(args, "on", 3) == 0)
 diff --git a/src/server/scripts/Commands/cs_modify.cpp b/src/server/scripts/Commands/cs_modify.cpp
-index 358eaac..e837994 100644
+index 32ee96d..8674aef 100644
 --- a/src/server/scripts/Commands/cs_modify.cpp
 +++ b/src/server/scripts/Commands/cs_modify.cpp
-@@ -472,16 +472,8 @@ public:
+@@ -474,16 +474,8 @@ public:
              return false;
          }
  
@@ -46,7 +46,7 @@ index 358eaac..e837994 100644
              return false;
  
          std::string targetNameLink = handler->GetNameLink(target);
-@@ -520,16 +512,8 @@ public:
+@@ -522,16 +514,8 @@ public:
              return false;
          }
  
@@ -64,7 +64,7 @@ index 358eaac..e837994 100644
              return false;
  
          std::string targetNameLink = handler->GetNameLink(target);
-@@ -565,16 +549,8 @@ public:
+@@ -567,16 +551,8 @@ public:
              return false;
          }
  
@@ -82,7 +82,7 @@ index 358eaac..e837994 100644
              return false;
  
          std::string targetNameLink = handler->GetNameLink(target);
-@@ -610,16 +586,8 @@ public:
+@@ -612,16 +588,8 @@ public:
              return false;
          }
  
@@ -100,7 +100,7 @@ index 358eaac..e837994 100644
              return false;
  
          std::string targetNameLink = handler->GetNameLink(target);
-@@ -655,16 +623,8 @@ public:
+@@ -657,16 +625,8 @@ public:
              return false;
          }
  

@@ -1,6 +1,6 @@
-From c04583e981c2c4ac6b271606294ef6262bbcac89 Mon Sep 17 00:00:00 2001
+From 383982e704f977decb6f53047648af3705dd76cd Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:45:57 +0100
+Date: Tue, 27 Mar 2012 03:05:12 +0200
 Subject: [PATCH 27/27] EsferaDeHieloLichKing
 
 ---
@@ -8,7 +8,7 @@ Subject: [PATCH 27/27] EsferaDeHieloLichKing
  1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp
-index 064a8fc..baea259 100755
+index 6d507a3..22743c7 100755
 --- a/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp
 +++ b/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp
 @@ -135,7 +135,7 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_

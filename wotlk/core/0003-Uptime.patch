@@ -1,6 +1,6 @@
-From cf9fb2c404110a3fb45f770fe8ce5ae9ee5efc7a Mon Sep 17 00:00:00 2001
+From 54f7628cdd90c71c3fc68e719c0dab961c3a27c3 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:40:20 +0100
+Date: Tue, 27 Mar 2012 02:46:35 +0200
 Subject: [PATCH 03/27] Uptime
 
 ---
@@ -20,10 +20,10 @@ index 0000000..5bfa9e2
 +ALTER TABLE `uptime` ADD COLUMN `players` SMALLINT(5) UNSIGNED DEFAULT '0' NOT NULL AFTER `uptime`;
 +ALTER TABLE `uptime` ADD COLUMN `queued` SMALLINT(5) UNSIGNED DEFAULT '0' NOT NULL AFTER `players`;
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 758c0c6..0475dc3 100755
+index f230f00..ae4cbed 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -1974,16 +1974,18 @@ void World::Update(uint32 diff)
+@@ -1994,16 +1994,18 @@ void World::Update(uint32 diff)
      if (m_timers[WUPDATE_UPTIME].Passed())
      {
          uint32 tmpDiff = uint32(m_gameTime - m_startTime);
@@ -47,10 +47,10 @@ index 758c0c6..0475dc3 100755
          LoginDatabase.Execute(stmt);
      }
 diff --git a/src/server/shared/Database/Implementation/LoginDatabase.cpp b/src/server/shared/Database/Implementation/LoginDatabase.cpp
-index 8ef8d3b..767d55d 100755
+index df92c6f..f9b61e9 100755
 --- a/src/server/shared/Database/Implementation/LoginDatabase.cpp
 +++ b/src/server/shared/Database/Implementation/LoginDatabase.cpp
-@@ -57,7 +57,7 @@ void LoginDatabaseConnection::DoPrepareStatements()
+@@ -66,7 +66,7 @@ void LoginDatabaseConnection::DoPrepareStatements()
      PREPARE_STATEMENT(LOGIN_UPD_MUTE_TIME, "UPDATE account SET mutetime = ? WHERE id = ?", CONNECTION_ASYNC);
      PREPARE_STATEMENT(LOGIN_UPD_LAST_IP, "UPDATE account SET last_ip = ? WHERE username = ?", CONNECTION_ASYNC);
      PREPARE_STATEMENT(LOGIN_UPD_ACCOUNT_ONLINE, "UPDATE account SET online = 1 WHERE id = ?", CONNECTION_ASYNC);

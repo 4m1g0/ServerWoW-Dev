@@ -1,6 +1,6 @@
-From 9c775d0262d9ea91748836ff09fa2f3b13270520 Mon Sep 17 00:00:00 2001
+From c03a4e12cd9b9976e4943bbb0e0b55eca0bc6318 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:40:20 +0100
+Date: Tue, 27 Mar 2012 02:47:56 +0200
 Subject: [PATCH 06/27] MuteLog
 
 ---
@@ -45,7 +45,7 @@ index 0000000..3e3d720
 +INSERT INTO trinity_string (entry, content_default, content_loc6) VALUES(90002, 'Mute history for account %s:', 'Historial de mute para la cuenta %s:');
 +INSERT INTO trinity_string (entry, content_default, content_loc6) VALUES(90003, 'Mute Date: %s Mutetime: %s Still active: %s  Reason: %s Set by: %s', 'Fecha de muteo: %s Tiempo: %s AÃºn activo: %s  Motivo: %s Puesto por: %s');
 diff --git a/src/server/authserver/Server/AuthSocket.cpp b/src/server/authserver/Server/AuthSocket.cpp
-index e1d77c6..4aa164c 100755
+index 15555e4..56d777c 100755
 --- a/src/server/authserver/Server/AuthSocket.cpp
 +++ b/src/server/authserver/Server/AuthSocket.cpp
 @@ -402,6 +402,8 @@ bool AuthSocket::_HandleLogonChallenge()
@@ -58,10 +58,10 @@ index e1d77c6..4aa164c 100755
                  // If the account is banned, reject the logon attempt
                  stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BANNED);
 diff --git a/src/server/game/Chat/Commands/Level2.cpp b/src/server/game/Chat/Commands/Level2.cpp
-index e10842c..b171003 100755
+index 2588a57..f9b3e2c 100755
 --- a/src/server/game/Chat/Commands/Level2.cpp
 +++ b/src/server/game/Chat/Commands/Level2.cpp
-@@ -76,6 +76,8 @@ bool ChatHandler::HandleMuteCommand(const char* args)
+@@ -77,6 +77,8 @@ bool ChatHandler::HandleMuteCommand(const char* args)
      if (HasLowerSecurity (target, target_guid, true))
          return false;
  
@@ -70,7 +70,7 @@ index e10842c..b171003 100755
      PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
  
      if (target)
-@@ -146,6 +148,8 @@ bool ChatHandler::HandleUnmuteCommand(const char* args)
+@@ -147,6 +149,8 @@ bool ChatHandler::HandleUnmuteCommand(const char* args)
  
      LoginDatabase.Execute(stmt);
  
@@ -80,10 +80,10 @@ index e10842c..b171003 100755
          ChatHandler(target).PSendSysMessage(LANG_YOUR_CHAT_ENABLED);
  
 diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
-index cb3eb82..0812952 100755
+index d5dd233..37cb0a6 100755
 --- a/src/server/game/Chat/Commands/Level3.cpp
 +++ b/src/server/game/Chat/Commands/Level3.cpp
-@@ -3157,26 +3157,44 @@ bool ChatHandler::HandleBanInfoCharacterCommand(const char *args)
+@@ -3160,26 +3160,44 @@ bool ChatHandler::HandleBanInfoCharacterCommand(const char *args)
  bool ChatHandler::HandleBanInfoHelper(uint32 accountid, char const* accountname)
  {
      QueryResult result = LoginDatabase.PQuery("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '%u' ORDER BY bandate ASC", accountid);
@@ -159,10 +159,10 @@ index 547f167..a4824d8 100755
      LANG_BANINFO_NEVER                  = 420,
      LANG_BANINFO_YES                    = 421,
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 0475dc3..59b247e 100755
+index ae4cbed..8d249b6 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -2335,10 +2335,11 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
+@@ -2355,10 +2355,11 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
  
          if (mode != BAN_IP)
          {
@@ -175,7 +175,7 @@ index 0475dc3..59b247e 100755
              // No SQL injection with prepared statements
              stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT_BANNED);
              stmt->setUInt32(0, account);
-@@ -2458,6 +2459,33 @@ bool World::RemoveBanCharacter(std::string name)
+@@ -2478,6 +2479,33 @@ bool World::RemoveBanCharacter(std::string name)
      return true;
  }
  
@@ -210,7 +210,7 @@ index 0475dc3..59b247e 100755
  void World::_UpdateGameTime()
  {
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index 0ded1e9..d9c2a94 100755
+index d54a77e..e41f2d9 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
 @@ -716,6 +716,8 @@ class World
@@ -223,11 +223,11 @@ index 0ded1e9..d9c2a94 100755
          // for max speed access
          static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
 diff --git a/src/server/shared/Database/Implementation/LoginDatabase.cpp b/src/server/shared/Database/Implementation/LoginDatabase.cpp
-index 767d55d..e219b5b 100755
+index f9b61e9..e72507f 100755
 --- a/src/server/shared/Database/Implementation/LoginDatabase.cpp
 +++ b/src/server/shared/Database/Implementation/LoginDatabase.cpp
-@@ -45,6 +45,9 @@ void LoginDatabaseConnection::DoPrepareStatements()
-     PREPARE_STATEMENT(LOGIN_DEL_REALM_CHARACTERS, "DELETE FROM realmcharacters WHERE acctid = ? AND realmid = ?", CONNECTION_ASYNC)
+@@ -54,6 +54,9 @@ void LoginDatabaseConnection::DoPrepareStatements()
+     PREPARE_STATEMENT(LOGIN_DEL_REALM_CHARACTERS, "DELETE FROM realmcharacters WHERE acctid = ?", CONNECTION_ASYNC);
      PREPARE_STATEMENT(LOGIN_INS_REALM_CHARACTERS, "INSERT INTO realmcharacters (numchars, acctid, realmid) VALUES (?, ?, ?)", CONNECTION_ASYNC)
      PREPARE_STATEMENT(LOGIN_SEL_SUM_REALM_CHARACTERS, "SELECT SUM(numchars) FROM realmcharacters WHERE acctid = ?", CONNECTION_ASYNC);
 +    PREPARE_STATEMENT(LOGIN_SET_ACCOUNT_MUTED, "INSERT INTO account_muted VALUES (?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, ?, ?, 1)", CONNECTION_ASYNC)
@@ -237,13 +237,13 @@ index 767d55d..e219b5b 100755
      PREPARE_STATEMENT(LOGIN_INS_REALM_CHARACTERS_INIT, "INSERT INTO realmcharacters (realmid, acctid, numchars) SELECT realmlist.id, account.id, 0 FROM realmlist, account LEFT JOIN realmcharacters ON acctid=account.id WHERE acctid IS NULL", CONNECTION_ASYNC);
      PREPARE_STATEMENT(LOGIN_DEL_OLD_BANS, "DELETE FROM ip_banned WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate<>bandate", CONNECTION_ASYNC);
 diff --git a/src/server/shared/Database/Implementation/LoginDatabase.h b/src/server/shared/Database/Implementation/LoginDatabase.h
-index afb1880..124bb13 100755
+index 4ad9ac1..59c939a 100755
 --- a/src/server/shared/Database/Implementation/LoginDatabase.h
 +++ b/src/server/shared/Database/Implementation/LoginDatabase.h
-@@ -82,6 +82,9 @@ enum LoginDatabaseStatements
-     LOGIN_DEL_ACCOUNT_ACCESS,
-     LOGIN_DEL_ACCOUNT_ACCESS_BY_REALM,
-     LOGIN_INS_ACCOUNT_ACCESS,
+@@ -108,6 +108,9 @@ enum LoginDatabaseStatements
+     LOGIN_SEL_ACCOUNT_WHOIS,
+     LOGIN_SEL_REALMLIST_SECURITY_LEVEL,
+     LOGIN_DEL_ACCOUNT,
 +    LOGIN_SET_ACCOUNT_MUTED,
 +    LOGIN_SET_ACCOUNT_NOT_MUTED,
 +    LOGIN_SET_EXPIREDACCMUTES,

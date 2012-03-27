@@ -1,15 +1,16 @@
-From 5a5b738a9aecfd4c50d8076d273aa06200f051c3 Mon Sep 17 00:00:00 2001
+From 1b29ce4b35f37e94ffdaec8f5661df8eca74228b Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:40:21 +0100
+Date: Tue, 27 Mar 2012 02:53:12 +0200
 Subject: [PATCH 08/27] vipAccount
 
 ---
- sql/own/logon_vipAccount.sql            |    1 +
- src/server/game/Server/WorldSession.cpp |    4 ++--
- src/server/game/Server/WorldSession.h   |    4 +++-
- src/server/game/Server/WorldSocket.cpp  |   10 ++++++----
- src/server/game/World/World.cpp         |    2 +-
- 5 files changed, 13 insertions(+), 8 deletions(-)
+ sql/own/logon_vipAccount.sql                       |    1 +
+ src/server/game/Server/WorldSession.cpp            |    4 ++--
+ src/server/game/Server/WorldSession.h              |    4 +++-
+ src/server/game/Server/WorldSocket.cpp             |    6 ++++--
+ src/server/game/World/World.cpp                    |    2 +-
+ .../Database/Implementation/LoginDatabase.cpp      |    2 +-
+ 6 files changed, 12 insertions(+), 7 deletions(-)
  create mode 100644 sql/own/logon_vipAccount.sql
 
 diff --git a/sql/own/logon_vipAccount.sql b/sql/own/logon_vipAccount.sql
@@ -20,7 +21,7 @@ index 0000000..a556336
 @@ -0,0 +1 @@
 +ALTER TABLE `account` ADD `vip` tinyint(3) unsigned NOT NULL DEFAULT '0' AFTER `recruiter`;
 diff --git a/src/server/game/Server/WorldSession.cpp b/src/server/game/Server/WorldSession.cpp
-index 48fa95f..1ea5d7e 100755
+index af38a5f..5b45aae 100755
 --- a/src/server/game/Server/WorldSession.cpp
 +++ b/src/server/game/Server/WorldSession.cpp
 @@ -88,9 +88,9 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
@@ -36,7 +37,7 @@ index 48fa95f..1ea5d7e 100755
  m_playerRecentlyLogout(false), m_playerSave(false),
  m_sessionDbcLocale(sWorld->GetAvailableDbcLocale(locale)),
 diff --git a/src/server/game/Server/WorldSession.h b/src/server/game/Server/WorldSession.h
-index 912a968..34a4e1a 100755
+index 3b17dd3..d21ba98 100755
 --- a/src/server/game/Server/WorldSession.h
 +++ b/src/server/game/Server/WorldSession.h
 @@ -215,7 +215,7 @@ class CharacterCreateInfo
@@ -65,21 +66,10 @@ index 912a968..34a4e1a 100755
          time_t timeLastWhoCommand;
  };
 diff --git a/src/server/game/Server/WorldSocket.cpp b/src/server/game/Server/WorldSocket.cpp
-index 2c6098f..05cd067 100755
+index cf9ec7d..75ea3bb 100755
 --- a/src/server/game/Server/WorldSocket.cpp
 +++ b/src/server/game/Server/WorldSocket.cpp
-@@ -816,8 +816,8 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
-     LoginDatabase.EscapeString (safe_account);
-     // No SQL injection, username escaped.
- 
--    //                                                 0       1          2       3     4  5      6          7       8         9      10
--    QueryResult result = LoginDatabase.PQuery ("SELECT id, sessionkey, last_ip, locked, v, s, expansion, mutetime, locale, recruiter, os FROM account "
-+    //                                                 0       1          2       3     4  5      6          7       8         9      10   11
-+    QueryResult result = LoginDatabase.PQuery ("SELECT id, sessionkey, last_ip, locked, v, s, expansion, mutetime, locale, recruiter, vip, os FROM account "
-                                                "WHERE username = '%s'", safe_account.c_str());
- 
-     // Stop if the account is not found
-@@ -896,7 +896,9 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
+@@ -894,7 +894,9 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
          locale = LOCALE_enUS;
  
      uint32 recruiter = fields[9].GetUInt32();
@@ -89,8 +79,8 @@ index 2c6098f..05cd067 100755
 +    bool vip = fields[10].GetBool();
  
      // Checks gmlevel per Realm
-     result =
-@@ -992,7 +994,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
+     stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_GMLEVEL_BY_REALMID);
+@@ -993,7 +995,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
      LoginDatabase.Execute(stmt);
  
      // NOTE ATM the socket is single-threaded, have this in mind ...
@@ -100,7 +90,7 @@ index 2c6098f..05cd067 100755
      m_Crypt.Init(&k);
  
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index aad4080..5487703 100755
+index 2782506..d1c0ace 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -263,7 +263,7 @@ World::AddSession_(WorldSession* s)
@@ -112,6 +102,19 @@ index aad4080..5487703 100755
      {
          AddQueuedPlayer (s);
          UpdateMaxSessionCounters();
+diff --git a/src/server/shared/Database/Implementation/LoginDatabase.cpp b/src/server/shared/Database/Implementation/LoginDatabase.cpp
+index e72507f..851a9f5 100755
+--- a/src/server/shared/Database/Implementation/LoginDatabase.cpp
++++ b/src/server/shared/Database/Implementation/LoginDatabase.cpp
+@@ -41,7 +41,7 @@ void LoginDatabaseConnection::DoPrepareStatements()
+     PREPARE_STATEMENT(LOGIN_SEL_FAILEDLOGINS, "SELECT id, failed_logins FROM account WHERE username = ?", CONNECTION_SYNCH)
+     PREPARE_STATEMENT(LOGIN_SEL_ACCOUNT_ID_BY_NAME, "SELECT id FROM account WHERE username = ?", CONNECTION_SYNCH)
+     PREPARE_STATEMENT(LOGIN_SEL_ACCOUNT_LIST_BY_NAME, "SELECT id, username FROM account WHERE username = ?", CONNECTION_SYNCH);
+-    PREPARE_STATEMENT(LOGIN_SEL_ACCOUNT_INFO_BY_NAME, "SELECT id, sessionkey, last_ip, locked, v, s, expansion, mutetime, locale, recruiter, os FROM account WHERE username = ?", CONNECTION_SYNCH);
++    PREPARE_STATEMENT(LOGIN_SEL_ACCOUNT_INFO_BY_NAME, "SELECT id, sessionkey, last_ip, locked, v, s, expansion, mutetime, locale, recruiter, vip, os FROM account WHERE username = ?", CONNECTION_SYNCH);
+     PREPARE_STATEMENT(LOGIN_SEL_ACCOUNT_LIST_BY_EMAIL, "SELECT id, username FROM account WHERE email = ?", CONNECTION_SYNCH);
+     PREPARE_STATEMENT(LOGIN_SEL_NUM_CHARS_ON_REALM, "SELECT numchars FROM realmcharacters WHERE realmid = ? AND acctid= ?", CONNECTION_SYNCH)
+     PREPARE_STATEMENT(LOGIN_SEL_ACCOUNT_BY_IP, "SELECT id, username FROM account WHERE last_ip = ?", CONNECTION_SYNCH)
 -- 
 1.7.5.4
 

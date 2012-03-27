@@ -1,21 +1,21 @@
-From 0fd13736080f0a7e062b8a5e7a8577184e61dd49 Mon Sep 17 00:00:00 2001
+From 5244922d98934357eb160bb570406a0dbf281cd9 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:42:29 +0100
+Date: Tue, 27 Mar 2012 02:58:15 +0200
 Subject: [PATCH 20/27] Armory
 
 ---
  src/server/game/Achievements/AchievementMgr.cpp |    1 +
- src/server/game/Entities/Item/Item.cpp          |    7 +++
- src/server/game/Entities/Player/Player.cpp      |   67 +++++++++++++++++++++++
+ src/server/game/Entities/Item/Item.cpp          |    7 ++
+ src/server/game/Entities/Player/Player.cpp      |   69 +++++++++++++++++++++++
  src/server/game/Entities/Player/Player.h        |   23 ++++++++
- src/server/game/Entities/Unit/Unit.cpp          |    3 +-
- 5 files changed, 100 insertions(+), 1 deletions(-)
+ src/server/game/Entities/Unit/Unit.cpp          |    1 +
+ 5 files changed, 101 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/game/Achievements/AchievementMgr.cpp b/src/server/game/Achievements/AchievementMgr.cpp
-index 271e78a..1f861fc 100755
+index 7b2e157..f1ba501 100755
 --- a/src/server/game/Achievements/AchievementMgr.cpp
 +++ b/src/server/game/Achievements/AchievementMgr.cpp
-@@ -2032,6 +2032,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
+@@ -2039,6 +2039,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
          return;
  
      SendAchievementEarned(achievement);
@@ -24,7 +24,7 @@ index 271e78a..1f861fc 100755
      ca.date = time(NULL);
      ca.changed = true;
 diff --git a/src/server/game/Entities/Item/Item.cpp b/src/server/game/Entities/Item/Item.cpp
-index 90f6f4a..00e6427 100755
+index 4a1d5d5..4ef3906 100755
 --- a/src/server/game/Entities/Item/Item.cpp
 +++ b/src/server/game/Entities/Item/Item.cpp
 @@ -276,6 +276,13 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
@@ -42,19 +42,21 @@ index 90f6f4a..00e6427 100755
  }
  
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index 870b6f6..ed26c2f 100755
+index de66362..d425ae4 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
-@@ -4945,6 +4945,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
-             trans->PAppend("DELETE FROM character_queststatus_daily WHERE guid = '%u'", guid);
-             trans->PAppend("DELETE FROM character_talent WHERE guid = '%u'", guid);
-             trans->PAppend("DELETE FROM character_skills WHERE guid = '%u'", guid);
+@@ -5059,6 +5059,10 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
+             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SKILLS);
+             stmt->setUInt32(0, guid);
+             trans->Append(stmt);
++            
++            // Esto es de la armeria pero tambien debe ser movido a prepared statemens
 +            trans->PAppend("DELETE FROM armory_character_stats WHERE guid = '%u'", guid);
 +            trans->PAppend("DELETE FROM character_feed_log WHERE guid = '%u'", guid);
  
              CharacterDatabase.CommitTransaction(trans);
              break;
-@@ -16627,6 +16629,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
+@@ -16793,6 +16797,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
  
          return false;
      }
@@ -63,7 +65,7 @@ index 870b6f6..ed26c2f 100755
  
      // overwrite possible wrong/corrupted guid
      SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
-@@ -18741,6 +18745,30 @@ void Player::SaveToDB(bool create /*=false*/)
+@@ -18916,6 +18922,30 @@ void Player::SaveToDB(bool create /*=false*/)
  
      CharacterDatabase.CommitTransaction(trans);
  
@@ -94,9 +96,9 @@ index 870b6f6..ed26c2f 100755
      // save pet (hunter pet level and experience and all type pets health/mana).
      if (Pet* pet = GetPet())
          pet->SavePetToDB(PET_SAVE_AS_CURRENT);
-@@ -25133,3 +25161,42 @@ bool Player::IsInWhisperWhiteList(uint64 guid)
-     }
-     return false;
+@@ -25548,3 +25578,42 @@ void Player::SendMovementSetCanTransitionBetweenSwimAndFly(bool apply)
+     data << uint32(0);          //! movement counter
+     SendDirectMessage(&data);
  }
 +
 +void Player::InitWowarmoryFeeds() {
@@ -137,9 +139,8 @@ index 870b6f6..ed26c2f 100755
 +    sLog->outDebug(LOG_FILTER_UNITS, "[Wowarmory]: create wowarmory feed (GUID: %u, type: %d, data: %u).", feed.guid, feed.type, feed.data);
 +    m_wowarmory_feeds.push_back(feed);
 +}
-\ No newline at end of file
 diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
-index 3d51014..66ce744 100755
+index ac50bbd..acf7bb7 100755
 --- a/src/server/game/Entities/Player/Player.h
 +++ b/src/server/game/Entities/Player/Player.h
 @@ -1057,6 +1057,21 @@ private:
@@ -164,7 +165,7 @@ index 3d51014..66ce744 100755
  class Player : public Unit, public GridObject<Player>
  {
      friend class WorldSession;
-@@ -2355,6 +2370,12 @@ class Player : public Unit, public GridObject<Player>
+@@ -2357,6 +2372,12 @@ class Player : public Unit, public GridObject<Player>
          void SendCinematicStart(uint32 CinematicSequenceId);
          void SendMovieStart(uint32 MovieId);
  
@@ -177,7 +178,7 @@ index 3d51014..66ce744 100755
          /*********************************************************/
          /***                 INSTANCE SYSTEM                   ***/
          /*********************************************************/
-@@ -2843,6 +2864,8 @@ class Player : public Unit, public GridObject<Player>
+@@ -2853,6 +2874,8 @@ class Player : public Unit, public GridObject<Player>
          uint32 m_timeSyncTimer;
          uint32 m_timeSyncClient;
          uint32 m_timeSyncServer;
@@ -187,10 +188,10 @@ index 3d51014..66ce744 100755
          InstanceTimeMap _instanceResetTimes;
          uint32 _pendingBindId;
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-index 3411d28..b54750f 100755
+index ce9cec4..636bfde 100755
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
-@@ -15517,6 +15517,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
+@@ -15561,6 +15561,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
                  {
                      if (creature->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
                          ((InstanceMap*)instanceMap)->PermBindAllPlayers(creditedPlayer);
@@ -198,15 +199,6 @@ index 3411d28..b54750f 100755
                  }
                  else
                  {
-@@ -16996,7 +16997,7 @@ void Unit::ExitVehicle(Position const* /*exitPosition*/)
-     //! to specify exit coordinates and either store those per passenger, or we need to
-     //! init spline movement based on those coordinates in unapply handlers, and
-     //! relocate exiting passengers based on Unit::moveSpline data. Either way,
--    //! Coming Soon™
-+    //! Coming Soon\99
- }
- 
- void Unit::_ExitVehicle(Position const* exitPosition)
 -- 
 1.7.5.4
 

@@ -1,6 +1,6 @@
-From a660818b2ba5f1c466af4aeb100459fc44c644f3 Mon Sep 17 00:00:00 2001
+From e77fed10c09c4e1c62857b182a9a6a3d3399ac62 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:40:21 +0100
+Date: Tue, 27 Mar 2012 02:47:56 +0200
 Subject: [PATCH 07/27] GMAllowInvitePlayer
 
 ---
@@ -12,10 +12,10 @@ Subject: [PATCH 07/27] GMAllowInvitePlayer
  5 files changed, 22 insertions(+), 4 deletions(-)
 
 diff --git a/src/server/game/Chat/Commands/Level1.cpp b/src/server/game/Chat/Commands/Level1.cpp
-index d592b33..73f73ff 100755
+index aebc28d..e4dbbb9 100755
 --- a/src/server/game/Chat/Commands/Level1.cpp
 +++ b/src/server/game/Chat/Commands/Level1.cpp
-@@ -201,7 +201,7 @@ bool ChatHandler::HandleSummonCommand(const char* args)
+@@ -199,7 +199,7 @@ bool ChatHandler::HandleSummonCommand(const char* args)
          }
          else if (map->IsDungeon())
          {
@@ -24,7 +24,7 @@ index d592b33..73f73ff 100755
  
              if (cMap->Instanceable() && cMap->GetInstanceId() != map->GetInstanceId())
                  target->UnbindInstance(map->GetInstanceId(), target->GetDungeonDifficulty(), true);
-@@ -211,11 +211,11 @@ bool ChatHandler::HandleSummonCommand(const char* args)
+@@ -209,11 +209,11 @@ bool ChatHandler::HandleSummonCommand(const char* args)
                  (target->GetGroup()->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) ||
                  (m_session->GetPlayer()->GetGroup()->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()))
                  // the last check is a bit excessive, but let it be, just in case
@@ -60,7 +60,7 @@ index 9343a53..b64aa41 100755
  
      // can't group with
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 59b247e..aad4080 100755
+index 8d249b6..2782506 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -873,6 +873,7 @@ void World::LoadConfigSettings(bool reload)
@@ -72,7 +72,7 @@ index 59b247e..aad4080 100755
      m_bool_configs[CONFIG_GM_LOWER_SECURITY] = ConfigMgr::GetBoolDefault("GM.LowerSecurity", false);
      m_float_configs[CONFIG_CHANCE_OF_GM_SURVEY] = ConfigMgr::GetFloatDefault("GM.TicketSystem.ChanceOfGMSurvey", 50.0f);
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index d9c2a94..65f883a 100755
+index e41f2d9..f9ee760 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
 @@ -107,6 +107,7 @@ enum WorldBoolConfigs

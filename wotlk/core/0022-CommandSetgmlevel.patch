@@ -1,14 +1,14 @@
-From 7b280702fc3001fc274f9c7ae9679771727e6a12 Mon Sep 17 00:00:00 2001
+From b03423487b15b03b9eacc4b0d086e535ad7128c1 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:45:57 +0100
+Date: Tue, 27 Mar 2012 03:05:12 +0200
 Subject: [PATCH 22/27] CommandSetgmlevel
 
 ---
- src/server/scripts/Commands/cs_account.cpp |   44 +++++++---------------------
- 1 files changed, 11 insertions(+), 33 deletions(-)
+ src/server/scripts/Commands/cs_account.cpp |   48 ++++++----------------------
+ 1 files changed, 10 insertions(+), 38 deletions(-)
 
 diff --git a/src/server/scripts/Commands/cs_account.cpp b/src/server/scripts/Commands/cs_account.cpp
-index 04f4cc6..1360d2f 100644
+index a7e4af2..e306ac1 100644
 --- a/src/server/scripts/Commands/cs_account.cpp
 +++ b/src/server/scripts/Commands/cs_account.cpp
 @@ -413,10 +413,9 @@ public:
@@ -52,14 +52,20 @@ index 04f4cc6..1360d2f 100644
          if (targetSecurity >= playerSecurity || gm >= playerSecurity)
          {
              handler->SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
-@@ -467,20 +466,8 @@ public:
+@@ -467,26 +466,8 @@ public:
              return false;
          }
  
 -        // Check and abort if the target gm has a higher rank on one of the realms and the new realm is -1
 -        if (gmRealmID == -1 && !AccountMgr::IsConsoleAccount(playerSecurity))
 -        {
--            QueryResult result = LoginDatabase.PQuery("SELECT * FROM account_access WHERE id = '%u' AND gmlevel > '%d'", targetAccountId, gm);
+-            PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ACCESS_GMLEVEL_TEST);
+-
+-            stmt->setUInt32(0, targetAccountId);
+-            stmt->setUInt8(1, uint8(gm));
+-
+-            PreparedQueryResult result = LoginDatabase.Query(stmt);
+-
 -            if (result)
 -            {
 -                handler->SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
@@ -68,28 +74,27 @@ index 04f4cc6..1360d2f 100644
 -            }
 -        }
 -
--        // Check if provided realmID has a negative value other than -1
+         // Check if provided realmID has a negative value other than -1
 -        if (gmRealmID < -1)
-+        // Check if provided realmID has a negative value
-+        if (realmID < 1)
++        if (gmRealmID < 1)
          {
              handler->SendSysMessage(LANG_INVALID_REALMID);
              handler->SetSentErrorMessage(true);
-@@ -490,19 +477,10 @@ public:
+@@ -496,19 +477,10 @@ public:
          // If gmRealmID is -1, delete all values for the account id, else, insert values for the specific realmID
          PreparedStatement* stmt;
  
 -        if (gmRealmID == -1)
 -        {
 -            stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_ACCESS);
-+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_ACCESS_BY_REALM);
- 
+-
 -            stmt->setUInt32(0, targetAccountId);
 -        }
 -        else
 -        {
 -            stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_ACCESS_BY_REALM);
--
++        stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_ACCESS_BY_REALM);
+ 
 -            stmt->setUInt32(0, targetAccountId);
 -            stmt->setUInt32(1, realmID);
 -        }
@@ -98,7 +103,7 @@ index 04f4cc6..1360d2f 100644
  
          LoginDatabase.Execute(stmt);
  
-@@ -512,7 +490,7 @@ public:
+@@ -518,7 +490,7 @@ public:
  
              stmt->setUInt32(0, targetAccountId);
              stmt->setUInt8(1, uint8(gm));

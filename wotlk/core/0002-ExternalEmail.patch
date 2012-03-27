@@ -1,6 +1,6 @@
-From 86cd96f8b944dcb7d346e399c02c30309fa13898 Mon Sep 17 00:00:00 2001
+From 57602dc8f799f5817adcc85c0bd5ba0dae2388ed Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:40:20 +0100
+Date: Tue, 27 Mar 2012 02:46:35 +0200
 Subject: [PATCH 02/27] ExternalEmail
 
 ---
@@ -104,7 +104,7 @@ index 3c3888e..e2e59ca 100755
 +    sLog->outString("EXTERNAL MAIL> All Mails Sent.");
 +}
 diff --git a/src/server/game/Server/WorldSession.h b/src/server/game/Server/WorldSession.h
-index a18067f..912a968 100755
+index 0fce0a3..3b17dd3 100755
 --- a/src/server/game/Server/WorldSession.h
 +++ b/src/server/game/Server/WorldSession.h
 @@ -333,6 +333,8 @@ class WorldSession
@@ -117,7 +117,7 @@ index a18067f..912a968 100755
          void SendAuctionHello(uint64 guid, Creature* unit);
          void SendAuctionCommandResult(uint32 auctionId, uint32 Action, uint32 ErrorCode, uint32 bidError = 0);
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 3efa976..758c0c6 100755
+index 99a04dd..f230f00 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -881,6 +881,9 @@ void World::LoadConfigSettings(bool reload)
@@ -130,7 +130,7 @@ index 3efa976..758c0c6 100755
      m_int_configs[CONFIG_UPTIME_UPDATE] = ConfigMgr::GetIntDefault("UpdateUptimeInterval", 10);
      if (int32(m_int_configs[CONFIG_UPTIME_UPDATE]) <= 0)
      {
-@@ -1695,6 +1698,8 @@ void World::SetInitialWorldSettings()
+@@ -1698,6 +1701,8 @@ void World::SetInitialWorldSettings()
  
      m_timers[WUPDATE_PINGDB].SetInterval(getIntConfig(CONFIG_DB_PING_INTERVAL)*MINUTE*IN_MILLISECONDS);    // Mysql ping time in minutes
  
@@ -139,7 +139,7 @@ index 3efa976..758c0c6 100755
      //to set mailtimer to return mails every day between 4 and 5 am
      //mailtimer is increased when updating auctions
      //one second is 1000 -(tested on win system)
-@@ -1920,6 +1925,16 @@ void World::Update(uint32 diff)
+@@ -1940,6 +1945,16 @@ void World::Update(uint32 diff)
          m_NextDailyQuestReset += DAY;
      }
  
@@ -157,7 +157,7 @@ index 3efa976..758c0c6 100755
          ResetWeeklyQuests();
  
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index be4c412..0ded1e9 100755
+index cab9c19..d54a77e 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
 @@ -77,6 +77,7 @@ enum WorldTimers

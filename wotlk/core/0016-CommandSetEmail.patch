@@ -1,6 +1,6 @@
-From eb80b1cb2be1dbb97f57866e7a16810b167b6624 Mon Sep 17 00:00:00 2001
+From 13419529702e0ab88190b620fed444400bc77b89 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:40:21 +0100
+Date: Tue, 27 Mar 2012 02:54:59 +0200
 Subject: [PATCH 16/27] CommandSetEmail
 
 ---
@@ -39,10 +39,10 @@ index 0000000..c941f19
 +  PRIMARY KEY (`entry`)
 +) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
 diff --git a/src/server/game/Accounts/AccountMgr.cpp b/src/server/game/Accounts/AccountMgr.cpp
-index a6ae300..9564374 100755
+index 240609e..cd83aca 100755
 --- a/src/server/game/Accounts/AccountMgr.cpp
 +++ b/src/server/game/Accounts/AccountMgr.cpp
-@@ -146,6 +146,26 @@ AccountOpResult ChangePassword(uint32 accountId, std::string newPassword)
+@@ -167,6 +167,26 @@ AccountOpResult ChangePassword(uint32 accountId, std::string newPassword)
      return AOR_OK;
  }
  
@@ -68,21 +68,21 @@ index a6ae300..9564374 100755
 +
  uint32 GetId(std::string username)
  {
-     LoginDatabase.EscapeString(username);
+     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_ACCOUNT_ID_BY_USERNAME);
 diff --git a/src/server/game/Accounts/AccountMgr.h b/src/server/game/Accounts/AccountMgr.h
-index 1b1ecfa..bd8b41d 100755
+index c69f3c0..1c98a9b 100755
 --- a/src/server/game/Accounts/AccountMgr.h
 +++ b/src/server/game/Accounts/AccountMgr.h
 @@ -40,6 +40,7 @@ namespace AccountMgr
-         AccountOpResult DeleteAccount(uint32 accountId);
-         AccountOpResult ChangeUsername(uint32 accountId, std::string newUsername, std::string newPassword);
-         AccountOpResult ChangePassword(uint32 accountId, std::string newPassword);
-+	AccountOpResult ChangeEmail(uint32 accid, std::string new_email);
-         bool CheckPassword(uint32 accountId, std::string password);
+     AccountOpResult DeleteAccount(uint32 accountId);
+     AccountOpResult ChangeUsername(uint32 accountId, std::string newUsername, std::string newPassword);
+     AccountOpResult ChangePassword(uint32 accountId, std::string newPassword);
++    AccountOpResult ChangeEmail(uint32 accid, std::string new_email);
+     bool CheckPassword(uint32 accountId, std::string password);
  
-         uint32 GetId(std::string username);
+     uint32 GetId(std::string username);
 diff --git a/src/server/scripts/Commands/cs_account.cpp b/src/server/scripts/Commands/cs_account.cpp
-index df83fe8..04f4cc6 100644
+index b521024..a7e4af2 100644
 --- a/src/server/scripts/Commands/cs_account.cpp
 +++ b/src/server/scripts/Commands/cs_account.cpp
 @@ -38,6 +38,7 @@ public:
@@ -93,7 +93,7 @@ index df83fe8..04f4cc6 100644
              { NULL,             0,                  false, NULL,                              "", NULL }
          };
          static ChatCommand accountCommandTable[] =
-@@ -586,6 +587,63 @@ public:
+@@ -592,6 +593,63 @@ public:
  
          return true;
      }

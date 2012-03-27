@@ -1,6 +1,6 @@
-From 77203f0d62afc43d5654327b26ee4c1374a11c7c Mon Sep 17 00:00:00 2001
+From c5419ed1c088f872e7bb3b65ad327305b1c21bf5 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:42:29 +0100
+Date: Tue, 27 Mar 2012 03:00:03 +0200
 Subject: [PATCH 21/27] ArenaLog
 
 ---
@@ -8,17 +8,17 @@ Subject: [PATCH 21/27] ArenaLog
  1 files changed, 4 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/game/Battlegrounds/Battleground.cpp b/src/server/game/Battlegrounds/Battleground.cpp
-index 10c0e75..f4324ed 100755
+index 36da0e9..accb915 100755
 --- a/src/server/game/Battlegrounds/Battleground.cpp
 +++ b/src/server/game/Battlegrounds/Battleground.cpp
 @@ -754,6 +754,10 @@ void Battleground::EndBattleground(uint32 winner)
                      for (Battleground::BattlegroundScoreMap::const_iterator itr = GetPlayerScoresBegin(); itr != GetPlayerScoresEnd(); ++itr)
                          if (Player* player = ObjectAccessor::FindPlayer(itr->first))
-                             sLog->outArena("Statistics for %s (GUID: " UI64FMTD ", Team: %d, IP: %s): %u damage, %u healing, %u killing blows", player->GetName(), itr->first, player->GetArenaTeamId(m_ArenaType == 5 ? 2 : m_ArenaType == 3), player->GetSession()->GetRemoteAddress().c_str(), itr->second->DamageDone, itr->second->HealingDone, itr->second->KillingBlows);
-+
+                             sLog->outArena("Statistics match Type: %u for %s (GUID: " UI64FMTD ", Team: %d, IP: %s): %u damage, %u healing, %u killing blows", m_ArenaType, player->GetName(), itr->first, player->GetArenaTeamId(m_ArenaType == 5 ? 2 : m_ArenaType == 3), player->GetSession()->GetRemoteAddress().c_str(), itr->second->DamageDone, itr->second->HealingDone, itr->second->KillingBlows);
++                
 +                // Guardamos los de arena en tabla logs
 +                CharacterDatabase.PExecute("INSERT INTO `logs` (type, param1, param2, param3, param4, param5, param6) VALUES (2, %u, %d, %d, %d, %d, %d)", m_ArenaType, winner_arena_team->GetId(), loser_arena_team->GetId(), winner_team_rating, loser_team_rating, GetStartTime());
-+
++                
              }
              // Deduct 16 points from each teams arena-rating if there are no winners after 45+2 minutes
              else

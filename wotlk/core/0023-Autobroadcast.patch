@@ -1,6 +1,6 @@
-From 4a3bd9833acc6b973f86889c43fddefc96ebbd72 Mon Sep 17 00:00:00 2001
+From f124cc9eff9cca760045fdbe0b64f9e47750099e Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:45:57 +0100
+Date: Tue, 27 Mar 2012 03:05:12 +0200
 Subject: [PATCH 23/27] Autobroadcast
 
 ---
@@ -24,10 +24,10 @@ index 0000000..6409baa
 +  PRIMARY KEY (`id`)
 +) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 5487703..9bcf070 100755
+index d1c0ace..41c2dec 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -1885,6 +1885,22 @@ void World::LoadAutobroadcasts()
+@@ -1888,6 +1888,22 @@ void World::LoadAutobroadcasts()
  
      sLog->outString(">> Loaded %u autobroadcasts definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
      sLog->outString();
@@ -49,8 +49,8 @@ index 5487703..9bcf070 100755
 +
  }
  
- /// Update the World !
-@@ -2651,17 +2667,46 @@ void World::ProcessCliCommands()
+ void World::LoadIp2nation()
+@@ -2671,17 +2687,46 @@ void World::ProcessCliCommands()
  
  void World::SendAutoBroadcast()
  {
@@ -99,7 +99,7 @@ index 5487703..9bcf070 100755
  
      else if (abcenter == 1)
      {
-@@ -2672,7 +2717,7 @@ void World::SendAutoBroadcast()
+@@ -2692,7 +2737,7 @@ void World::SendAutoBroadcast()
  
      else if (abcenter == 2)
      {
@@ -109,10 +109,10 @@ index 5487703..9bcf070 100755
          WorldPacket data(SMSG_NOTIFICATION, (msg.size()+1));
          data << msg;
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index 65f883a..0e65e07 100755
+index f9ee760..9e541dc 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
-@@ -845,6 +845,7 @@ class World
+@@ -847,6 +847,7 @@ class World
          std::string m_DBVersion;
  
          std::list<std::string> m_Autobroadcasts;

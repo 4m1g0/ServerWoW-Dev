@@ -1,6 +1,6 @@
-From 517b6cfff766b7f79b741fa20cd3f44a90dbc4ac Mon Sep 17 00:00:00 2001
+From 62912de0606a2d53ef1b45dd5c3e28a2da0c316c Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:45:57 +0100
+Date: Tue, 27 Mar 2012 03:05:12 +0200
 Subject: [PATCH 25/27] AmphitheaterofAnguish
 
 ---
@@ -8,10 +8,10 @@ Subject: [PATCH 25/27] AmphitheaterofAnguish
  1 files changed, 15 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/scripts/Northrend/zuldrak.cpp b/src/server/scripts/Northrend/zuldrak.cpp
-index 4cea6d8..96e874b 100644
+index 33d295e..c69a3fc 100644
 --- a/src/server/scripts/Northrend/zuldrak.cpp
 +++ b/src/server/scripts/Northrend/zuldrak.cpp
-@@ -248,7 +248,9 @@ enum eGurgthock
+@@ -247,7 +247,9 @@ enum eGurgthock
      QUEST_AMPHITHEATER_ANGUISH_YGGDRAS_1          = 12932,
      QUEST_AMPHITHEATER_ANGUISH_MAGNATAUR          = 12933,
      QUEST_AMPHITHEATER_ANGUISH_FROM_BEYOND        = 12934,
@@ -21,7 +21,7 @@ index 4cea6d8..96e874b 100644
      NPC_ORINOKO_TUSKBREAKER                       = 30020,
      NPC_KORRAK_BLOODRAGER                         = 30023,
      NPC_YGGDRAS                                   = 30014,
-@@ -399,6 +401,10 @@ public:
+@@ -398,6 +400,10 @@ public:
                              uiTimer = 2000;
                              uiPhase = 12;
                              break;
@@ -32,7 +32,7 @@ index 4cea6d8..96e874b 100644
                     }
                          break;
                  }
-@@ -521,6 +527,12 @@ public:
+@@ -520,6 +526,12 @@ public:
                                  creature->AI()->SetData(1, uiBossRandom);
                              uiPhase = 0;
                              break;
@@ -45,7 +45,7 @@ index 4cea6d8..96e874b 100644
                      }
                  }else uiTimer -= uiDiff;
              }
-@@ -547,6 +559,9 @@ public:
+@@ -546,6 +558,9 @@ public:
              case QUEST_AMPHITHEATER_ANGUISH_FROM_BEYOND:
                  creature->AI()->SetData(1, quest->GetQuestId());
                  break;

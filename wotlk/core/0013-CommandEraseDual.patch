@@ -1,6 +1,6 @@
-From c58a4a54e58bf81ad871dae651b3074bb1b72e05 Mon Sep 17 00:00:00 2001
+From a9482a3ff632c90a02e11821d95da04721ce1586 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:40:21 +0100
+Date: Tue, 27 Mar 2012 02:53:12 +0200
 Subject: [PATCH 13/27] CommandEraseDual
 
 ---
@@ -10,7 +10,7 @@ Subject: [PATCH 13/27] CommandEraseDual
  3 files changed, 25 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/game/Chat/Chat.cpp b/src/server/game/Chat/Chat.cpp
-index a6596de..6f87e9b 100755
+index 9992721..867a82b 100755
 --- a/src/server/game/Chat/Chat.cpp
 +++ b/src/server/game/Chat/Chat.cpp
 @@ -368,6 +368,7 @@ ChatCommand* ChatHandler::getCommandTable()
@@ -22,7 +22,7 @@ index a6596de..6f87e9b 100755
          { "recall",         SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleRecallCommand>,              "", NULL },
          { "save",           SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleSaveCommand>,                "", NULL },
 diff --git a/src/server/game/Chat/Chat.h b/src/server/game/Chat/Chat.h
-index 2311f4b..330d6ce 100755
+index 0a39eb4..414e70f 100755
 --- a/src/server/game/Chat/Chat.h
 +++ b/src/server/game/Chat/Chat.h
 @@ -275,6 +275,7 @@ class ChatHandler
@@ -34,10 +34,10 @@ index 2311f4b..330d6ce 100755
          bool HandleDieCommand(const char* args);
          bool HandleDamageCommand(const char *args);
 diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
-index ebc1b95..be5ae20 100755
+index 3115c39..555d09a 100755
 --- a/src/server/game/Chat/Commands/Level3.cpp
 +++ b/src/server/game/Chat/Commands/Level3.cpp
-@@ -174,6 +174,29 @@ bool ChatHandler::HandleUnLearnCommand(const char *args)
+@@ -173,6 +173,29 @@ bool ChatHandler::HandleUnLearnCommand(const char *args)
      return true;
  }
  

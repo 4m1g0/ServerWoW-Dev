@@ -1,6 +1,6 @@
-From 6d18a1a4f6293cedf879c5c01030bf38aa33e09b Mon Sep 17 00:00:00 2001
+From 98441b0bb766e41b99e46c8fede876fa08c1554b Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 5 Mar 2012 20:40:21 +0100
+Date: Tue, 27 Mar 2012 02:55:00 +0200
 Subject: [PATCH 17/27] CrashFix-in-Map
 
 ---
@@ -8,10 +8,10 @@ Subject: [PATCH 17/27] CrashFix-in-Map
  1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/src/server/game/Maps/Map.cpp b/src/server/game/Maps/Map.cpp
-index 00b52bf..6e3afa7 100755
+index 3be2479..123b64e 100755
 --- a/src/server/game/Maps/Map.cpp
 +++ b/src/server/game/Maps/Map.cpp
-@@ -2222,7 +2222,7 @@ bool InstanceMap::CanEnter(Player* player)
+@@ -2312,7 +2312,7 @@ bool InstanceMap::CanEnter(Player* player)
      if (player->GetMapRef().getTarget() == this)
      {
          sLog->outError("InstanceMap::CanEnter - player %s(%u) already in map %d, %d, %d!", player->GetName(), player->GetGUIDLow(), GetId(), GetInstanceId(), GetSpawnMode());
