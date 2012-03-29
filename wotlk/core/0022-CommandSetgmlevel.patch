@@ -1,6 +1,6 @@
-From b03423487b15b03b9eacc4b0d086e535ad7128c1 Mon Sep 17 00:00:00 2001
+From 6923469bec577f5ee398993284ce60a8b6b1c1e2 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 27 Mar 2012 03:05:12 +0200
+Date: Thu, 29 Mar 2012 06:46:46 +0200
 Subject: [PATCH 22/27] CommandSetgmlevel
 
 ---
@@ -8,7 +8,7 @@ Subject: [PATCH 22/27] CommandSetgmlevel
  1 files changed, 10 insertions(+), 38 deletions(-)
 
 diff --git a/src/server/scripts/Commands/cs_account.cpp b/src/server/scripts/Commands/cs_account.cpp
-index a7e4af2..e306ac1 100644
+index a7e4af2..73183ae 100644
 --- a/src/server/scripts/Commands/cs_account.cpp
 +++ b/src/server/scripts/Commands/cs_account.cpp
 @@ -413,10 +413,9 @@ public:

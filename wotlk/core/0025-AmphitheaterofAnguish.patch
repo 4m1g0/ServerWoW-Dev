@@ -1,6 +1,6 @@
-From 62912de0606a2d53ef1b45dd5c3e28a2da0c316c Mon Sep 17 00:00:00 2001
+From 2ee7d82b3661ba1adb0aececb29c972b58589396 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 27 Mar 2012 03:05:12 +0200
+Date: Thu, 29 Mar 2012 06:46:46 +0200
 Subject: [PATCH 25/27] AmphitheaterofAnguish
 
 ---
@@ -8,7 +8,7 @@ Subject: [PATCH 25/27] AmphitheaterofAnguish
  1 files changed, 15 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/scripts/Northrend/zuldrak.cpp b/src/server/scripts/Northrend/zuldrak.cpp
-index 33d295e..c69a3fc 100644
+index f0e8ce9..86382e5 100644
 --- a/src/server/scripts/Northrend/zuldrak.cpp
 +++ b/src/server/scripts/Northrend/zuldrak.cpp
 @@ -247,7 +247,9 @@ enum eGurgthock

@@ -1,6 +1,6 @@
-From 57602dc8f799f5817adcc85c0bd5ba0dae2388ed Mon Sep 17 00:00:00 2001
+From 2e0ec934ec93f165cd023bd3df608a83ab7d4c0d Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 27 Mar 2012 02:46:35 +0200
+Date: Thu, 29 Mar 2012 06:46:43 +0200
 Subject: [PATCH 02/27] ExternalEmail
 
 ---
@@ -117,10 +117,10 @@ index 0fce0a3..3b17dd3 100755
          void SendAuctionHello(uint64 guid, Creature* unit);
          void SendAuctionCommandResult(uint32 auctionId, uint32 Action, uint32 ErrorCode, uint32 bidError = 0);
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 99a04dd..f230f00 100755
+index a842c28..5e45644 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -881,6 +881,9 @@ void World::LoadConfigSettings(bool reload)
+@@ -878,6 +878,9 @@ void World::LoadConfigSettings(bool reload)
  
      m_int_configs[CONFIG_MAIL_DELIVERY_DELAY] = ConfigMgr::GetIntDefault("MailDeliveryDelay", HOUR);
  
@@ -130,7 +130,7 @@ index 99a04dd..f230f00 100755
      m_int_configs[CONFIG_UPTIME_UPDATE] = ConfigMgr::GetIntDefault("UpdateUptimeInterval", 10);
      if (int32(m_int_configs[CONFIG_UPTIME_UPDATE]) <= 0)
      {
-@@ -1698,6 +1701,8 @@ void World::SetInitialWorldSettings()
+@@ -1684,6 +1687,8 @@ void World::SetInitialWorldSettings()
  
      m_timers[WUPDATE_PINGDB].SetInterval(getIntConfig(CONFIG_DB_PING_INTERVAL)*MINUTE*IN_MILLISECONDS);    // Mysql ping time in minutes
  
@@ -139,7 +139,7 @@ index 99a04dd..f230f00 100755
      //to set mailtimer to return mails every day between 4 and 5 am
      //mailtimer is increased when updating auctions
      //one second is 1000 -(tested on win system)
-@@ -1940,6 +1945,16 @@ void World::Update(uint32 diff)
+@@ -1909,6 +1914,16 @@ void World::Update(uint32 diff)
          m_NextDailyQuestReset += DAY;
      }
  
@@ -157,10 +157,10 @@ index 99a04dd..f230f00 100755
          ResetWeeklyQuests();
  
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index cab9c19..d54a77e 100755
+index 95e9fbd..2cce99d 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
-@@ -77,6 +77,7 @@ enum WorldTimers
+@@ -78,6 +78,7 @@ enum WorldTimers
      WUPDATE_MAILBOXQUEUE,
      WUPDATE_DELETECHARS,
      WUPDATE_PINGDB,
@@ -168,7 +168,7 @@ index cab9c19..d54a77e 100755
      WUPDATE_COUNT
  };
  
-@@ -234,6 +235,8 @@ enum WorldIntConfigs
+@@ -235,6 +236,8 @@ enum WorldIntConfigs
      CONFIG_START_GM_LEVEL,
      CONFIG_GROUP_VISIBILITY,
      CONFIG_MAIL_DELIVERY_DELAY,
@@ -178,7 +178,7 @@ index cab9c19..d54a77e 100755
      CONFIG_SKILL_CHANCE_ORANGE,
      CONFIG_SKILL_CHANCE_YELLOW,
 diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
-index ab4a8a8..40fbfcd 100644
+index 5d83710..d6ef204 100644
 --- a/src/server/worldserver/worldserver.conf.dist
 +++ b/src/server/worldserver/worldserver.conf.dist
 @@ -1325,6 +1325,20 @@ MaxRecruitAFriendBonusDistance = 100

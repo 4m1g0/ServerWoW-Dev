@@ -1,6 +1,6 @@
-From a9482a3ff632c90a02e11821d95da04721ce1586 Mon Sep 17 00:00:00 2001
+From 10bc429024bdc4850170a6772a828f1a311fe8ca Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 27 Mar 2012 02:53:12 +0200
+Date: Thu, 29 Mar 2012 06:46:45 +0200
 Subject: [PATCH 13/27] CommandEraseDual
 
 ---
@@ -34,7 +34,7 @@ index 0a39eb4..414e70f 100755
          bool HandleDieCommand(const char* args);
          bool HandleDamageCommand(const char *args);
 diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
-index 3115c39..555d09a 100755
+index 6a4ce33..7a5052a 100755
 --- a/src/server/game/Chat/Commands/Level3.cpp
 +++ b/src/server/game/Chat/Commands/Level3.cpp
 @@ -173,6 +173,29 @@ bool ChatHandler::HandleUnLearnCommand(const char *args)

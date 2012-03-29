@@ -1,6 +1,6 @@
-From 5244922d98934357eb160bb570406a0dbf281cd9 Mon Sep 17 00:00:00 2001
+From 1d15714b8a6b1971a20b397bdf7998b4c240104d Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 27 Mar 2012 02:58:15 +0200
+Date: Thu, 29 Mar 2012 06:46:45 +0200
 Subject: [PATCH 20/27] Armory
 
 ---
@@ -12,7 +12,7 @@ Subject: [PATCH 20/27] Armory
  5 files changed, 101 insertions(+), 0 deletions(-)
 
 diff --git a/src/server/game/Achievements/AchievementMgr.cpp b/src/server/game/Achievements/AchievementMgr.cpp
-index 7b2e157..f1ba501 100755
+index 36748dd..3a3b8e2 100755
 --- a/src/server/game/Achievements/AchievementMgr.cpp
 +++ b/src/server/game/Achievements/AchievementMgr.cpp
 @@ -2039,6 +2039,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
@@ -42,10 +42,10 @@ index 4a1d5d5..4ef3906 100755
  }
  
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index de66362..d425ae4 100755
+index 7d2c62f..642fdff 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
-@@ -5059,6 +5059,10 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
+@@ -5063,6 +5063,10 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
              stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SKILLS);
              stmt->setUInt32(0, guid);
              trans->Append(stmt);
@@ -56,7 +56,7 @@ index de66362..d425ae4 100755
  
              CharacterDatabase.CommitTransaction(trans);
              break;
-@@ -16793,6 +16797,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
+@@ -16797,6 +16801,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
  
          return false;
      }
@@ -65,7 +65,7 @@ index de66362..d425ae4 100755
  
      // overwrite possible wrong/corrupted guid
      SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
-@@ -18916,6 +18922,30 @@ void Player::SaveToDB(bool create /*=false*/)
+@@ -18914,6 +18920,30 @@ void Player::SaveToDB(bool create /*=false*/)
  
      CharacterDatabase.CommitTransaction(trans);
  
@@ -96,7 +96,7 @@ index de66362..d425ae4 100755
      // save pet (hunter pet level and experience and all type pets health/mana).
      if (Pet* pet = GetPet())
          pet->SavePetToDB(PET_SAVE_AS_CURRENT);
-@@ -25548,3 +25578,42 @@ void Player::SendMovementSetCanTransitionBetweenSwimAndFly(bool apply)
+@@ -25545,3 +25575,42 @@ void Player::SendMovementSetCanTransitionBetweenSwimAndFly(bool apply)
      data << uint32(0);          //! movement counter
      SendDirectMessage(&data);
  }
@@ -140,7 +140,7 @@ index de66362..d425ae4 100755
 +    m_wowarmory_feeds.push_back(feed);
 +}
 diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
-index ac50bbd..acf7bb7 100755
+index b39e2b8..cce80cb 100755
 --- a/src/server/game/Entities/Player/Player.h
 +++ b/src/server/game/Entities/Player/Player.h
 @@ -1057,6 +1057,21 @@ private:
@@ -188,10 +188,10 @@ index ac50bbd..acf7bb7 100755
          InstanceTimeMap _instanceResetTimes;
          uint32 _pendingBindId;
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-index ce9cec4..636bfde 100755
+index 30be1a8..7b7c8df 100755
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
-@@ -15561,6 +15561,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
+@@ -15568,6 +15568,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
                  {
                      if (creature->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
                          ((InstanceMap*)instanceMap)->PermBindAllPlayers(creditedPlayer);

@@ -1,6 +1,6 @@
-From 2a3db072d8661dbcf4ecb5ecd78f6d030b557f08 Mon Sep 17 00:00:00 2001
+From d635bca701cb6645b1c2a08dc1834b51fbb0d32a Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 27 Mar 2012 02:55:00 +0200
+Date: Thu, 29 Mar 2012 06:46:45 +0200
 Subject: [PATCH 19/27] AntiHack_LOS
 
 ---
@@ -35,10 +35,10 @@ index 6a8ae07..66c7ab9 100755
              // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
              if (!isAlive())
 diff --git a/src/server/game/Entities/Creature/Creature.h b/src/server/game/Entities/Creature/Creature.h
-index a866404..944bc28 100755
+index f100d39..00b7262 100755
 --- a/src/server/game/Entities/Creature/Creature.h
 +++ b/src/server/game/Entities/Creature/Creature.h
-@@ -729,6 +729,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
+@@ -731,6 +731,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
          /// Timers
          time_t m_corpseRemoveTime;                          // (msecs)timer for death or corpse disappearance
          time_t m_respawnTime;                               // (secs) time of next respawn

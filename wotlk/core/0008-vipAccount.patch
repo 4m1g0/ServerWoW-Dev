@@ -1,6 +1,6 @@
-From 1b29ce4b35f37e94ffdaec8f5661df8eca74228b Mon Sep 17 00:00:00 2001
+From a1c59684c07c25190c17222aef165854c7cfd1e3 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 27 Mar 2012 02:53:12 +0200
+Date: Thu, 29 Mar 2012 06:46:44 +0200
 Subject: [PATCH 08/27] vipAccount
 
 ---
@@ -90,10 +90,10 @@ index cf9ec7d..75ea3bb 100755
      m_Crypt.Init(&k);
  
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 2782506..d1c0ace 100755
+index f8d7a38..cdeae38 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -263,7 +263,7 @@ World::AddSession_(WorldSession* s)
+@@ -263,7 +263,7 @@ void World::AddSession_(WorldSession* s)
      if (decrease_session)
          --Sessions;
  

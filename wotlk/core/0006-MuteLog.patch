@@ -1,6 +1,6 @@
-From c03a4e12cd9b9976e4943bbb0e0b55eca0bc6318 Mon Sep 17 00:00:00 2001
+From 509cc0a3f755cd8f2bf0b8280a0a5f34af85b582 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 27 Mar 2012 02:47:56 +0200
+Date: Thu, 29 Mar 2012 06:46:44 +0200
 Subject: [PATCH 06/27] MuteLog
 
 ---
@@ -80,7 +80,7 @@ index 2588a57..f9b3e2c 100755
          ChatHandler(target).PSendSysMessage(LANG_YOUR_CHAT_ENABLED);
  
 diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
-index d5dd233..37cb0a6 100755
+index eca5a86..6f604db 100755
 --- a/src/server/game/Chat/Commands/Level3.cpp
 +++ b/src/server/game/Chat/Commands/Level3.cpp
 @@ -3160,26 +3160,44 @@ bool ChatHandler::HandleBanInfoCharacterCommand(const char *args)
@@ -159,10 +159,10 @@ index 547f167..a4824d8 100755
      LANG_BANINFO_NEVER                  = 420,
      LANG_BANINFO_YES                    = 421,
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index ae4cbed..8d249b6 100755
+index 8651995..86aeafa 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -2355,10 +2355,11 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
+@@ -2324,10 +2324,11 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
  
          if (mode != BAN_IP)
          {
@@ -175,7 +175,7 @@ index ae4cbed..8d249b6 100755
              // No SQL injection with prepared statements
              stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT_BANNED);
              stmt->setUInt32(0, account);
-@@ -2478,6 +2479,33 @@ bool World::RemoveBanCharacter(std::string name)
+@@ -2447,6 +2448,33 @@ bool World::RemoveBanCharacter(std::string name)
      return true;
  }
  
@@ -210,10 +210,10 @@ index ae4cbed..8d249b6 100755
  void World::_UpdateGameTime()
  {
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index d54a77e..e41f2d9 100755
+index 2cce99d..018ea57 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
-@@ -716,6 +716,8 @@ class World
+@@ -717,6 +717,8 @@ class World
          bool RemoveBanAccount(BanMode mode, std::string nameOrIP);
          BanReturn BanCharacter(std::string name, std::string duration, std::string reason, std::string author);
          bool RemoveBanCharacter(std::string name);
