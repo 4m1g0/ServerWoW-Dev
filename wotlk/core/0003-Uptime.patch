@@ -35,14 +35,14 @@ index f230f00..ae4cbed 100755
  
          PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_UPTIME_PLAYERS);
  
-         stmt->setUInt64(0, uint64(tmpDiff));
+         stmt->setUInt32(0, tmpDiff);
 -        stmt->setUInt16(1, uint16(maxOnlinePlayers));
 -        stmt->setUInt32(2, realmID);
--        stmt->setUInt64(3, uint64(m_startTime));
+-        stmt->setUInt32(3, uint32(m_startTime));
 +        stmt->setUInt16(1, uint16(OnlinePlayers));
 +        stmt->setUInt16(2, uint16(activeQueued));
 +        stmt->setUInt32(3, realmID);
-+        stmt->setUInt64(4, uint64(m_startTime));
++        stmt->setUInt32(4, uint32(m_startTime));
  
          LoginDatabase.Execute(stmt);
      }
