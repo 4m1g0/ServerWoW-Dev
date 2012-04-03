@@ -1,5 +1,8 @@
 delete from disables where `comment` like '[LCV]%';
 
+-- Enable Arena de Cloacas de Dalaran
+DELETE FROM disables WHERE entry = 10 AND sourceType = 3;
+
 -- Trial of champion 
 INSERT INTO disables (`sourceType`, `entry`, `flags`, `comment`) VALUES (2, 650, 3, '[LCV]Close: Trial of champion');
 
