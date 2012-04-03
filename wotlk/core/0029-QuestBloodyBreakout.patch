@@ -1,0 +1,54 @@
+From f60b464abf237d422c94940b081c1a05154dc88b Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Tue, 3 Apr 2012 04:16:06 +0200
+Subject: [PATCH] Fix koltira dks
+
+---
+ .../EasternKingdoms/ScarletEnclave/chapter2.cpp    |   10 +++-------
+ 1 files changed, 3 insertions(+), 7 deletions(-)
+
+diff --git a/src/server/scripts/EasternKingdoms/ScarletEnclave/chapter2.cpp b/src/server/scripts/EasternKingdoms/ScarletEnclave/chapter2.cpp
+index 1c17e6a..f8839b6 100644
+--- a/src/server/scripts/EasternKingdoms/ScarletEnclave/chapter2.cpp
++++ b/src/server/scripts/EasternKingdoms/ScarletEnclave/chapter2.cpp
+@@ -217,10 +217,7 @@ public:
+ 
+     struct npc_koltira_deathweaverAI : public npc_escortAI
+     {
+-        npc_koltira_deathweaverAI(Creature* creature) : npc_escortAI(creature)
+-        {
+-            me->SetReactState(REACT_DEFENSIVE);
+-        }
++        npc_koltira_deathweaverAI(Creature* creature) : npc_escortAI(creature) { }
+ 
+         uint32 m_uiWave;
+         uint32 m_uiWave_Timer;
+@@ -233,7 +230,6 @@ public:
+                 m_uiWave = 0;
+                 m_uiWave_Timer = 3000;
+                 m_uiValrothGUID = 0;
+-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                 me->LoadEquipment(0, true);
+                 me->RemoveAura(SPELL_ANTI_MAGIC_ZONE);
+             }
+@@ -245,7 +241,7 @@ public:
+             {
+                 case 0:
+                     DoScriptText(SAY_BREAKOUT1, me);
+-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
++                    me->SetReactState(REACT_DEFENSIVE);
+                     break;
+                 case 1:
+                     me->SetStandState(UNIT_STAND_STATE_KNEEL);
+@@ -269,7 +265,7 @@ public:
+                     me->Mount(MODEL_DEATH_KNIGHT_MOUNT);
+                     break;
+                 case 10:
+-                    me->Dismount();
++                    me->DisappearAndDie();
+                     break;
+             }
+         }
+-- 
+1.7.5.4
+
