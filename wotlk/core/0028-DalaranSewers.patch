@@ -1,0 +1,53 @@
+From 5b09273f3f6bb91307b2f0fc16467c414aa44809 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <zazu@server4.serverwow.co>
+Date: Mon, 2 Apr 2012 19:03:04 -0500
+Subject: [PATCH] dalaran sewers
+
+---
+ .../game/Battlegrounds/Zones/BattlegroundDS.cpp    |    3 ---
+ .../game/Battlegrounds/Zones/BattlegroundDS.h      |    8 ++++----
+ 3 files changed, 6 insertions(+), 8 deletions(-)
+
+diff --git a/src/server/game/Battlegrounds/Zones/BattlegroundDS.cpp b/src/server/game/Battlegrounds/Zones/BattlegroundDS.cpp
+index 8a11edf..dcb6e66 100644
+--- a/src/server/game/Battlegrounds/Zones/BattlegroundDS.cpp
++++ b/src/server/game/Battlegrounds/Zones/BattlegroundDS.cpp
+@@ -88,9 +88,6 @@ void BattlegroundDS::PostUpdateImpl(uint32 diff)
+         }
+         else if (getWaterFallStatus() == BG_DS_WATERFALL_STATUS_WARNING) // Active collision and perform knockback
+         {
+-            if (Creature* waterSpout = GetBgMap()->GetCreature(BgCreatures[BG_DS_NPC_WATERFALL_KNOCKBACK]))
+-                waterSpout->CastSpell(waterSpout, BG_DS_SPELL_WATER_SPOUT, true);
+-
+             if (GameObject* gob = GetBgMap()->GetGameObject(BgObjects[BG_DS_OBJECT_WATER_1]))
+                 gob->SetGoState(GO_STATE_READY);
+ 
+diff --git a/src/server/game/Battlegrounds/Zones/BattlegroundDS.h b/src/server/game/Battlegrounds/Zones/BattlegroundDS.h
+index 12ed91f..8df01e6 100755
+--- a/src/server/game/Battlegrounds/Zones/BattlegroundDS.h
++++ b/src/server/game/Battlegrounds/Zones/BattlegroundDS.h
+@@ -66,9 +66,9 @@ enum BattlegroundDSData
+ { // These values are NOT blizzlike... need the correct data!
+     BG_DS_WATERFALL_TIMER_MIN                    = 30000,
+     BG_DS_WATERFALL_TIMER_MAX                    = 60000,
+-    BG_DS_WATERFALL_WARNING_DURATION             = 7000,
+-    BG_DS_WATERFALL_DURATION                     = 10000,
+-    BG_DS_WATERFALL_KNOCKBACK_TIMER              = 500,
++    BG_DS_WATERFALL_WARNING_DURATION             = 2000,
++    BG_DS_WATERFALL_DURATION                     = 30000,
++    BG_DS_WATERFALL_KNOCKBACK_TIMER              = 1500,
+ 
+     BG_DS_PIPE_KNOCKBACK_FIRST_DELAY             = 5000,
+     BG_DS_PIPE_KNOCKBACK_DELAY                   = 3000,
+@@ -118,7 +118,7 @@ class BattlegroundDS : public Battleground
+         void setWaterFallStatus(uint8 status) { _waterfallStatus = status; };
+         uint32 getWaterFallTimer() { return _waterfallTimer; };
+         void setWaterFallTimer(uint32 timer) { _waterfallTimer = timer; };
+-        uint32 getWaterFallKnockbackTimer() { return _waterfallTimer; };
++        uint32 getWaterFallKnockbackTimer() { return _waterfallKnockbackTimer; };
+         void setWaterFallKnockbackTimer(uint32 timer) { _waterfallKnockbackTimer = timer; };
+         uint8 getPipeKnockBackCount() { return _pipeKnockBackCount; };
+         void setPipeKnockBackCount(uint8 count) { _pipeKnockBackCount = count; };
+-- 
+1.7.1
+
