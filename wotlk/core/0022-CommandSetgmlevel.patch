@@ -28,7 +28,7 @@ index a7e4af2..73183ae 100644
          // Check for invalid specified GM level.
          gm = (isAccountNameGiven) ? atoi(arg2) : atoi(arg1);
 -        if (gm > SEC_CONSOLE)
-+        if (gm >=  handler->GetSession()->GetSecurity() || gm < 0)
++        if (gm < 0)
          {
              handler->SendSysMessage(LANG_BAD_VALUE);
              handler->SetSentErrorMessage(true);
