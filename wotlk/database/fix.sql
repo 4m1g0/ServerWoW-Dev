@@ -63,3 +63,7 @@ UPDATE creature_template SET mechanic_immune_mask = 803160063 WHERE entry IN (34
 UPDATE creature_template SET mechanic_immune_mask = 668942335 WHERE entry IN (34497, 35350, 35351, 35352);
 UPDATE creature_template SET mechanic_immune_mask = 769605631 WHERE entry IN (34496, 35347, 35348, 35349);
 UPDATE creature_template SET mechanic_immune_mask = 650854235 WHERE entry IN (34564, 34566, 35615, 35616);
+
+-- Reducida la probabilidad de alterac en bg aleatoria.
+UPDATE battleground_template SET weight = 3;
+UPDATE battleground_template SET weight = 1 WHERE id = 1;
