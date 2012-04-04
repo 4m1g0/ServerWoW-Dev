@@ -5,16 +5,16 @@ Subject: [PATCH] HD 059. Quest: Seguimos destilando.
 
 Signed-off-by: Souler <soulerhyd@gmail.com>
 ---
- sql/updates/HD_059_world.sql                    |    2 +
+ sql/own/0011-world_SeguimosDestilando.sql       |    2 +
  src/server/scripts/Northrend/sholazar_basin.cpp |  213 +++++++++++++++++++++++
  2 files changed, 215 insertions(+), 0 deletions(-)
  create mode 100644 sql/updates/HD_059_world.sql
 
-diff --git a/sql/updates/HD_059_world.sql b/sql/updates/HD_059_world.sql
+diff --git a/sql/own/0011-world_SeguimosDestilando.sql b/sql/own/0011-world_SeguimosDestilando.sql
 new file mode 100644
 index 0000000..e0b48b9
 --- /dev/null
-+++ b/sql/updates/HD_059_world.sql
++++ b/sql/own/0011-world_SeguimosDestilando.sql
 @@ -0,0 +1,2 @@
 +UPDATE gameobject_template SET scriptName =  'go_still_tools' WHERE entry IN (190639, 190638, 190637, 190636, 190635);
 +UPDATE creature_template SET ScriptName = 'npc_tipsy_gossip' WHERE entry = 28566;
