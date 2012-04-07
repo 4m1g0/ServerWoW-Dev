@@ -127,3 +127,25 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,4,0,0,0,100,0,3000,4000,8000,10000,11,32015,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,'[LCV] Cast Knockdown'),
 (@ENTRY,@SOURCETYPE,5,0,0,0,100,0,15000,20000,30000,34000,11,12169,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,'[LCV] Cast Shield Block'),
 (@ENTRY,@SOURCETYPE,6,0,0,0,100,0,1000,2000,18000,20000,11,19131,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,'[LCV] Cast Shield Charge');
+
+
+-- Quest Protocolo de emergencia: sección 8.2, párrafo D   ID: 11796
+SET @NPC1 := 25845;
+SET @NPC2 := 25846;
+SET @NPC3 := 25847;
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN (@NPC1, @NPC2, @NPC3);
+UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry` IN (@NPC1, @NPC2, @NPC3);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC1, @NPC2, @NPC3) AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`)
+VALUES
+(@NPC1, 0, 0, 1, 8, 0, 100, 0, 46171, 0, 0, 0, 33, @NPC1, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, '[LCV] Kill credit NPC 25845'),
+(@NPC2, 0, 0, 1, 8, 0, 100, 0, 46171, 0, 0, 0, 33, @NPC2, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, '[LCV] Kill credit NPC 25846'),
+(@NPC3, 0, 0, 1, 8, 0, 100, 0, 46171, 0, 0, 0, 33, @NPC3, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, '[LCV] Kill credit NPC 25847');
+
+DELETE FROM `conditions` WHERE `SourceEntry`=46171;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ErrorTextId`,`ScriptName`,`Comment`)
+VALUES
+(13,1,46171,0,31,0,3,@NPC1,0,0,0, '','[LCV] Fyx Target 1 - Spell 46171'),
+(13,1,46171,1,31,0,3,@NPC2,0,0,0, '','[LCV] Fyx Target 2 - Spell 46171'),
+(13,1,46171,2,31,0,3,@NPC3,0,0,0, '','[LCV] Fyx Target 3 - Spell 46171');
