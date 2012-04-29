@@ -29,6 +29,7 @@ INSERT INTO disables (`sourceType`, `entry`, `flags`, `comment`) VALUES (0, 126,
 -- Spell Eyes of the Beast 
 INSERT INTO disables (`sourceType`, `entry`, `flags`, `comment`) VALUES (0, 1002, 1, '[LCV]Disable: Eyes of the Beast');
 
+-- CREO QUE ESTOS YA NO SON NECESARIOS
 -- Spells: Mithril Mechanical Dragonling and Winterfin First Responder (summon lots of npcs)
 INSERT IGNORE INTO disables (`sourceType`, `entry`, `flags`, `comment`) VALUES (0, 12624, 1, '[LCV]Disable: dragonizo mecánico de mitril');
 INSERT IGNORE INTO disables (`sourceType`, `entry`, `flags`, `comment`) VALUES (0, 23050, 1, '[LCV]Disable: dragonizo mecánico de mitril');
@@ -52,6 +53,9 @@ INSERT IGNORE INTO disables (`sourceType`, `entry`, `flags`, `comment`) VALUES (
 INSERT INTO `disables` VALUES
 (0, 23397, 3, '', '', '[LCV]CURRENTLY A SOURCE OF BUG ABUSE - Allows Warriors to stack Berserker Stance passive auras indefinitely and for use in all stances'),
 (0, 23398, 3, '', '', '[LCV]CURRENTLY A SOURCE OF BUG ABUSE - Allows Druids to stack Cat Form passive auras indefinitely and for use in all stances');
+
+-- Usan el papel de regalo para dupear items, eliminemos esta posibilidad.
+INSERT IGNORE INTO disables (`sourceType`, `entry`, `flags`, `comment`) VALUES (0, 68417, 1, '[LCV]Disable: Wrapping Paper - Dummy Spell');
 
 
 
