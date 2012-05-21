@@ -1,10 +1,10 @@
-From 1bbaa86da0d041966c3beb92483c370532871ce1 Mon Sep 17 00:00:00 2001
+From 159c02a30756cefd883d2443212c7ef2d04bf97d Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:45 +0200
-Subject: [PATCH 15/27] CommandModiy
+Date: Mon, 21 May 2012 22:20:42 +0200
+Subject: [PATCH 15/25] CommandModiy
 
 ---
- src/server/scripts/Commands/cs_gm.cpp     |    4 +-
+ src/server/scripts/Commands/cs_gm.cpp     |    4 +--
  src/server/scripts/Commands/cs_modify.cpp |   50 +++--------------------------
  2 files changed, 7 insertions(+), 47 deletions(-)
 
@@ -25,10 +25,10 @@ index d449b36..dc53cf0 100644
          WorldPacket data(12);
          if (strncmp(args, "on", 3) == 0)
 diff --git a/src/server/scripts/Commands/cs_modify.cpp b/src/server/scripts/Commands/cs_modify.cpp
-index 32ee96d..8674aef 100644
+index b6feccc..2e9b52a 100644
 --- a/src/server/scripts/Commands/cs_modify.cpp
 +++ b/src/server/scripts/Commands/cs_modify.cpp
-@@ -474,16 +474,8 @@ public:
+@@ -481,16 +481,8 @@ public:
              return false;
          }
  
@@ -46,7 +46,7 @@ index 32ee96d..8674aef 100644
              return false;
  
          std::string targetNameLink = handler->GetNameLink(target);
-@@ -522,16 +514,8 @@ public:
+@@ -529,16 +521,8 @@ public:
              return false;
          }
  
@@ -64,7 +64,7 @@ index 32ee96d..8674aef 100644
              return false;
  
          std::string targetNameLink = handler->GetNameLink(target);
-@@ -567,16 +551,8 @@ public:
+@@ -574,16 +558,8 @@ public:
              return false;
          }
  
@@ -82,7 +82,7 @@ index 32ee96d..8674aef 100644
              return false;
  
          std::string targetNameLink = handler->GetNameLink(target);
-@@ -612,16 +588,8 @@ public:
+@@ -619,16 +595,8 @@ public:
              return false;
          }
  
@@ -100,7 +100,7 @@ index 32ee96d..8674aef 100644
              return false;
  
          std::string targetNameLink = handler->GetNameLink(target);
-@@ -657,16 +625,8 @@ public:
+@@ -664,16 +632,8 @@ public:
              return false;
          }
  
@@ -119,5 +119,5 @@ index 32ee96d..8674aef 100644
  
          handler->PSendSysMessage(LANG_YOU_CHANGE_FLY_SPEED, FSpeed, handler->GetNameLink(target).c_str());
 -- 
-1.7.5.4
+1.7.9.5
 

@@ -1,14 +1,13 @@
-From 1e8e711dcdf30c27b73434bc308bedc26c9ba294 Mon Sep 17 00:00:00 2001
-From: Souler <soulerhyd@gmail.com>
-Date: Fri, 8 Jul 2011 08:11:28 +0200
-Subject: [PATCH] HD 059. Quest: Seguimos destilando.
+From 8347838122c8817f38d801cb82671786ac7ca228 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Mon, 21 May 2012 22:24:32 +0200
+Subject: [PATCH 25/25] QuestSeguimosDestilando
 
-Signed-off-by: Souler <soulerhyd@gmail.com>
 ---
  sql/own/0011-world_SeguimosDestilando.sql       |    2 +
  src/server/scripts/Northrend/sholazar_basin.cpp |  213 +++++++++++++++++++++++
- 2 files changed, 215 insertions(+), 0 deletions(-)
- create mode 100644 sql/updates/HD_059_world.sql
+ 2 files changed, 215 insertions(+)
+ create mode 100644 sql/own/0011-world_SeguimosDestilando.sql
 
 diff --git a/sql/own/0011-world_SeguimosDestilando.sql b/sql/own/0011-world_SeguimosDestilando.sql
 new file mode 100644
@@ -19,10 +18,10 @@ index 0000000..e0b48b9
 +UPDATE gameobject_template SET scriptName =  'go_still_tools' WHERE entry IN (190639, 190638, 190637, 190636, 190635);
 +UPDATE creature_template SET ScriptName = 'npc_tipsy_gossip' WHERE entry = 28566;
 diff --git a/src/server/scripts/Northrend/sholazar_basin.cpp b/src/server/scripts/Northrend/sholazar_basin.cpp
-index c0f4d7e..92db756 100644
+index 93d0182..f89a219 100644
 --- a/src/server/scripts/Northrend/sholazar_basin.cpp
 +++ b/src/server/scripts/Northrend/sholazar_basin.cpp
-@@ -851,6 +851,217 @@ public:
+@@ -746,6 +746,217 @@ public:
      }
  };
  
@@ -240,13 +239,13 @@ index c0f4d7e..92db756 100644
  void AddSC_sholazar_basin()
  {
      new npc_injured_rainspeaker_oracle();
-@@ -863,4 +1074,6 @@ void AddSC_sholazar_basin()
-     new npc_captive_croco_gossip();
-     new npc_captive_croco_vehicle();
-     new npc_harkek_gossip();
+@@ -756,4 +967,6 @@ void AddSC_sholazar_basin()
+     new npc_adventurous_dwarf();
+     new npc_jungle_punch_target();
+     new spell_q12620_the_lifewarden_wrath();
 +    new go_still_tools();
 +    new npc_tipsy_gossip();
  }
 -- 
-1.7.5.4
+1.7.9.5
 

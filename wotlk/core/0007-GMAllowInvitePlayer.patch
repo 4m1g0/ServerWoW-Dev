@@ -1,7 +1,7 @@
-From 2d74aded69cf85d0c7768a8afd514052a1f51518 Mon Sep 17 00:00:00 2001
+From 73025816a7962e1f92b5097f461b9e776198919d Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:44 +0200
-Subject: [PATCH 07/27] GMAllowInvitePlayer
+Date: Mon, 21 May 2012 22:20:41 +0200
+Subject: [PATCH 07/25] GMAllowInvitePlayer
 
 ---
  src/server/game/Chat/Commands/Level1.cpp     |    6 +++---
@@ -12,7 +12,7 @@ Subject: [PATCH 07/27] GMAllowInvitePlayer
  5 files changed, 22 insertions(+), 4 deletions(-)
 
 diff --git a/src/server/game/Chat/Commands/Level1.cpp b/src/server/game/Chat/Commands/Level1.cpp
-index aebc28d..e4dbbb9 100755
+index 17cf506..978b55d 100755
 --- a/src/server/game/Chat/Commands/Level1.cpp
 +++ b/src/server/game/Chat/Commands/Level1.cpp
 @@ -199,7 +199,7 @@ bool ChatHandler::HandleSummonCommand(const char* args)
@@ -60,7 +60,7 @@ index de8dc2b..d152e51 100755
  
      // can't group with
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 86aeafa..f8d7a38 100755
+index f4b0851..ff6d994 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -870,6 +870,7 @@ void World::LoadConfigSettings(bool reload)
@@ -103,5 +103,5 @@ index d6ef204..4dbcc0b 100644
  #        Description: Allow players to add GM characters to their friends list.
  #        Default:     0 - (Disabled)
 -- 
-1.7.5.4
+1.7.9.5
 

@@ -1,18 +1,18 @@
-From d635bca701cb6645b1c2a08dc1834b51fbb0d32a Mon Sep 17 00:00:00 2001
+From c7337107791c6a0ac802b5147f02c5358d3126d7 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:45 +0200
-Subject: [PATCH 19/27] AntiHack_LOS
+Date: Mon, 21 May 2012 22:20:42 +0200
+Subject: [PATCH 18/25] AntiHack_LOS
 
 ---
  src/server/game/Entities/Creature/Creature.cpp |   15 +++++++++++++++
  src/server/game/Entities/Creature/Creature.h   |    1 +
- 2 files changed, 16 insertions(+), 0 deletions(-)
+ 2 files changed, 16 insertions(+)
 
 diff --git a/src/server/game/Entities/Creature/Creature.cpp b/src/server/game/Entities/Creature/Creature.cpp
-index 6a8ae07..66c7ab9 100755
+index d120713..3933bee 100755
 --- a/src/server/game/Entities/Creature/Creature.cpp
 +++ b/src/server/game/Entities/Creature/Creature.cpp
-@@ -551,6 +551,21 @@ void Creature::Update(uint32 diff)
+@@ -552,6 +552,21 @@ void Creature::Update(uint32 diff)
                  m_AI_locked = false;
              }
  
@@ -35,10 +35,10 @@ index 6a8ae07..66c7ab9 100755
              // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
              if (!isAlive())
 diff --git a/src/server/game/Entities/Creature/Creature.h b/src/server/game/Entities/Creature/Creature.h
-index f100d39..00b7262 100755
+index f6021a7..a0bfac2 100755
 --- a/src/server/game/Entities/Creature/Creature.h
 +++ b/src/server/game/Entities/Creature/Creature.h
-@@ -731,6 +731,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
+@@ -729,6 +729,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
          /// Timers
          time_t m_corpseRemoveTime;                          // (msecs)timer for death or corpse disappearance
          time_t m_respawnTime;                               // (secs) time of next respawn
@@ -47,5 +47,5 @@ index f100d39..00b7262 100755
          uint32 m_corpseDelay;                               // (secs) delay between death and corpse disappearance
          float m_respawnradius;
 -- 
-1.7.5.4
+1.7.9.5
 

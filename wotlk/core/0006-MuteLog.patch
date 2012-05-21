@@ -1,19 +1,19 @@
-From 509cc0a3f755cd8f2bf0b8280a0a5f34af85b582 Mon Sep 17 00:00:00 2001
+From 8086f91620f8e67ace20dd14012501a505fd25e9 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:44 +0200
-Subject: [PATCH 06/27] MuteLog
+Date: Mon, 21 May 2012 22:20:41 +0200
+Subject: [PATCH 06/25] MuteLog
 
 ---
- sql/own/auth_mutehistory.sql                       |   11 ++++
- sql/own/world_mutehistory.sql                      |    3 +
+ sql/own/auth_mutehistory.sql                       |   11 +++++
+ sql/own/world_mutehistory.sql                      |    3 ++
  src/server/authserver/Server/AuthSocket.cpp        |    2 +
  src/server/game/Chat/Commands/Level2.cpp           |    4 ++
- src/server/game/Chat/Commands/Level3.cpp           |   50 +++++++++++++------
- src/server/game/Miscellaneous/Language.h           |    3 +
+ src/server/game/Chat/Commands/Level3.cpp           |   50 +++++++++++++-------
+ src/server/game/Miscellaneous/Language.h           |    3 ++
  src/server/game/World/World.cpp                    |   30 +++++++++++-
  src/server/game/World/World.h                      |    2 +
- .../Database/Implementation/LoginDatabase.cpp      |    3 +
- .../shared/Database/Implementation/LoginDatabase.h |    3 +
+ .../Database/Implementation/LoginDatabase.cpp      |    3 ++
+ .../shared/Database/Implementation/LoginDatabase.h |    3 ++
  10 files changed, 94 insertions(+), 17 deletions(-)
  create mode 100644 sql/own/auth_mutehistory.sql
  create mode 100644 sql/own/world_mutehistory.sql
@@ -58,7 +58,7 @@ index 15555e4..56d777c 100755
                  // If the account is banned, reject the logon attempt
                  stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BANNED);
 diff --git a/src/server/game/Chat/Commands/Level2.cpp b/src/server/game/Chat/Commands/Level2.cpp
-index 2588a57..f9b3e2c 100755
+index e8eec0f..365876b 100755
 --- a/src/server/game/Chat/Commands/Level2.cpp
 +++ b/src/server/game/Chat/Commands/Level2.cpp
 @@ -77,6 +77,8 @@ bool ChatHandler::HandleMuteCommand(const char* args)
@@ -80,10 +80,10 @@ index 2588a57..f9b3e2c 100755
          ChatHandler(target).PSendSysMessage(LANG_YOUR_CHAT_ENABLED);
  
 diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
-index eca5a86..6f604db 100755
+index 30562bb..66e22b5 100755
 --- a/src/server/game/Chat/Commands/Level3.cpp
 +++ b/src/server/game/Chat/Commands/Level3.cpp
-@@ -3160,26 +3160,44 @@ bool ChatHandler::HandleBanInfoCharacterCommand(const char *args)
+@@ -3140,26 +3140,44 @@ bool ChatHandler::HandleBanInfoCharacterCommand(const char *args)
  bool ChatHandler::HandleBanInfoHelper(uint32 accountid, char const* accountname)
  {
      QueryResult result = LoginDatabase.PQuery("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '%u' ORDER BY bandate ASC", accountid);
@@ -145,7 +145,7 @@ index eca5a86..6f604db 100755
      return true;
  }
 diff --git a/src/server/game/Miscellaneous/Language.h b/src/server/game/Miscellaneous/Language.h
-index 547f167..a4824d8 100755
+index aec7283..47a72ed 100755
 --- a/src/server/game/Miscellaneous/Language.h
 +++ b/src/server/game/Miscellaneous/Language.h
 @@ -363,6 +363,9 @@ enum TrinityStrings
@@ -159,10 +159,10 @@ index 547f167..a4824d8 100755
      LANG_BANINFO_NEVER                  = 420,
      LANG_BANINFO_YES                    = 421,
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 8651995..86aeafa 100755
+index c0f9550..f4b0851 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -2324,10 +2324,11 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
+@@ -2327,10 +2327,11 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, std::string dura
  
          if (mode != BAN_IP)
          {
@@ -175,7 +175,7 @@ index 8651995..86aeafa 100755
              // No SQL injection with prepared statements
              stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT_BANNED);
              stmt->setUInt32(0, account);
-@@ -2447,6 +2448,33 @@ bool World::RemoveBanCharacter(std::string name)
+@@ -2450,6 +2451,33 @@ bool World::RemoveBanCharacter(std::string name)
      return true;
  }
  
@@ -223,10 +223,10 @@ index 2cce99d..018ea57 100755
          // for max speed access
          static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
 diff --git a/src/server/shared/Database/Implementation/LoginDatabase.cpp b/src/server/shared/Database/Implementation/LoginDatabase.cpp
-index f9b61e9..e72507f 100755
+index 4b40bf4..94577e2 100755
 --- a/src/server/shared/Database/Implementation/LoginDatabase.cpp
 +++ b/src/server/shared/Database/Implementation/LoginDatabase.cpp
-@@ -54,6 +54,9 @@ void LoginDatabaseConnection::DoPrepareStatements()
+@@ -55,6 +55,9 @@ void LoginDatabaseConnection::DoPrepareStatements()
      PREPARE_STATEMENT(LOGIN_DEL_REALM_CHARACTERS, "DELETE FROM realmcharacters WHERE acctid = ?", CONNECTION_ASYNC);
      PREPARE_STATEMENT(LOGIN_INS_REALM_CHARACTERS, "INSERT INTO realmcharacters (numchars, acctid, realmid) VALUES (?, ?, ?)", CONNECTION_ASYNC)
      PREPARE_STATEMENT(LOGIN_SEL_SUM_REALM_CHARACTERS, "SELECT SUM(numchars) FROM realmcharacters WHERE acctid = ?", CONNECTION_ASYNC);
@@ -235,12 +235,12 @@ index f9b61e9..e72507f 100755
 +    PREPARE_STATEMENT(LOGIN_SET_EXPIREDACCMUTES, "UPDATE account_muted SET active = 0 WHERE active = 1 AND unmutedate<>mutedate AND unmutedate<=UNIX_TIMESTAMP()", CONNECTION_ASYNC)
      PREPARE_STATEMENT(LOGIN_INS_ACCOUNT, "INSERT INTO account(username, sha_pass_hash, joindate) VALUES(?, ?, NOW())", CONNECTION_ASYNC);
      PREPARE_STATEMENT(LOGIN_INS_REALM_CHARACTERS_INIT, "INSERT INTO realmcharacters (realmid, acctid, numchars) SELECT realmlist.id, account.id, 0 FROM realmlist, account LEFT JOIN realmcharacters ON acctid=account.id WHERE acctid IS NULL", CONNECTION_ASYNC);
-     PREPARE_STATEMENT(LOGIN_DEL_OLD_BANS, "DELETE FROM ip_banned WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate<>bandate", CONNECTION_ASYNC);
+     PREPARE_STATEMENT(LOGIN_UPD_EXPANSION, "UPDATE account SET expansion = ? WHERE id = ?", CONNECTION_ASYNC);
 diff --git a/src/server/shared/Database/Implementation/LoginDatabase.h b/src/server/shared/Database/Implementation/LoginDatabase.h
-index 4ad9ac1..59c939a 100755
+index 7c2a94e..1bd6588 100755
 --- a/src/server/shared/Database/Implementation/LoginDatabase.h
 +++ b/src/server/shared/Database/Implementation/LoginDatabase.h
-@@ -108,6 +108,9 @@ enum LoginDatabaseStatements
+@@ -107,6 +107,9 @@ enum LoginDatabaseStatements
      LOGIN_SEL_ACCOUNT_WHOIS,
      LOGIN_SEL_REALMLIST_SECURITY_LEVEL,
      LOGIN_DEL_ACCOUNT,
@@ -251,5 +251,5 @@ index 4ad9ac1..59c939a 100755
      MAX_LOGINDATABASE_STATEMENTS,
  };
 -- 
-1.7.5.4
+1.7.9.5
 

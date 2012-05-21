@@ -1,17 +1,17 @@
-From fade669508faa3d5a8111b3dcf61c76ae5d5907a Mon Sep 17 00:00:00 2001
+From 3cc5ed199b96c2ff15d889f5514b88fd3d1c0a3e Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:44 +0200
-Subject: [PATCH 10/27] Protectchannelpass
+Date: Mon, 21 May 2012 22:20:41 +0200
+Subject: [PATCH 10/25] Protectchannelpass
 
 ---
  src/server/game/Chat/Channels/Channel.cpp |    5 ++++-
- 1 files changed, 4 insertions(+), 1 deletions(-)
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/src/server/game/Chat/Channels/Channel.cpp b/src/server/game/Chat/Channels/Channel.cpp
-index 92cf4d7..8419e0b 100755
+index 0e89601..63df019 100755
 --- a/src/server/game/Chat/Channels/Channel.cpp
 +++ b/src/server/game/Chat/Channels/Channel.cpp
-@@ -144,6 +144,9 @@ void Channel::CleanOldChannelsInDB()
+@@ -143,6 +143,9 @@ void Channel::CleanOldChannelsInDB()
  
  void Channel::Join(uint64 p, const char *pass)
  {
@@ -21,7 +21,7 @@ index 92cf4d7..8419e0b 100755
      WorldPacket data;
      if (IsOn(p))
      {
-@@ -395,7 +398,7 @@ void Channel::Password(uint64 p, const char *pass)
+@@ -394,7 +397,7 @@ void Channel::Password(uint64 p, const char *pass)
          MakeNotMember(&data);
          SendToOne(&data, p);
      }
@@ -31,5 +31,5 @@ index 92cf4d7..8419e0b 100755
          WorldPacket data;
          MakeNotModerator(&data);
 -- 
-1.7.5.4
+1.7.9.5
 

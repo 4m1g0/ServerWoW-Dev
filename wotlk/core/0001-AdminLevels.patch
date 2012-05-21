@@ -1,13 +1,13 @@
-From 8abdf48fa433e3b0df08ddf0d0920c52f9284649 Mon Sep 17 00:00:00 2001
+From c369e6dd2f24696d5082ded728b63beb7c5c1b7f Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:43 +0200
-Subject: [PATCH 01/27] AdminLevels
+Date: Mon, 21 May 2012 22:20:40 +0200
+Subject: [PATCH 01/25] AdminLevels
 
 ---
- sql/own/0001-world_Announce.sql                 |    3 ++
+ sql/own/0001-world_Announce.sql                 |    3 +++
  src/server/game/AI/SmartScripts/SmartScript.cpp |    1 +
- src/server/game/Chat/Commands/Level1.cpp        |   30 ++++++++++++++++++++--
- src/server/shared/Common.h                      |    7 ++++-
+ src/server/game/Chat/Commands/Level1.cpp        |   30 ++++++++++++++++++++---
+ src/server/shared/Common.h                      |    7 ++++--
  4 files changed, 36 insertions(+), 5 deletions(-)
  create mode 100644 sql/own/0001-world_Announce.sql
 
@@ -21,10 +21,10 @@ index 0000000..77bb028
 +INSERT INTO `trinity_string` VALUES
 +(3,'|cffff0000<%s>|c1f40af20 %s|cffffff00: %s|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 diff --git a/src/server/game/AI/SmartScripts/SmartScript.cpp b/src/server/game/AI/SmartScripts/SmartScript.cpp
-index b2c4fd2..63834fb 100644
+index 85b117c..fdae918 100644
 --- a/src/server/game/AI/SmartScripts/SmartScript.cpp
 +++ b/src/server/game/AI/SmartScripts/SmartScript.cpp
-@@ -1631,6 +1631,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
+@@ -1639,6 +1639,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
              delete casters;
              break;
          }
@@ -33,7 +33,7 @@ index b2c4fd2..63834fb 100644
          {
              uint32 actions[SMART_ACTION_PARAM_COUNT];
 diff --git a/src/server/game/Chat/Commands/Level1.cpp b/src/server/game/Chat/Commands/Level1.cpp
-index a5647d2..aebc28d 100755
+index a10a78a..17cf506 100755
 --- a/src/server/game/Chat/Commands/Level1.cpp
 +++ b/src/server/game/Chat/Commands/Level1.cpp
 @@ -72,9 +72,33 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
@@ -92,5 +92,5 @@ index 259c60a..a1d7dec 100755
  
  enum LocaleConstant
 -- 
-1.7.5.4
+1.7.9.5
 

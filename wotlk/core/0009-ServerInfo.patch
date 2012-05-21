@@ -1,11 +1,11 @@
-From acf76f689302a65161cf916b784a18cb0f614447 Mon Sep 17 00:00:00 2001
+From b0593ccd315b35e449f0f7d518c37dae6050e8de Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:44 +0200
-Subject: [PATCH 09/27] ServerInfo
+Date: Mon, 21 May 2012 22:20:41 +0200
+Subject: [PATCH 09/25] ServerInfo
 
 ---
  src/server/shared/SystemConfig.h |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/server/shared/SystemConfig.h b/src/server/shared/SystemConfig.h
 index 2431ebb..348a626 100755
@@ -21,5 +21,5 @@ index 2431ebb..348a626 100755
  #if TRINITY_ENDIAN == TRINITY_BIGENDIAN
  # define _ENDIAN_STRING "big-endian"
 -- 
-1.7.5.4
+1.7.9.5
 

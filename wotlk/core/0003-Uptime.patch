@@ -1,7 +1,7 @@
-From 4e8fcab61d9ccf009e8932407d5659bbf15b703f Mon Sep 17 00:00:00 2001
+From 79128c91281d61ec0c6683f653a0e253ac6c82c9 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:43 +0200
-Subject: [PATCH 03/27] Uptime
+Date: Mon, 21 May 2012 22:20:41 +0200
+Subject: [PATCH 03/25] Uptime
 
 ---
  sql/own/0004-auth_Uptime.sql                       |    3 +++
@@ -20,10 +20,10 @@ index 0000000..5bfa9e2
 +ALTER TABLE `uptime` ADD COLUMN `players` SMALLINT(5) UNSIGNED DEFAULT '0' NOT NULL AFTER `uptime`;
 +ALTER TABLE `uptime` ADD COLUMN `queued` SMALLINT(5) UNSIGNED DEFAULT '0' NOT NULL AFTER `players`;
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 5e45644..8651995 100755
+index c1d9c94..c0f9550 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -1963,16 +1963,18 @@ void World::Update(uint32 diff)
+@@ -1966,16 +1966,18 @@ void World::Update(uint32 diff)
      if (m_timers[WUPDATE_UPTIME].Passed())
      {
          uint32 tmpDiff = uint32(m_gameTime - m_startTime);
@@ -47,10 +47,10 @@ index 5e45644..8651995 100755
          LoginDatabase.Execute(stmt);
      }
 diff --git a/src/server/shared/Database/Implementation/LoginDatabase.cpp b/src/server/shared/Database/Implementation/LoginDatabase.cpp
-index df92c6f..f9b61e9 100755
+index 028d927..4b40bf4 100755
 --- a/src/server/shared/Database/Implementation/LoginDatabase.cpp
 +++ b/src/server/shared/Database/Implementation/LoginDatabase.cpp
-@@ -66,7 +66,7 @@ void LoginDatabaseConnection::DoPrepareStatements()
+@@ -65,7 +65,7 @@ void LoginDatabaseConnection::DoPrepareStatements()
      PREPARE_STATEMENT(LOGIN_UPD_MUTE_TIME, "UPDATE account SET mutetime = ? WHERE id = ?", CONNECTION_ASYNC);
      PREPARE_STATEMENT(LOGIN_UPD_LAST_IP, "UPDATE account SET last_ip = ? WHERE username = ?", CONNECTION_ASYNC);
      PREPARE_STATEMENT(LOGIN_UPD_ACCOUNT_ONLINE, "UPDATE account SET online = 1 WHERE id = ?", CONNECTION_ASYNC);
@@ -60,5 +60,5 @@ index df92c6f..f9b61e9 100755
      PREPARE_STATEMENT(LOGIN_DEL_ACCOUNT_ACCESS, "DELETE FROM account_access WHERE id = ?", CONNECTION_ASYNC);
      PREPARE_STATEMENT(LOGIN_DEL_ACCOUNT_ACCESS_BY_REALM, "DELETE FROM account_access WHERE id = ? AND (RealmID = ? OR RealmID = -1)", CONNECTION_ASYNC);
 -- 
-1.7.5.4
+1.7.9.5
 

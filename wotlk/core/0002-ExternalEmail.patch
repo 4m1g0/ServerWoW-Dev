@@ -1,16 +1,16 @@
-From 2e0ec934ec93f165cd023bd3df608a83ab7d4c0d Mon Sep 17 00:00:00 2001
+From a19f4fdb856d3a47805c4408a94685961921b407 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:43 +0200
-Subject: [PATCH 02/27] ExternalEmail
+Date: Mon, 21 May 2012 22:20:40 +0200
+Subject: [PATCH 02/25] ExternalEmail
 
 ---
  sql/own/0002-char_ExternalMail.sql           |   12 +++++
  src/server/game/Mails/Mail.cpp               |   64 ++++++++++++++++++++++++++
  src/server/game/Server/WorldSession.h        |    2 +
  src/server/game/World/World.cpp              |   15 ++++++
- src/server/game/World/World.h                |    3 +
+ src/server/game/World/World.h                |    3 ++
  src/server/worldserver/worldserver.conf.dist |   14 ++++++
- 6 files changed, 110 insertions(+), 0 deletions(-)
+ 6 files changed, 110 insertions(+)
  create mode 100644 sql/own/0002-char_ExternalMail.sql
 
 diff --git a/sql/own/0002-char_ExternalMail.sql b/sql/own/0002-char_ExternalMail.sql
@@ -104,7 +104,7 @@ index 3c3888e..e2e59ca 100755
 +    sLog->outString("EXTERNAL MAIL> All Mails Sent.");
 +}
 diff --git a/src/server/game/Server/WorldSession.h b/src/server/game/Server/WorldSession.h
-index 0fce0a3..3b17dd3 100755
+index bb54a0a..138ca04 100755
 --- a/src/server/game/Server/WorldSession.h
 +++ b/src/server/game/Server/WorldSession.h
 @@ -333,6 +333,8 @@ class WorldSession
@@ -117,7 +117,7 @@ index 0fce0a3..3b17dd3 100755
          void SendAuctionHello(uint64 guid, Creature* unit);
          void SendAuctionCommandResult(uint32 auctionId, uint32 Action, uint32 ErrorCode, uint32 bidError = 0);
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index a842c28..5e45644 100755
+index 6e32d33..c1d9c94 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -878,6 +878,9 @@ void World::LoadConfigSettings(bool reload)
@@ -130,7 +130,7 @@ index a842c28..5e45644 100755
      m_int_configs[CONFIG_UPTIME_UPDATE] = ConfigMgr::GetIntDefault("UpdateUptimeInterval", 10);
      if (int32(m_int_configs[CONFIG_UPTIME_UPDATE]) <= 0)
      {
-@@ -1684,6 +1687,8 @@ void World::SetInitialWorldSettings()
+@@ -1687,6 +1690,8 @@ void World::SetInitialWorldSettings()
  
      m_timers[WUPDATE_PINGDB].SetInterval(getIntConfig(CONFIG_DB_PING_INTERVAL)*MINUTE*IN_MILLISECONDS);    // Mysql ping time in minutes
  
@@ -139,7 +139,7 @@ index a842c28..5e45644 100755
      //to set mailtimer to return mails every day between 4 and 5 am
      //mailtimer is increased when updating auctions
      //one second is 1000 -(tested on win system)
-@@ -1909,6 +1914,16 @@ void World::Update(uint32 diff)
+@@ -1912,6 +1917,16 @@ void World::Update(uint32 diff)
          m_NextDailyQuestReset += DAY;
      }
  
@@ -203,5 +203,5 @@ index 5d83710..d6ef204 100644
  #        Description: Allow skill increase from prospecting.
  #        Default:     0 - (Disabled)
 -- 
-1.7.5.4
+1.7.9.5
 

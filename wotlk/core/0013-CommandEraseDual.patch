@@ -1,19 +1,19 @@
-From 10bc429024bdc4850170a6772a828f1a311fe8ca Mon Sep 17 00:00:00 2001
+From 197827d83420c2605040a238729d1316b097b380 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:45 +0200
-Subject: [PATCH 13/27] CommandEraseDual
+Date: Mon, 21 May 2012 22:20:41 +0200
+Subject: [PATCH 13/25] CommandEraseDual
 
 ---
  src/server/game/Chat/Chat.cpp            |    1 +
  src/server/game/Chat/Chat.h              |    1 +
  src/server/game/Chat/Commands/Level3.cpp |   23 +++++++++++++++++++++++
- 3 files changed, 25 insertions(+), 0 deletions(-)
+ 3 files changed, 25 insertions(+)
 
 diff --git a/src/server/game/Chat/Chat.cpp b/src/server/game/Chat/Chat.cpp
-index 9992721..867a82b 100755
+index cc64a8e..4b762b0 100755
 --- a/src/server/game/Chat/Chat.cpp
 +++ b/src/server/game/Chat/Chat.cpp
-@@ -368,6 +368,7 @@ ChatCommand* ChatHandler::getCommandTable()
+@@ -367,6 +367,7 @@ ChatCommand* ChatHandler::getCommandTable()
          { "itemmove",       SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleItemMoveCommand>,            "", NULL },
          { "cooldown",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleCooldownCommand>,            "", NULL },
          { "unlearn",        SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleUnLearnCommand>,             "", NULL },
@@ -22,7 +22,7 @@ index 9992721..867a82b 100755
          { "recall",         SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleRecallCommand>,              "", NULL },
          { "save",           SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleSaveCommand>,                "", NULL },
 diff --git a/src/server/game/Chat/Chat.h b/src/server/game/Chat/Chat.h
-index 0a39eb4..414e70f 100755
+index e88914a..44d6330 100755
 --- a/src/server/game/Chat/Chat.h
 +++ b/src/server/game/Chat/Chat.h
 @@ -275,6 +275,7 @@ class ChatHandler
@@ -34,7 +34,7 @@ index 0a39eb4..414e70f 100755
          bool HandleDieCommand(const char* args);
          bool HandleDamageCommand(const char *args);
 diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
-index 6a4ce33..7a5052a 100755
+index 9efc407..18a0110 100755
 --- a/src/server/game/Chat/Commands/Level3.cpp
 +++ b/src/server/game/Chat/Commands/Level3.cpp
 @@ -173,6 +173,29 @@ bool ChatHandler::HandleUnLearnCommand(const char *args)
@@ -68,5 +68,5 @@ index 6a4ce33..7a5052a 100755
  {
      Player* target = getSelectedPlayer();
 -- 
-1.7.5.4
+1.7.9.5
 

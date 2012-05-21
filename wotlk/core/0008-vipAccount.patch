@@ -1,7 +1,7 @@
-From a1c59684c07c25190c17222aef165854c7cfd1e3 Mon Sep 17 00:00:00 2001
+From 29ad8224034dcc883a1e4967179dcb9cbe586d51 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:44 +0200
-Subject: [PATCH 08/27] vipAccount
+Date: Mon, 21 May 2012 22:20:41 +0200
+Subject: [PATCH 08/25] vipAccount
 
 ---
  sql/own/logon_vipAccount.sql                       |    1 +
@@ -21,7 +21,7 @@ index 0000000..a556336
 @@ -0,0 +1 @@
 +ALTER TABLE `account` ADD `vip` tinyint(3) unsigned NOT NULL DEFAULT '0' AFTER `recruiter`;
 diff --git a/src/server/game/Server/WorldSession.cpp b/src/server/game/Server/WorldSession.cpp
-index af38a5f..5b45aae 100755
+index 88248b7..9e4f3d3 100755
 --- a/src/server/game/Server/WorldSession.cpp
 +++ b/src/server/game/Server/WorldSession.cpp
 @@ -88,9 +88,9 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
@@ -37,7 +37,7 @@ index af38a5f..5b45aae 100755
  m_playerRecentlyLogout(false), m_playerSave(false),
  m_sessionDbcLocale(sWorld->GetAvailableDbcLocale(locale)),
 diff --git a/src/server/game/Server/WorldSession.h b/src/server/game/Server/WorldSession.h
-index 3b17dd3..d21ba98 100755
+index 138ca04..642c9dd 100755
 --- a/src/server/game/Server/WorldSession.h
 +++ b/src/server/game/Server/WorldSession.h
 @@ -215,7 +215,7 @@ class CharacterCreateInfo
@@ -66,7 +66,7 @@ index 3b17dd3..d21ba98 100755
          time_t timeLastWhoCommand;
  };
 diff --git a/src/server/game/Server/WorldSocket.cpp b/src/server/game/Server/WorldSocket.cpp
-index cf9ec7d..75ea3bb 100755
+index 64137df..28eedb2 100755
 --- a/src/server/game/Server/WorldSocket.cpp
 +++ b/src/server/game/Server/WorldSocket.cpp
 @@ -894,7 +894,9 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
@@ -90,7 +90,7 @@ index cf9ec7d..75ea3bb 100755
      m_Crypt.Init(&k);
  
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index f8d7a38..cdeae38 100755
+index ff6d994..43c6609 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -263,7 +263,7 @@ void World::AddSession_(WorldSession* s)
@@ -103,10 +103,10 @@ index f8d7a38..cdeae38 100755
          AddQueuedPlayer (s);
          UpdateMaxSessionCounters();
 diff --git a/src/server/shared/Database/Implementation/LoginDatabase.cpp b/src/server/shared/Database/Implementation/LoginDatabase.cpp
-index e72507f..851a9f5 100755
+index 94577e2..16de80c 100755
 --- a/src/server/shared/Database/Implementation/LoginDatabase.cpp
 +++ b/src/server/shared/Database/Implementation/LoginDatabase.cpp
-@@ -41,7 +41,7 @@ void LoginDatabaseConnection::DoPrepareStatements()
+@@ -42,7 +42,7 @@ void LoginDatabaseConnection::DoPrepareStatements()
      PREPARE_STATEMENT(LOGIN_SEL_FAILEDLOGINS, "SELECT id, failed_logins FROM account WHERE username = ?", CONNECTION_SYNCH)
      PREPARE_STATEMENT(LOGIN_SEL_ACCOUNT_ID_BY_NAME, "SELECT id FROM account WHERE username = ?", CONNECTION_SYNCH)
      PREPARE_STATEMENT(LOGIN_SEL_ACCOUNT_LIST_BY_NAME, "SELECT id, username FROM account WHERE username = ?", CONNECTION_SYNCH);
@@ -116,5 +116,5 @@ index e72507f..851a9f5 100755
      PREPARE_STATEMENT(LOGIN_SEL_NUM_CHARS_ON_REALM, "SELECT numchars FROM realmcharacters WHERE realmid = ? AND acctid= ?", CONNECTION_SYNCH)
      PREPARE_STATEMENT(LOGIN_SEL_ACCOUNT_BY_IP, "SELECT id, username FROM account WHERE last_ip = ?", CONNECTION_SYNCH)
 -- 
-1.7.5.4
+1.7.9.5
 

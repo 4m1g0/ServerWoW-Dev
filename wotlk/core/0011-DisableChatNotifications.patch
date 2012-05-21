@@ -1,17 +1,17 @@
-From 9954ec52f7401d704cdcbf638f76a78868ec66bb Mon Sep 17 00:00:00 2001
+From 606c2396c133ef3a186fb59d018fe28e731a34fc Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:44 +0200
-Subject: [PATCH 11/27] DisableChatNotifications
+Date: Mon, 21 May 2012 22:20:41 +0200
+Subject: [PATCH 11/25] DisableChatNotifications
 
 ---
  src/server/game/Chat/Channels/Channel.cpp |    8 ++++----
- 1 files changed, 4 insertions(+), 4 deletions(-)
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/src/server/game/Chat/Channels/Channel.cpp b/src/server/game/Chat/Channels/Channel.cpp
-index 8419e0b..58b30bc 100755
+index 63df019..2b63785 100755
 --- a/src/server/game/Chat/Channels/Channel.cpp
 +++ b/src/server/game/Chat/Channels/Channel.cpp
-@@ -806,15 +806,15 @@ void Channel::MakeNotifyPacket(WorldPacket* data, uint8 notify_type)
+@@ -805,15 +805,15 @@ void Channel::MakeNotifyPacket(WorldPacket* data, uint8 notify_type)
  // done 0x00
  void Channel::MakeJoined(WorldPacket* data, uint64 guid)
  {
@@ -32,5 +32,5 @@ index 8419e0b..58b30bc 100755
  
  // done 0x02
 -- 
-1.7.5.4
+1.7.9.5
 

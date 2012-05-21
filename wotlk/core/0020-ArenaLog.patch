@@ -1,17 +1,17 @@
-From 6e921996035073bddb82426656cf3987562b74a0 Mon Sep 17 00:00:00 2001
+From 785387d5074f5e1af4bd2b78f8f7ed6089db9577 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:45 +0200
-Subject: [PATCH 21/27] ArenaLog
+Date: Mon, 21 May 2012 22:20:50 +0200
+Subject: [PATCH 20/25] ArenaLog
 
 ---
  src/server/game/Battlegrounds/Battleground.cpp |    4 ++++
- 1 files changed, 4 insertions(+), 0 deletions(-)
+ 1 file changed, 4 insertions(+)
 
 diff --git a/src/server/game/Battlegrounds/Battleground.cpp b/src/server/game/Battlegrounds/Battleground.cpp
-index 1a5f341..e8b9f06 100755
+index 9d5858e..f83fe92 100755
 --- a/src/server/game/Battlegrounds/Battleground.cpp
 +++ b/src/server/game/Battlegrounds/Battleground.cpp
-@@ -751,6 +751,10 @@ void Battleground::EndBattleground(uint32 winner)
+@@ -782,6 +782,10 @@ void Battleground::EndBattleground(uint32 winner)
                      for (Battleground::BattlegroundScoreMap::const_iterator itr = GetPlayerScoresBegin(); itr != GetPlayerScoresEnd(); ++itr)
                          if (Player* player = ObjectAccessor::FindPlayer(itr->first))
                              sLog->outArena("Statistics match Type: %u for %s (GUID: " UI64FMTD ", Team: %d, IP: %s): %u damage, %u healing, %u killing blows", m_ArenaType, player->GetName(), itr->first, player->GetArenaTeamId(m_ArenaType == 5 ? 2 : m_ArenaType == 3), player->GetSession()->GetRemoteAddress().c_str(), itr->second->DamageDone, itr->second->HealingDone, itr->second->KillingBlows);
@@ -23,5 +23,5 @@ index 1a5f341..e8b9f06 100755
              // Deduct 16 points from each teams arena-rating if there are no winners after 45+2 minutes
              else
 -- 
-1.7.5.4
+1.7.9.5
 

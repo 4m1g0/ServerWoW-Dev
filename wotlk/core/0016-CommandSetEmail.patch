@@ -1,14 +1,14 @@
-From a79b71447571bfd598182993b68ddebc55eb04ed Mon Sep 17 00:00:00 2001
+From 2c848bcea4d0906dc2c2f9ed489c4acb6fc44636 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:45 +0200
-Subject: [PATCH 16/27] CommandSetEmail
+Date: Mon, 21 May 2012 22:20:42 +0200
+Subject: [PATCH 16/25] CommandSetEmail
 
 ---
  sql/own/char_logs.sql                      |   21 ++++++++++
  src/server/game/Accounts/AccountMgr.cpp    |   20 ++++++++++
  src/server/game/Accounts/AccountMgr.h      |    1 +
  src/server/scripts/Commands/cs_account.cpp |   58 ++++++++++++++++++++++++++++
- 4 files changed, 100 insertions(+), 0 deletions(-)
+ 4 files changed, 100 insertions(+)
  create mode 100644 sql/own/char_logs.sql
 
 diff --git a/sql/own/char_logs.sql b/sql/own/char_logs.sql
@@ -39,10 +39,10 @@ index 0000000..c941f19
 +  PRIMARY KEY (`entry`)
 +) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
 diff --git a/src/server/game/Accounts/AccountMgr.cpp b/src/server/game/Accounts/AccountMgr.cpp
-index 240609e..cd83aca 100755
+index 8076f80..968e9ee 100755
 --- a/src/server/game/Accounts/AccountMgr.cpp
 +++ b/src/server/game/Accounts/AccountMgr.cpp
-@@ -167,6 +167,26 @@ AccountOpResult ChangePassword(uint32 accountId, std::string newPassword)
+@@ -176,6 +176,26 @@ AccountOpResult ChangePassword(uint32 accountId, std::string newPassword)
      return AOR_OK;
  }
  
@@ -158,5 +158,5 @@ index b521024..a7e4af2 100644
  
  void AddSC_account_commandscript()
 -- 
-1.7.5.4
+1.7.9.5
 

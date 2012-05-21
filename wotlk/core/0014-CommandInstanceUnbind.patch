@@ -1,17 +1,17 @@
-From 7a1d562e7eeb172b246db0ac00fd3ae99007dd34 Mon Sep 17 00:00:00 2001
+From c937c0ec50cfe8037a4fe249786cfdc75918c4b6 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:45 +0200
-Subject: [PATCH 14/27] CommandInstanceUnbind
+Date: Mon, 21 May 2012 22:20:41 +0200
+Subject: [PATCH 14/25] CommandInstanceUnbind
 
 ---
  src/server/game/Chat/Commands/Level3.cpp |    8 +++++---
- 1 files changed, 5 insertions(+), 3 deletions(-)
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
-index 7a5052a..cf40a53 100755
+index 18a0110..6d19355 100755
 --- a/src/server/game/Chat/Commands/Level3.cpp
 +++ b/src/server/game/Chat/Commands/Level3.cpp
-@@ -4202,9 +4202,11 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char *args)
+@@ -4182,9 +4182,11 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char *args)
      if (!*args)
          return false;
  
@@ -27,5 +27,5 @@ index 7a5052a..cf40a53 100755
      char* map = strtok((char*)args, " ");
      char* pDiff = strtok(NULL, " ");
 -- 
-1.7.5.4
+1.7.9.5
 

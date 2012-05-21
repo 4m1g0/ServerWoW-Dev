@@ -1,14 +1,14 @@
-From 6923469bec577f5ee398993284ce60a8b6b1c1e2 Mon Sep 17 00:00:00 2001
+From 9ff56c7290dcc9c81c709c6202536b885a58349d Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Thu, 29 Mar 2012 06:46:46 +0200
-Subject: [PATCH 22/27] CommandSetgmlevel
+Date: Mon, 21 May 2012 22:20:50 +0200
+Subject: [PATCH 21/25] CommandSetgmlevel
 
 ---
  src/server/scripts/Commands/cs_account.cpp |   48 ++++++----------------------
- 1 files changed, 10 insertions(+), 38 deletions(-)
+ 1 file changed, 10 insertions(+), 38 deletions(-)
 
 diff --git a/src/server/scripts/Commands/cs_account.cpp b/src/server/scripts/Commands/cs_account.cpp
-index a7e4af2..73183ae 100644
+index a7e4af2..d48bb76 100644
 --- a/src/server/scripts/Commands/cs_account.cpp
 +++ b/src/server/scripts/Commands/cs_account.cpp
 @@ -413,10 +413,9 @@ public:
@@ -113,5 +113,5 @@ index a7e4af2..73183ae 100644
              LoginDatabase.Execute(stmt);
          }
 -- 
-1.7.5.4
+1.7.9.5
 
