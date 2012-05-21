@@ -409,3 +409,81 @@ UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY2 LIMIT 1;
 UPDATE creature_template SET InhabitType=1 WHERE entry=@ENTRY2;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,11,0,100,0,0,0,0,0,18,2,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Kaylaan the lost - on respawn - Set React State");
+
+
+
+-- Author: Amnesio
+-- Date: 2012/05/03
+-- Quest: Bombing Run
+-- ID: 11010
+
+SET @NPC1 := 23118;
+SET @NPC2 := 22451;
+SET @OBJ := 185861;
+SET @SPELL1 := 40160;  
+SET @SPELL2 := 40197; 
+SET @SPELL3 := 36238; 
+SET @TEXT := 2096;
+SET @GUIDOBJ := 209440;
+SET @GUIDNPC := 209426; 
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry`=@NPC1;
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry`=@NPC2;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC1 AND `source_type`=0;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC2 AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`)
+VALUES
+(@NPC1, 0, 0, 1, 8, 0, 100, 0, @SPELL1, 0, 0, 0, 33, @NPC1, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, '[LCV] Kill credit NPC 23118'),
+(@NPC1, 0, 1, 1, 8, 0, 100, 0, @SPELL1, 0, 0, 0, 11, 40162, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, '[LCV] Kill credit NPC 23118'),
+(@NPC2, 0, 0, 0, 1, 0, 100, 0, 2000, 4000, 6000, 8000, 11, @SPELL3, 0, 0, 0, 0, 0, 18, 35, 0, 0, 0, 0, 0, 0, '[LCV] Attac NPC ');
+
+DELETE FROM `conditions` WHERE `SourceEntry`=@SPELL1;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ErrorTextId`,`ScriptName`,`Comment`)
+VALUES
+(13,1,@SPELL1,0,31,0,5,@NPC1,0,0,0, '','[LCV] Fyx Target Spell 40160'),
+(17,0,@SPELL1,0,23,0,3785,0,0,0,@TEXT,'','[LCV] Area 3785 (Forge Camp: Wrath) usable Spell 40160'),
+(17,0,@SPELL1,1,23,0,3784,0,0,0,@TEXT,'','[LCV] Area 3785 (Forge Camp: terror)  usable Spell 40160');
+
+DELETE FROM `trinity_string` WHERE `entry`=@TEXT;
+INSERT INTO `trinity_string` (`entry`, `content_default`)
+VALUES
+(@TEXT, 'Area invalida, solo utilizable en Forge Camp: Wrath o Forge Camp: terror');
+
+DELETE FROM `creature_template_addon` WHERE `entry`=@NPC1;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`,`mount`,`bytes1`,`bytes2`,`emote`,`auras`)
+VALUES
+(@NPC1, 0, 0, 0, 0, 0,'40194 40196');
+
+DELETE FROM `creature` WHERE `id`=@NPC1;
+INSERT INTO `creature` (`guid`, `id`,`map`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`)
+VALUES
+(@GUIDNPC,@NPC1,530,1,2765.238281,7022.401367,370.205109,2.237938),
+(@GUIDNPC+1,@NPC1,530,1,2779.886963,7032.839355,370.539960,2.249719),
+(@GUIDNPC+2,@NPC1,530,1,2802.229492,7040.037598,370.079315,2.223496),
+(@GUIDNPC+3,@NPC1,530,1,2820.273682,7050.170898,370.451782,1.497002),
+(@GUIDNPC+4,@NPC1,530,1,2941.743652,7104.679688,370.088531,2.243130),
+(@GUIDNPC+5,@NPC1,530,1,1700.898438,7342.907227,369.962006,5.636046),
+(@GUIDNPC+6,@NPC1,530,1,1695.757080,7352.343262,370.263550,0.012581),
+(@GUIDNPC+7,@NPC1,530,1,1707.099121,7368.621582,369.987183,5.416125),
+(@GUIDNPC+8,@NPC1,530,1,1719.083984,7383.237793,370.056396,6.248646),
+(@GUIDNPC+9,@NPC1,530,1,1623.423462,7247.753418,369.019836,0.648757),
+(@GUIDNPC+10,@NPC1,530,1,1637.106812,7234.111816,368.717102,0.114682),
+(@GUIDNPC+11,@NPC1,530,1,1653.978638,7209.547852,368.938507,6.276129),
+(@GUIDNPC+12,@NPC1,530,1,1652.010376,7189.753906,369.434845,0.047918);
+
+DELETE FROM `gameobject` WHERE `id`=@OBJ;
+INSERT INTO `gameobject` (`guid`, `id`,`map`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`)
+VALUES
+(@GUIDOBJ,@OBJ,530,1,2765.238281,7022.401367,370.205109,2.237938),
+(@GUIDOBJ+1,@OBJ,530,1,2779.886963,7032.839355,370.539960,2.249719),
+(@GUIDOBJ+2,@OBJ,530,1,2802.229492,7040.037598,370.079315,2.223496),
+(@GUIDOBJ+3,@OBJ,530,1,2820.273682,7050.170898,370.451782,1.497002),
+(@GUIDOBJ+4,@OBJ,530,1,2941.743652,7104.679688,370.088531,2.243130),
+(@GUIDOBJ+5,@OBJ,530,1,1700.898438,7342.907227,369.962006,5.636046),
+(@GUIDOBJ+6,@OBJ,530,1,1695.757080,7352.343262,370.263550,0.012581),
+(@GUIDOBJ+7,@OBJ,530,1,1707.099121,7368.621582,369.987183,5.416125),
+(@GUIDOBJ+8,@OBJ,530,1,1719.083984,7383.237793,370.056396,6.248646),
+(@GUIDOBJ+9,@OBJ,530,1,1623.423462,7247.753418,369.019836,0.648757),
+(@GUIDOBJ+10,@OBJ,530,1,1637.106812,7234.111816,368.717102,0.114682),
+(@GUIDOBJ+11,@OBJ,530,1,1653.978638,7209.547852,368.938507,6.276129),
+(@GUIDOBJ+12,@OBJ,530,1,1652.010376,7189.753906,369.434845,0.047918);
