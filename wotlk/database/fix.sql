@@ -113,20 +113,50 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (15, @GOSSIP_2, 0, 0, 0, 2, 0, @ITEM, 10, 0, 1, 0, '', '[LCV] Only show gossip if player has less then 10 outfits');
 
 
--- Fix quest ¡Detén la ascensión! 11249
+﻿-- Author: Decode --
+-- Date: 2012/04/07
+-- Quest: ¡Detén la ascensión!
+-- ID: 11260
+
 SET @ENTRY := 23671;
 SET @SOURCETYPE := 0;
 
-update `creature_template` SET faction_a = 14, faction_h = 14 where entry= @ENTRY;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
-(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,5000,5000,7000,8000,11,35263,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,'[LCV] Cast Frost Attack'),
-(@ENTRY,@SOURCETYPE,2,0,0,0,100,0,10000,10000,12000,13000,11,32736,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,'[LCV] Cast Mortal Strike'),
-(@ENTRY,@SOURCETYPE,3,0,0,0,100,0,7000,8000,12000,14000,11,8599,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,'[LCV] Cast Enrage'),
-(@ENTRY,@SOURCETYPE,4,0,0,0,100,0,3000,4000,8000,10000,11,32015,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,'[LCV] Cast Knockdown'),
-(@ENTRY,@SOURCETYPE,5,0,0,0,100,0,15000,20000,30000,34000,11,12169,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,'[LCV] Cast Shield Block'),
-(@ENTRY,@SOURCETYPE,6,0,0,0,100,0,1000,2000,18000,20000,11,19131,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,'[LCV] Cast Shield Charge');
+(@ENTRY,@SOURCETYPE,0,1,11,0,100,0,0,0,0,0,2,14,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"[LCV] set faction to Halfdan "),
+(@ENTRY,@SOURCETYPE,1,2,61,0,100,0,0,0,0,0,12,24118,1,60000,0,0,0,8,0,0,0,1698.87,-4111.68,272.314,272.24,"[LCV] Summon Val'kyr "),
+-- (@ENTRY,@SOURCETYPE,2,3,61,0,100,0,0,0,0,0,12,24118,1,60000,0,0,0,8,0,0,0,1703.66,-4099.4,272.63,3.7945,"summon"),
+(@ENTRY,@SOURCETYPE,2,0,61,0,100,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0.0,0.0,0.0,0.0,"[LCV] 1 yell OOC"),
+(@ENTRY,@SOURCETYPE,3,0,0,0,100,0,1,2,10000000,20000000,1,1,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"[LCV] 2 Yell IC"),
+(@ENTRY,@SOURCETYPE,4,0,0,0,100,0,1000,2000,15000,20000,11,19131,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"[LCV] Cast Shield Charge"),
+(@ENTRY,@SOURCETYPE,5,0,0,0,100,0,3000,4000,8000,10000,11,32736,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"[LCV] Cast Mortal Strike"),
+(@ENTRY,@SOURCETYPE,6,0,0,0,100,0,2000,3000,6000,8000,11,32015,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"[LCV] Cast knockdown"),
+(@ENTRY,@SOURCETYPE,7,0,0,0,100,0,6000,8000,10000,12000,11,35263,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"[LCV] Cast Frost Attack"),
+(@ENTRY,@SOURCETYPE,8,0,0,0,100,0,6000,8000,8000,10000,11,12169,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"[LCV] Cast Shield Block"),
+(@ENTRY,@SOURCETYPE,9,0,2,0,100,0,30,40,20000,25000,11,8599,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"[LCV] Cast Enrage at 30% HP"),
+(@ENTRY,@SOURCETYPE,10,0,2,0,100,0,10,25,20000,25000,1,2,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"[LCV] yells at 20%"),
+(@ENTRY,@SOURCETYPE,11,13,6,0,100,0,10,0,0,0,45,1,1,0,0,0,0,19,24118,0,0,0.0,0.0,0.0,0.0,"[LCV] Set data to Val'kyr Observer");
+
+DELETE FROM `creature_text` WHERE `entry`=23671;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (23671,0,0,'¿Acaso piensas que no se lo que tratas de hacer?',14,0,100,0,0,0,'1 text');
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (23671,1,0,'No detendras mi Ascención, ¡es tiempo de Morir!',14,0,100,0,0,0,'Comment');
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (23671,2,0,'¡No!, ¡No me derrotaras!',14,0,100,0,0,0,'Comment');
+
+-- Val'kyr Observer
+SET @ENTRY2 := 24118;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY2 AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY2 LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY2,@SOURCETYPE,0,1,38,0,100,0,1,1,0,0,1,0,0,0,0,0,0,21,60,0,0,0.0,0.0,0.0,0.0," [LCV] Yell after death"),
+(@ENTRY2,@SOURCETYPE,1,2,61,0,100,0,0,0,0,0,1,1,100000,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"[LCV]Second dialog."),
+(@ENTRY2,@SOURCETYPE,2,0,61,0,100,0,0,0,0,0,41,5000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"[LCV]Force to despawn");
+
+DELETE FROM `creature_text` WHERE `entry`=24118;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (24118,0,0,'Que Desafortunado, Halfdan',14,0,100,0,0,0,'Comment');
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (24118,1,0,'No eres Digno de la Ascención, Halfdan. ¡Que tu alma conozca el olvido!',14,0,100,0,0,0,'Comment');
 
 
 -- Author: Amnesio
