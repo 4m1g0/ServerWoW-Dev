@@ -62,7 +62,7 @@ index 43c6609..570798e 100755
 +    std::string name;
  
      msg = Trinity::Containers::SelectRandomContainerElement(m_Autobroadcasts);
-+    name = SelectRandomContainerElement(m_Autobroadcasts_names);
++    name = Trinity::Containers::SelectRandomContainerElement(m_Autobroadcasts_names);
 +
 +    uint32 guid = sObjectMgr->GetPlayerGUIDByName(name);
 +    uint64 pl_account = sObjectMgr->GetPlayerAccountIdByGUID(guid);
