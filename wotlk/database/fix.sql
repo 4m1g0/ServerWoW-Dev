@@ -375,3 +375,37 @@ INSERT INTO conditions (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`,
 (15, 27376, 2, 0, 9, 12245, 0, 0, 0, '', NULL),
 (15, 27376, 1, 0, 9, 12245, 0, 0, 0, '', NULL),
 (15, 27376, 0, 0, 9, 12245, 0, 0, 0, '', NULL);
+
+
+
+-- Author: Decode
+-- Date: 2012/04/25
+-- Quest: Punto de inflexión
+-- ID: 10507
+
+-- Socrethar
+SET @ENTRY := 20132;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+DELETE FROM creature_ai_scripts WHERE creature_id=@entry;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,1,11,0,100,0,0,0,0,0,2,14,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Socrethar - On respawn - Set faction to 14"),
+(@ENTRY,@SOURCETYPE,2,0,23,0,100,0,37539,0,0,0,11,37539,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Socrethar -  Has aura - Cast spell Nether Protection"),
+(@ENTRY,@SOURCETYPE,3,0,0,0,100,0,4000,4000,6000,6000,11,15496,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"Socretar - IC - Cast Cleave"),
+(@ENTRY,@SOURCETYPE,4,0,0,0,100,0,2000,2000,10000,10000,11,28448,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"Socretar - IC - Cast Shadow Bolt Volley"),
+(@ENTRY,@SOURCETYPE,5,0,0,0,100,0,5000,5000,10000,10000,11,37537,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"Socretar - IC - Cast Backlash"),
+(@ENTRY,@SOURCETYPE,6,0,0,0,100,0,20000,20000,30000,30000,11,37540,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"Socretar - IC - Cast Fireball Barrage"),
+(@ENTRY,@SOURCETYPE,7,0,0,0,100,0,2000,2000,15000,20000,11,37538,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Socrethar - IC- Cast Anti-Magic Shield"),
+(@ENTRY,@SOURCETYPE,8,0,1,0,100,0,0,0,0,0,19,33088,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Socrethar - OOC- Remove Unit flag back to normal");
+
+-- Kaylaan the Lost
+SET @ENTRY2 := 20794;
+SET @SOURCETYPE2 := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY2 AND `source_type`=@SOURCETYPE2;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY2 LIMIT 1;
+UPDATE creature_template SET InhabitType=1 WHERE entry=@ENTRY2;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,11,0,100,0,0,0,0,0,18,2,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Kaylaan the lost - on respawn - Set React State");
