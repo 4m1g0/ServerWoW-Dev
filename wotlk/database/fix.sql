@@ -487,3 +487,48 @@ VALUES
 (@GUIDOBJ+10,@OBJ,530,1,1637.106812,7234.111816,368.717102,0.114682),
 (@GUIDOBJ+11,@OBJ,530,1,1653.978638,7209.547852,368.938507,6.276129),
 (@GUIDOBJ+12,@OBJ,530,1,1652.010376,7189.753906,369.434845,0.047918);
+
+
+
+--Autor: Amnesio
+--Quest:just-following-orders
+--ID:12540
+
+SET @NPC1 := 28325;
+SET @NPC2:= 28217;
+SET @GOSSIP_1:=9677;
+SET @QUEST:=12540;
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry`=@NPC1;
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry`=@NPC2;
+UPDATE `creature_template` SET `npcflag`=`npcflag`|3 WHERE `entry`=@NPC2;
+UPDATE `creature_template` SET `ScriptName`='' WHERE `entry`=@NPC2;
+UPDATE `creature_template` SET `dynamicflags`= `dynamicflags`|32 WHERE `entry`=@NPC2;
+UPDATE `creature_template` SET `unit_flags`= `unit_flags`|536870912 WHERE `entry`=@NPC2;
+DELETE FROM `creature` WHERE `id`=@NPC1;
+DELETE FROM `creature_ai_scripts` WHERE `creature_id`=@NPC2;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC1 AND `source_type`=0;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC2 AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`)
+VALUES
+(@NPC1, 0, 0, 0, 1, 0, 100, 0, 5000, 9000, 9000, 14000, 11, 34370, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, '[LCV] Fix Atack npc 28325'),
+(@NPC1, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 33, @NPC1, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, '[LCV] Fix kill credit  quest 12540'),
+(@NPC2, 0, 0, 0, 1, 0, 100, 0, 1, 100, 150, 200, 95, 32, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, '[LCV] Injured Rainspeaker Oracle - dead - '),
+(@NPC2, 0, 1, 0, 62, 0, 100, 0, @GOSSIP_1, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, '[LCV] Injured Rainspeaker Oracle - On Gossip Select - '),
+(@NPC2, 0, 2, 0, 62, 0, 100, 0, @GOSSIP_1, 0, 0, 0, 12, @NPC1, 6, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, '[LCV] Injured Rainspeaker Oracle - On Gossip Select - Spawn npc 28325'),
+(@NPC2, 0, 3, 0, 62, 0, 100, 0, @GOSSIP_1, 0, 0, 0, 96, 32, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, '[LCV] Injured Rainspeaker Oracle - live'),
+(@NPC2, 0, 4, 0, 62, 0, 100, 0, @GOSSIP_1, 0, 0, 0, 23, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, '[LCV] Injured Rainspeaker Oracle - Change Phase'),
+(@NPC2, 0, 5, 0, 1, 1, 100, 0, 18000, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, '[LCV] Injured Rainspeaker Oracle - Respawn phase 0 3min later');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=15 AND `SourceGroup`=@GOSSIP_1;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ErrorTextId`,`ScriptName`,`Comment`)
+VALUES
+(15, @GOSSIP_1, 0, 0, 9, 0, @QUEST, 0, 0, 0, 0, '', '[LCV] Only show gossip if player has quest Just Following Orders');
+
+DELETE FROM `gossip_menu` WHERE `entry`=9677 AND `text_id`=13124;
+INSERT INTO `gossip_menu` (`entry`,`text_id`) VALUES
+(9677,13124);
+
+DELETE FROM `gossip_menu_option` WHERE `menu_id`=9677;
+INSERT INTO `gossip_menu_option` (`menu_id`,`id`,`option_icon`,`option_text`,`option_id`,`npc_option_npcflag`,`action_menu_id`,`action_poi_id`,`box_coded`,`box_money`,`box_text`) VALUES
+(9677,0,0, '<Reach down and pull the Injured Rainspeaker Oracle to its feet.>',1,1,0,0,0,0, '');
