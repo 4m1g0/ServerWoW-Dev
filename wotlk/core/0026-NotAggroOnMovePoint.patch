@@ -1,0 +1,14 @@
+diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
+index ba48117..f718b24 100755
+--- a/src/server/game/Entities/Unit/Unit.cpp
++++ b/src/server/game/Entities/Unit/Unit.cpp
+@@ -12907,6 +12907,9 @@ bool Unit::CanHaveThreatList() const
+     // summons can not have a threat list, unless they are controlled by a creature
+     if (HasUnitTypeMask(UNIT_MASK_MINION | UNIT_MASK_GUARDIAN | UNIT_MASK_CONTROLABLE_GUARDIAN) && IS_PLAYER_GUID(((Pet*)this)->GetOwnerGUID()))
+         return false;
++    
++    if (GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
++        return false;
+ 
+     return true;
+ }
