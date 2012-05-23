@@ -112,10 +112,9 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (15, @GOSSIP_1, 0, 0, 0, 2, 0, @ITEM, 10, 0, 1, 0, '', '[LCV] Only show gossip if player has less then 10 outfits'),
 (15, @GOSSIP_2, 0, 0, 0, 2, 0, @ITEM, 10, 0, 1, 0, '', '[LCV] Only show gossip if player has less then 10 outfits');
 
-
-﻿-- Author: Decode --
+﻿-- Author: Decode
 -- Date: 2012/04/07
--- Quest: ¡Detén la ascensión!
+-- Quest: Detén la ascensión!
 -- ID: 11260
 
 SET @ENTRY := 23671;
@@ -240,7 +239,7 @@ UPDATE `creature_template` SET `mindmg`=509, `maxdmg`=683, `attackpower`=805 WHE
 
 
 
--- Author: Decode --
+-- Author: Decode
 -- Date: 2012/04/13
 -- Quest: Ninguna piedad con los cautivos
 -- ID: 12245
@@ -520,9 +519,9 @@ VALUES
 
 
 
---Autor: Amnesio
---Quest:just-following-orders
---ID:12540
+-- Autor: Amnesio
+-- Quest:just-following-orders
+-- ID:12540
 
 SET @NPC1 := 28325;
 SET @NPC2:= 28217;

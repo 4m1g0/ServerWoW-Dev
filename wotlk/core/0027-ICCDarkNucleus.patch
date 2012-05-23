@@ -1,0 +1,13 @@
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp
+index d091a87..77dc51b 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp
+@@ -1328,6 +1328,7 @@ class npc_dark_nucleus : public CreatureScript
+ 
+                 me->DeleteThreatList();
+                 me->AddThreat(attacker, 500000000.0f);
++                AttackStart(attacker);
+             }
+ 
+             void UpdateAI(uint32 const diff)
+
