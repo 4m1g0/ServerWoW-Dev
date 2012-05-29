@@ -1,21 +1,20 @@
-From 
+From 2e92a04673932e997f8d61a3cc9e5e0a9d38e8ec Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 25 May 2012 11:42:00 +0100
-Subject: [PATCH] Sindragosa
- Ice Tomb LoS
+Date: Tue, 29 May 2012 20:03:10 +0200
+Subject: [PATCH] sindragosa ice tomb
 
 ---
- .../0029-world_script_names.sql                    |    1 +
- .../Northrend/IcecrownCitadel/boss_sindragosa.cpp  |   58 --------------------
- 2 files changed, 60 insertions(+), 0 deletions(-)
+ sql/own/0029-world_script_names.sql                |   12 ++++
+ .../Northrend/IcecrownCitadel/boss_sindragosa.cpp  |   58 ++++++++++++++++++++
+ 2 files changed, 70 insertions(+)
  create mode 100644 sql/own/0029-world_script_names.sql
 
 diff --git a/sql/own/0029-world_script_names.sql b/sql/own/0029-world_script_names.sql
 new file mode 100644
-index 0000000..9619121
+index 0000000..921701b
 --- /dev/null
 +++ b/sql/own/0029-world_script_names.sql
-@@ -0,0 +12 @@
+@@ -0,0 +1,12 @@
 +DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_sindragosa_collision_filter';
 +INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES 
 +(69845, 'spell_sindragosa_collision_filter'),
@@ -29,10 +28,10 @@ index 0000000..9619121
 +(72530, 'spell_sindragosa_collision_filter');
 +
 diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
-index a544f2f..0187924 100644
+index 6039ace..6c606cd 100644
 --- a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
 +++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
-@@ -1198,63 +1198,6 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
+@@ -1251,6 +1251,63 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
          }
  };
  
@@ -96,14 +95,14 @@ index a544f2f..0187924 100644
  class spell_sindragosa_icy_grip : public SpellScriptLoader
  {
      public:
-@@ -1513,7 +1456,6 @@ void AddSC_boss_sindragosa()
+@@ -1549,6 +1606,7 @@ void AddSC_boss_sindragosa()
      new spell_sindragosa_instability();
      new spell_sindragosa_frost_beacon();
      new spell_sindragosa_ice_tomb();
 +    new spell_sindragosa_collision_filter();
      new spell_sindragosa_icy_grip();
+     new spell_sindragosa_mystic_buffet();
      new spell_rimefang_icy_blast();
-     new spell_frostwarden_handler_order_whelp();
 -- 
-1.7.10
+1.7.9.5
 
