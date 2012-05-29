@@ -40,6 +40,7 @@ update creature_template set mechanic_immune_mask = 617299839 where entry in (37
 update creature_template set mechanic_immune_mask = 617299839 where entry in (37562, 38602, 38760, 38761);
 */
 -- Añadido spawn de Lok'lira the Crone para hijos de hodir FROM ytdb (29975)
+DELETE FROM `creature` WHERE `guid` = 900000;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES('900000','29975','571','1','1','0','0','6917.26','-1541.88','833.81','1.11376','600','0','0','12175','0','0','0','0','0');
 
 -- InhabitType de este npc debe ser 4 para que se mantenga en el aire y el vehicle id para que el arpon surta efecto sobre el.
@@ -112,10 +113,8 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (15, @GOSSIP_1, 0, 0, 0, 2, 0, @ITEM, 10, 0, 1, 0, '', '[LCV] Only show gossip if player has less then 10 outfits'),
 (15, @GOSSIP_2, 0, 0, 0, 2, 0, @ITEM, 10, 0, 1, 0, '', '[LCV] Only show gossip if player has less then 10 outfits');
 
-﻿-- Author: Decode
--- Date: 2012/04/07
--- Quest: Detén la ascensión!
--- ID: 11260
+-- Author: Decode
+-- Quest: deten la ascension
 
 SET @ENTRY := 23671;
 SET @SOURCETYPE := 0;
@@ -561,3 +560,14 @@ INSERT INTO `gossip_menu` (`entry`,`text_id`) VALUES
 DELETE FROM `gossip_menu_option` WHERE `menu_id`=9677;
 INSERT INTO `gossip_menu_option` (`menu_id`,`id`,`option_icon`,`option_text`,`option_id`,`npc_option_npcflag`,`action_menu_id`,`action_poi_id`,`box_coded`,`box_money`,`box_text`) VALUES
 (9677,0,0, '<Reach down and pull the Injured Rainspeaker Oracle to its feet.>',1,1,0,0,0,0, '');
+
+
+-- Author 4m1g0
+-- Corregida inmunidades de sister svalna (icc) data from YTDB
+-- Date: 29/05/2012
+
+UPDATE `creature_template` SET `mechanic_immune_mask` = 8388624 WHERE entry IN (37126, 38258);
+
+
+
+
