@@ -1,0 +1,693 @@
+diff --git a/src/server/game/Entities/Object/Object.cpp b/src/server/game/Entities/Object/Object.cpp
+index fc1b56c..0605105 100755
+--- a/src/server/game/Entities/Object/Object.cpp
++++ b/src/server/game/Entities/Object/Object.cpp
+@@ -1201,7 +1201,7 @@ void MovementInfo::OutDebug()
+ WorldObject::WorldObject(bool isWorldObject): WorldLocation(),
+ m_name(""), m_isActive(false), m_isWorldObject(isWorldObject), m_zoneScript(NULL),
+ m_transport(NULL), m_currMap(NULL), m_InstanceId(0),
+-m_phaseMask(PHASEMASK_NORMAL), m_notifyflags(0), m_executed_notifies(0)
++m_phaseMask(PHASEMASK_NORMAL)
+ {
+     m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE | GHOST_VISIBILITY_GHOST);
+     m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE);
+diff --git a/src/server/game/Entities/Object/Object.h b/src/server/game/Entities/Object/Object.h
+index 3693f68..41097be 100755
+--- a/src/server/game/Entities/Object/Object.h
++++ b/src/server/game/Entities/Object/Object.h
+@@ -797,14 +797,6 @@ class WorldObject : public Object, public WorldLocation
+         virtual void UpdateObjectVisibility(bool forced = true);
+         void BuildUpdate(UpdateDataMapType&);
+ 
+-        //relocation and visibility system functions
+-        void AddToNotify(uint16 f) { m_notifyflags |= f;}
+-        bool isNeedNotify(uint16 f) const { return m_notifyflags & f;}
+-        uint16 GetNotifyFlags() const { return m_notifyflags; }
+-        bool NotifyExecuted(uint16 f) const { return m_executed_notifies & f;}
+-        void SetNotified(uint16 f) { m_executed_notifies |= f;}
+-        void ResetAllNotifies() { m_notifyflags = 0; m_executed_notifies = 0; }
+-
+         bool isActiveObject() const { return m_isActive; }
+         void setActive(bool isActiveObject);
+         void SetWorldObject(bool apply);
+@@ -864,9 +856,6 @@ class WorldObject : public Object, public WorldLocation
+         uint32 m_InstanceId;                                // in map copy with instance id
+         uint32 m_phaseMask;                                 // in area phase state
+ 
+-        uint16 m_notifyflags;
+-        uint16 m_executed_notifies;
+-
+         virtual bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const;
+ 
+         bool CanNeverSee(WorldObject const* obj) const { return GetMap() != obj->GetMap() || !InSamePhase(obj); }
+diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
+index 7c70fe9..5ac7461 100755
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -21736,7 +21736,7 @@ bool Player::IsNeverVisible() const
+     if (Unit::IsNeverVisible())
+         return true;
+ 
+-    if (GetSession()->PlayerLogout() || GetSession()->PlayerLoading())
++    if (GetSession()->PlayerLogout() /*|| GetSession()->PlayerLoading()*/)
+         return true;
+ 
+     return false;
+@@ -21939,17 +21939,6 @@ template void Player::UpdateVisibilityOf(Corpse*        target, UpdateData& data
+ template void Player::UpdateVisibilityOf(GameObject*    target, UpdateData& data, std::set<Unit*>& visibleNow);
+ template void Player::UpdateVisibilityOf(DynamicObject* target, UpdateData& data, std::set<Unit*>& visibleNow);
+ 
+-void Player::UpdateObjectVisibility(bool forced)
+-{
+-    if (!forced)
+-        AddToNotify(NOTIFY_VISIBILITY_CHANGED);
+-    else
+-    {
+-        Unit::UpdateObjectVisibility(true);
+-        UpdateVisibilityForPlayer();
+-    }
+-}
+-
+ void Player::UpdateVisibilityForPlayer()
+ {
+     // updates visibility of all objects around point of view for current player
+diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
+index ed88799..ba226b4 100755
+--- a/src/server/game/Entities/Player/Player.h
++++ b/src/server/game/Entities/Player/Player.h
+@@ -2328,7 +2328,6 @@ class Player : public Unit, public GridObject<Player>
+         bool IsVisibleGloballyFor(Player* player) const;
+ 
+         void SendInitialVisiblePackets(Unit* target);
+-        void UpdateObjectVisibility(bool forced = true);
+         void UpdateVisibilityForPlayer();
+         void UpdateVisibilityOf(WorldObject* target);
+         void UpdateTriggerVisibility();
+diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
+index fb91c3f..d8ada47 100755
+--- a/src/server/game/Entities/Unit/Unit.cpp
++++ b/src/server/game/Entities/Unit/Unit.cpp
+@@ -253,6 +253,7 @@ m_HostileRefManager(this)
+     _focusSpell = NULL;
+     _targetLocked = false;
+     _lastLiquid = NULL;
++    m_VisibilityUpdScheduled = false;
+ }
+ 
+ ////////////////////////////////////////////////////////////
+@@ -16600,17 +16601,61 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
+                 summon->SetPhaseMask(newPhaseMask, true);
+ }
+ 
+-void Unit::UpdateObjectVisibility(bool forced)
++class Unit::VisibilityUpdater : public BasicEvent
+ {
+-    if (!forced)
+-        AddToNotify(NOTIFY_VISIBILITY_CHANGED);
+-    else
++    Unit& m_owner;
++public:
++    explicit VisibilityUpdater(Unit * me) : m_owner(*me) {
++        m_owner.m_VisibilityUpdScheduled = true;
++    }
++
++    ~VisibilityUpdater() {
++        m_owner.m_VisibilityUpdScheduled = false;
++    }
++
++    virtual bool Execute(uint64 , uint32) 
+     {
+-        WorldObject::UpdateObjectVisibility(true);
+-        // call MoveInLineOfSight for nearby creatures
+-        Trinity::AIRelocationNotifier notifier(*this);
+-        VisitNearbyObject(GetVisibilityRange(), notifier);
++        Trinity::AIRelocationNotifier notifier(m_owner);
++        m_owner.VisitNearbyObject(m_owner.GetVisibilityRange(), notifier);
++        return true;
+     }
++
++    static void UpdateVisibilityForced(Unit* me)
++    {
++        if (!me->IsInWorld())
++            return;
++        if (!me->m_sharedVision.empty())
++            for (SharedVisionList::const_iterator it = me->m_sharedVision.begin();it!= me->m_sharedVision.end();)
++            {
++                Player * tmp = *it;
++                ++it;
++                tmp->UpdateVisibilityForPlayer();
++            }
++        if (me->isType(TYPEMASK_PLAYER))
++            ((Player*)me)->UpdateVisibilityForPlayer();
++        me->WorldObject::UpdateObjectVisibility(true);
++    }
++
++    static void ScheduleAINotify(Unit* me)
++    {
++        if (!me->m_VisibilityUpdScheduled)
++            me->m_Events.AddEvent(new VisibilityUpdater(me), me->m_Events.CalculateTime(World::AIRelocationNotifyPeriod));
++    }
++};
++
++void Unit::OnRelocated()
++{
++    if (!m_lastVisibilityUpdPos.IsInDist(this, World::MinRequiredDistance)) {
++        m_lastVisibilityUpdPos = *this;
++        VisibilityUpdater::UpdateVisibilityForced(this);
++    }
++    VisibilityUpdater::ScheduleAINotify(this);
++}
++
++void Unit::UpdateObjectVisibility(bool /*forced*/)
++{
++    VisibilityUpdater::UpdateVisibilityForced(this);
++    VisibilityUpdater::ScheduleAINotify(this);
+ }
+ 
+ void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
+diff --git a/src/server/game/Entities/Unit/Unit.h b/src/server/game/Entities/Unit/Unit.h
+index 5a6276d..5ba56af 100755
+--- a/src/server/game/Entities/Unit/Unit.h
++++ b/src/server/game/Entities/Unit/Unit.h
+@@ -2251,6 +2251,8 @@ class Unit : public WorldObject
+ 
+         // Movement info
+         Movement::MoveSpline * movespline;
++        
++        void OnRelocated();
+ 
+     protected:
+         explicit Unit (bool isWorldObject);
+@@ -2311,6 +2313,10 @@ class Unit : public WorldObject
+ 
+         MotionMaster i_motionMaster;
+ 
++        class VisibilityUpdater;
++        Position m_lastVisibilityUpdPos;
++        bool m_VisibilityUpdScheduled;
++
+         uint32 m_reactiveTimer[MAX_REACTIVE];
+         uint32 m_regenTimer;
+ 
+diff --git a/src/server/game/Grids/NGrid.h b/src/server/game/Grids/NGrid.h
+index b5701a7..da2dddf 100755
+--- a/src/server/game/Grids/NGrid.h
++++ b/src/server/game/Grids/NGrid.h
+@@ -27,16 +27,14 @@
+ #include "Timer.h"
+ #include "Util.h"
+ 
+-#define DEFAULT_VISIBILITY_NOTIFY_PERIOD      1000
+-
+ class GridInfo
+ {
+ public:
+     GridInfo()
+-        : i_timer(0), vis_Update(0, irand(0, DEFAULT_VISIBILITY_NOTIFY_PERIOD)),
++        : i_timer(0),
+           i_unloadActiveLockCount(0), i_unloadExplicitLock(false), i_unloadReferenceLock(false) {}
+     GridInfo(time_t expiry, bool unload = true )
+-        : i_timer(expiry), vis_Update(0, irand(0, DEFAULT_VISIBILITY_NOTIFY_PERIOD)),
++        : i_timer(expiry),
+           i_unloadActiveLockCount(0), i_unloadExplicitLock(!unload), i_unloadReferenceLock(false) {}
+     const TimeTracker& getTimeTracker() const { return i_timer; }
+     bool getUnloadLock() const { return i_unloadActiveLockCount || i_unloadExplicitLock || i_unloadReferenceLock; }
+@@ -48,10 +46,8 @@ public:
+     void setTimer(const TimeTracker& pTimer) { i_timer = pTimer; }
+     void ResetTimeTracker(time_t interval) { i_timer.Reset(interval); }
+     void UpdateTimeTracker(time_t diff) { i_timer.Update(diff); }
+-    PeriodicTimer& getRelocationTimer() { return vis_Update; }
+ private:
+     TimeTracker i_timer;
+-    PeriodicTimer vis_Update;
+ 
+     uint16 i_unloadActiveLockCount : 16;                    // lock from active object spawn points (prevent clone loading)
+     bool   i_unloadExplicitLock    : 1;                     // explicit manual lock or config setting
+diff --git a/src/server/game/Grids/Notifiers/GridNotifiers.cpp b/src/server/game/Grids/Notifiers/GridNotifiers.cpp
+index a02c18c..71956fa 100755
+--- a/src/server/game/Grids/Notifiers/GridNotifiers.cpp
++++ b/src/server/game/Grids/Notifiers/GridNotifiers.cpp
+@@ -42,9 +42,7 @@ void VisibleNotifier::SendToSelf()
+                 vis_guids.erase((*itr)->GetGUID());
+ 
+                 i_player.UpdateVisibilityOf((*itr), i_data, i_visibleNow);
+-
+-                if (!(*itr)->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+-                    (*itr)->UpdateVisibilityOf(&i_player);
++                (*itr)->UpdateVisibilityOf(&i_player);
+             }
+         }
+ 
+@@ -56,7 +54,7 @@ void VisibleNotifier::SendToSelf()
+         if (IS_PLAYER_GUID(*it))
+         {
+             Player* player = ObjectAccessor::FindPlayer(*it);
+-            if (player && player->IsInWorld() && !player->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
++            if (player && player->IsInWorld())
+                 player->UpdateVisibilityOf(&i_player);
+         }
+     }
+@@ -118,114 +116,6 @@ inline void CreatureUnitRelocationWorker(Creature* c, Unit* u)
+             c->AI()->MoveInLineOfSight_Safe(u);
+ }
+ 
+-void PlayerRelocationNotifier::Visit(PlayerMapType &m)
+-{
+-    for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+-    {
+-        Player* player = iter->getSource();
+-
+-        vis_guids.erase(player->GetGUID());
+-
+-        i_player.UpdateVisibilityOf(player, i_data, i_visibleNow);
+-
+-        if (player->m_seer->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+-            continue;
+-
+-        player->UpdateVisibilityOf(&i_player);
+-    }
+-}
+-
+-void PlayerRelocationNotifier::Visit(CreatureMapType &m)
+-{
+-    bool relocated_for_ai = (&i_player == i_player.m_seer);
+-
+-    for (CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+-    {
+-        Creature* c = iter->getSource();
+-
+-        vis_guids.erase(c->GetGUID());
+-
+-        i_player.UpdateVisibilityOf(c, i_data, i_visibleNow);
+-
+-        if (relocated_for_ai && !c->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+-            CreatureUnitRelocationWorker(c, &i_player);
+-    }
+-}
+-
+-void CreatureRelocationNotifier::Visit(PlayerMapType &m)
+-{
+-    for (PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+-    {
+-        Player* player = iter->getSource();
+-
+-        if (!player->m_seer->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+-            player->UpdateVisibilityOf(&i_creature);
+-
+-        CreatureUnitRelocationWorker(&i_creature, player);
+-    }
+-}
+-
+-void CreatureRelocationNotifier::Visit(CreatureMapType &m)
+-{
+-    if (!i_creature.isAlive())
+-        return;
+-
+-    for (CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+-    {
+-        Creature* c = iter->getSource();
+-        CreatureUnitRelocationWorker(&i_creature, c);
+-
+-        if (!c->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+-            CreatureUnitRelocationWorker(c, &i_creature);
+-    }
+-}
+-
+-void DelayedUnitRelocation::Visit(CreatureMapType &m)
+-{
+-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+-    {
+-        Creature* unit = iter->getSource();
+-        if (!unit->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+-            continue;
+-
+-        CreatureRelocationNotifier relocate(*unit);
+-
+-        TypeContainerVisitor<CreatureRelocationNotifier, WorldTypeMapContainer > c2world_relocation(relocate);
+-        TypeContainerVisitor<CreatureRelocationNotifier, GridTypeMapContainer >  c2grid_relocation(relocate);
+-
+-        cell.Visit(p, c2world_relocation, i_map, *unit, i_radius);
+-        cell.Visit(p, c2grid_relocation, i_map, *unit, i_radius);
+-    }
+-}
+-
+-void DelayedUnitRelocation::Visit(PlayerMapType &m)
+-{
+-    for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+-    {
+-        Player* player = iter->getSource();
+-        WorldObject const* viewPoint = player->m_seer;
+-
+-        if (!viewPoint->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
+-            continue;
+-
+-        if (player != viewPoint && !viewPoint->IsPositionValid())
+-            continue;
+-
+-        CellCoord pair2(Trinity::ComputeCellCoord(viewPoint->GetPositionX(), viewPoint->GetPositionY()));
+-        Cell cell2(pair2);
+-        //cell.SetNoCreate(); need load cells around viewPoint or player, that's why its commented
+-
+-        PlayerRelocationNotifier relocate(*player);
+-        TypeContainerVisitor<PlayerRelocationNotifier, WorldTypeMapContainer > c2world_relocation(relocate);
+-        TypeContainerVisitor<PlayerRelocationNotifier, GridTypeMapContainer >  c2grid_relocation(relocate);
+-
+-        cell2.Visit(pair2, c2world_relocation, i_map, *viewPoint, i_radius);
+-        cell2.Visit(pair2, c2grid_relocation, i_map, *viewPoint, i_radius);
+-
+-        relocate.SendToSelf();
+-    }
+-}
+-
+ void AIRelocationNotifier::Visit(CreatureMapType &m)
+ {
+     for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+diff --git a/src/server/game/Grids/Notifiers/GridNotifiers.h b/src/server/game/Grids/Notifiers/GridNotifiers.h
+index e81822e..10fa062 100755
+--- a/src/server/game/Grids/Notifiers/GridNotifiers.h
++++ b/src/server/game/Grids/Notifiers/GridNotifiers.h
+@@ -60,37 +60,6 @@ namespace Trinity
+         void Visit(DynamicObjectMapType &);
+     };
+ 
+-    struct PlayerRelocationNotifier : public VisibleNotifier
+-    {
+-        PlayerRelocationNotifier(Player &player) : VisibleNotifier(player) {}
+-
+-        template<class T> void Visit(GridRefManager<T> &m) { VisibleNotifier::Visit(m); }
+-        void Visit(CreatureMapType &);
+-        void Visit(PlayerMapType &);
+-    };
+-
+-    struct CreatureRelocationNotifier
+-    {
+-        Creature &i_creature;
+-        CreatureRelocationNotifier(Creature &c) : i_creature(c) {}
+-        template<class T> void Visit(GridRefManager<T> &) {}
+-        void Visit(CreatureMapType &);
+-        void Visit(PlayerMapType &);
+-    };
+-
+-    struct DelayedUnitRelocation
+-    {
+-        Map &i_map;
+-        Cell &cell;
+-        CellCoord &p;
+-        const float i_radius;
+-        DelayedUnitRelocation(Cell &c, CellCoord &pair, Map &map, float radius) :
+-            i_map(map), cell(c), p(pair), i_radius(radius) {}
+-        template<class T> void Visit(GridRefManager<T> &) {}
+-        void Visit(CreatureMapType &);
+-        void Visit(PlayerMapType   &);
+-    };
+-
+     struct AIRelocationNotifier
+     {
+         Unit &i_unit;
+diff --git a/src/server/game/Maps/Map.cpp b/src/server/game/Maps/Map.cpp
+index a1b3d91..a16a939 100755
+--- a/src/server/game/Maps/Map.cpp
++++ b/src/server/game/Maps/Map.cpp
+@@ -207,7 +207,6 @@ void Map::DeleteStateMachine()
+ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode, Map* _parent):
+ _creatureToMoveLock(false), i_mapEntry (sMapStore.LookupEntry(id)), i_spawnMode(SpawnMode), i_InstanceId(InstanceId),
+ m_unloadTimer(0), m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE),
+-m_VisibilityNotifyPeriod(DEFAULT_VISIBILITY_NOTIFY_PERIOD),
+ m_activeNonPlayersIter(m_activeNonPlayers.end()), i_gridExpiry(expiry),
+ i_scriptLock(false)
+ {
+@@ -232,7 +231,6 @@ void Map::InitVisibilityDistance()
+ {
+     //init visibility for continents
+     m_VisibleDistance = World::GetMaxVisibleDistanceOnContinents();
+-    m_VisibilityNotifyPeriod = World::GetVisibilityNotifyPeriodOnContinents();
+ }
+ 
+ // Template specialization of utility methods
+@@ -561,101 +559,9 @@ void Map::Update(const uint32 t_diff)
+ 
+     MoveAllCreaturesInMoveList();
+ 
+-    if (!m_mapRefManager.isEmpty() || !m_activeNonPlayers.empty())
+-        ProcessRelocationNotifies(t_diff);
+-
+     sScriptMgr->OnMapUpdate(this, t_diff);
+ }
+ 
+-struct ResetNotifier
+-{
+-    template<class T>inline void resetNotify(GridRefManager<T> &m)
+-    {
+-        for (typename GridRefManager<T>::iterator iter=m.begin(); iter != m.end(); ++iter)
+-            iter->getSource()->ResetAllNotifies();
+-    }
+-    template<class T> void Visit(GridRefManager<T> &) {}
+-    void Visit(CreatureMapType &m) { resetNotify<Creature>(m);}
+-    void Visit(PlayerMapType &m) { resetNotify<Player>(m);}
+-};
+-
+-void Map::ProcessRelocationNotifies(const uint32 diff)
+-{
+-    for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end(); ++i)
+-    {
+-        NGridType *grid = i->getSource();
+-
+-        if (grid->GetGridState() != GRID_STATE_ACTIVE)
+-            continue;
+-
+-        grid->getGridInfoRef()->getRelocationTimer().TUpdate(diff);
+-        if (!grid->getGridInfoRef()->getRelocationTimer().TPassed())
+-            continue;
+-
+-        uint32 gx = grid->getX(), gy = grid->getY();
+-
+-        CellCoord cell_min(gx*MAX_NUMBER_OF_CELLS, gy*MAX_NUMBER_OF_CELLS);
+-        CellCoord cell_max(cell_min.x_coord + MAX_NUMBER_OF_CELLS, cell_min.y_coord+MAX_NUMBER_OF_CELLS);
+-
+-        for (uint32 x = cell_min.x_coord; x < cell_max.x_coord; ++x)
+-        {
+-            for (uint32 y = cell_min.y_coord; y < cell_max.y_coord; ++y)
+-            {
+-                uint32 cell_id = (y * TOTAL_NUMBER_OF_CELLS_PER_MAP) + x;
+-                if (!isCellMarked(cell_id))
+-                    continue;
+-
+-                CellCoord pair(x, y);
+-                Cell cell(pair);
+-                cell.SetNoCreate();
+-
+-                Trinity::DelayedUnitRelocation cell_relocation(cell, pair, *this, MAX_VISIBILITY_DISTANCE);
+-                TypeContainerVisitor<Trinity::DelayedUnitRelocation, GridTypeMapContainer  > grid_object_relocation(cell_relocation);
+-                TypeContainerVisitor<Trinity::DelayedUnitRelocation, WorldTypeMapContainer > world_object_relocation(cell_relocation);
+-                Visit(cell, grid_object_relocation);
+-                Visit(cell, world_object_relocation);
+-            }
+-        }
+-    }
+-
+-    ResetNotifier reset;
+-    TypeContainerVisitor<ResetNotifier, GridTypeMapContainer >  grid_notifier(reset);
+-    TypeContainerVisitor<ResetNotifier, WorldTypeMapContainer > world_notifier(reset);
+-    for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end(); ++i)
+-    {
+-        NGridType *grid = i->getSource();
+-
+-        if (grid->GetGridState() != GRID_STATE_ACTIVE)
+-            continue;
+-
+-        if (!grid->getGridInfoRef()->getRelocationTimer().TPassed())
+-            continue;
+-
+-        grid->getGridInfoRef()->getRelocationTimer().TReset(diff, m_VisibilityNotifyPeriod);
+-
+-        uint32 gx = grid->getX(), gy = grid->getY();
+-
+-        CellCoord cell_min(gx*MAX_NUMBER_OF_CELLS, gy*MAX_NUMBER_OF_CELLS);
+-        CellCoord cell_max(cell_min.x_coord + MAX_NUMBER_OF_CELLS, cell_min.y_coord+MAX_NUMBER_OF_CELLS);
+-
+-        for (uint32 x = cell_min.x_coord; x < cell_max.x_coord; ++x)
+-        {
+-            for (uint32 y = cell_min.y_coord; y < cell_max.y_coord; ++y)
+-            {
+-                uint32 cell_id = (y * TOTAL_NUMBER_OF_CELLS_PER_MAP) + x;
+-                if (!isCellMarked(cell_id))
+-                    continue;
+-
+-                CellCoord pair(x, y);
+-                Cell cell(pair);
+-                cell.SetNoCreate();
+-                Visit(cell, grid_notifier);
+-                Visit(cell, world_notifier);
+-            }
+-        }
+-    }
+-}
+-
+ void Map::RemovePlayerFromMap(Player* player, bool remove)
+ {
+     player->RemoveFromWorld();
+@@ -725,7 +631,7 @@ void Map::PlayerRelocation(Player* player, float x, float y, float z, float orie
+         AddToGrid(player, new_cell);
+     }
+ 
+-    player->UpdateObjectVisibility(false);
++    player->OnRelocated();
+ }
+ 
+ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, float ang, bool respawnRelocationOnFail)
+@@ -758,7 +664,7 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
+         creature->Relocate(x, y, z, ang);
+         if (creature->IsVehicle())
+             creature->GetVehicleKit()->RelocatePassengers(x, y, z, ang);
+-        creature->UpdateObjectVisibility(false);
++        creature->OnRelocated();
+         RemoveCreatureFromMoveList(creature);
+     }
+ 
+@@ -809,7 +715,7 @@ void Map::MoveAllCreaturesInMoveList()
+             // update pos
+             c->Relocate(c->_newPosition);
+             //CreatureRelocationNotify(c, new_cell, new_cell.cellCoord());
+-            c->UpdateObjectVisibility(false);
++            c->OnRelocated();
+         }
+         else
+         {
+@@ -922,7 +828,7 @@ bool Map::CreatureRespawnRelocation(Creature* c, bool diffGridOnly)
+         c->Relocate(resp_x, resp_y, resp_z, resp_o);
+         c->GetMotionMaster()->Initialize();                 // prevent possible problems with default move generators
+         //CreatureRelocationNotify(c, resp_cell, resp_cell.GetCellCoord());
+-        c->UpdateObjectVisibility(false);
++        c->OnRelocated();
+         return true;
+     }
+ 
+@@ -2301,7 +2207,6 @@ void InstanceMap::InitVisibilityDistance()
+ {
+     //init visibility distance for instances
+     m_VisibleDistance = World::GetMaxVisibleDistanceInInstances();
+-    m_VisibilityNotifyPeriod = World::GetVisibilityNotifyPeriodInInstances();
+ }
+ 
+ /*
+@@ -2708,7 +2613,6 @@ void BattlegroundMap::InitVisibilityDistance()
+ {
+     //init visibility distance for BG/Arenas
+     m_VisibleDistance = World::GetMaxVisibleDistanceInBGArenas();
+-    m_VisibilityNotifyPeriod = World::GetVisibilityNotifyPeriodInBGArenas();
+ }
+ 
+ bool BattlegroundMap::CanEnter(Player* player)
+diff --git a/src/server/game/Maps/Map.h b/src/server/game/Maps/Map.h
+index 6ba0864..7f8e45f 100755
+--- a/src/server/game/Maps/Map.h
++++ b/src/server/game/Maps/Map.h
+@@ -503,8 +503,6 @@ class Map : public GridRefManager<NGridType>
+         MapRefManager m_mapRefManager;
+         MapRefManager::iterator m_mapRefIter;
+ 
+-        int32 m_VisibilityNotifyPeriod;
+-
+         typedef std::set<WorldObject*> ActiveNonPlayers;
+         ActiveNonPlayers m_activeNonPlayers;
+         ActiveNonPlayers::iterator m_activeNonPlayersIter;
+@@ -529,10 +527,6 @@ class Map : public GridRefManager<NGridType>
+         GridMap* GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+         std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
+ 
+-        //these functions used to process player/mob aggro reactions and
+-        //visibility calculations. Highly optimized for massive calculations
+-        void ProcessRelocationNotifies(const uint32 diff);
+-
+         bool i_scriptLock;
+         std::set<WorldObject*> i_objectsToRemove;
+         std::map<WorldObject*, bool> i_objectsToSwitch;
+diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
+index 6e32d33..994e706 100755
+--- a/src/server/game/World/World.cpp
++++ b/src/server/game/World/World.cpp
+@@ -86,9 +86,8 @@ float World::m_MaxVisibleDistanceOnContinents = DEFAULT_VISIBILITY_DISTANCE;
+ float World::m_MaxVisibleDistanceInInstances  = DEFAULT_VISIBILITY_INSTANCE;
+ float World::m_MaxVisibleDistanceInBGArenas   = DEFAULT_VISIBILITY_BGARENAS;
+ 
+-int32 World::m_visibility_notify_periodOnContinents = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
+-int32 World::m_visibility_notify_periodInInstances  = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
+-int32 World::m_visibility_notify_periodInBGArenas   = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
++float World::MinRequiredDistance = 10.f;
++int32 World::AIRelocationNotifyPeriod = 1000;
+ 
+ /// World constructor
+ World::World()
+@@ -1095,9 +1094,8 @@ void World::LoadConfigSettings(bool reload)
+         m_MaxVisibleDistanceInBGArenas = MAX_VISIBILITY_DISTANCE;
+     }
+ 
+-    m_visibility_notify_periodOnContinents = ConfigMgr::GetIntDefault("Visibility.Notify.Period.OnContinents", DEFAULT_VISIBILITY_NOTIFY_PERIOD);
+-    m_visibility_notify_periodInInstances = ConfigMgr::GetIntDefault("Visibility.Notify.Period.InInstances",   DEFAULT_VISIBILITY_NOTIFY_PERIOD);
+-    m_visibility_notify_periodInBGArenas = ConfigMgr::GetIntDefault("Visibility.Notify.Period.InBGArenas",    DEFAULT_VISIBILITY_NOTIFY_PERIOD);
++    MinRequiredDistance = ConfigMgr::GetFloatDefault("Visibility.MinRequiredDistance", MinRequiredDistance);
++    AIRelocationNotifyPeriod = ConfigMgr::GetIntDefault("Visibility.AIRelocationNotifyPeriod", AIRelocationNotifyPeriod);
+ 
+     ///- Load the CharDelete related config options
+     m_int_configs[CONFIG_CHARDELETE_METHOD] = ConfigMgr::GetIntDefault("CharDelete.Method", 0);
+diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
+index 95e9fbd..8420560 100755
+--- a/src/server/game/World/World.h
++++ b/src/server/game/World/World.h
+@@ -720,9 +720,10 @@ class World
+         static float GetMaxVisibleDistanceInInstances()     { return m_MaxVisibleDistanceInInstances;  }
+         static float GetMaxVisibleDistanceInBGArenas()      { return m_MaxVisibleDistanceInBGArenas;   }
+ 
+-        static int32 GetVisibilityNotifyPeriodOnContinents(){ return m_visibility_notify_periodOnContinents; }
+-        static int32 GetVisibilityNotifyPeriodInInstances() { return m_visibility_notify_periodInInstances;  }
+-        static int32 GetVisibilityNotifyPeriodInBGArenas()  { return m_visibility_notify_periodInBGArenas;   }
++        static int32 AIRelocationNotifyPeriod;
++
++        // The distance minimum that need to pass to trigger visibility update
++        static float MinRequiredDistance;
+ 
+         void ProcessCliCommands();
+         void QueueCliCommand(CliCommandHolder* commandHolder) { cliCmdQueue.add(commandHolder); }
+@@ -817,10 +818,6 @@ class World
+         static float m_MaxVisibleDistanceInInstances;
+         static float m_MaxVisibleDistanceInBGArenas;
+ 
+-        static int32 m_visibility_notify_periodOnContinents;
+-        static int32 m_visibility_notify_periodInInstances;
+-        static int32 m_visibility_notify_periodInBGArenas;
+-
+         // CLI command holder to be thread safe
+         ACE_Based::LockedQueue<CliCommandHolder*, ACE_Thread_Mutex> cliCmdQueue;
+ 
+diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
+index 5d83710..7818b7d 100644
+--- a/src/server/worldserver/worldserver.conf.dist
++++ b/src/server/worldserver/worldserver.conf.dist
+@@ -2037,18 +2037,17 @@ Visibility.Distance.Instances = 120
+ Visibility.Distance.BGArenas = 180
+ 
+ #
+-#    Visibility.Notify.Period.OnContinents
+-#    Visibility.Notify.Period.InInstances
+-#    Visibility.Notify.Period.InBGArenas
+-#        Description: Time (in milliseconds) for visibility update period. Lower values may have
++#    Visibility.AIRelocationNotifyPeriod
++#        Description: Delay (in milliseconds) between unit moves and nearby AI reactions. Lower values may have
+ #                     performance impact.
+-#        Default:     1000 - (Visibility.Notify.Period.OnContinents)
+-#                     1000 - (Visibility.Notify.Period.InInstances)
+-#                     1000 - (Visibility.Notify.Period.InBGArenas)
++#        Default:     1000 - (Visibility.AIRelocationNotifyPeriod)
++#
++#    Visibility.MinRequiredDistance
++#        Description: Distance minimum (in yards) than need to pass to trigger visibility update
++#        Default:     10 - (Visibility.MinRequiredDistance)
+ 
+-Visibility.Notify.Period.OnContinents = 1000
+-Visibility.Notify.Period.InInstances  = 1000
+-Visibility.Notify.Period.InBGArenas   = 1000
++Visibility.AIRelocationNotifyPeriod = 1000
++Visibility.MinRequiredDistance      = 10
+ 
+ #
+ ###################################################################################################
