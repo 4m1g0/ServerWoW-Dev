@@ -4,11 +4,9 @@ Date: Sat, 26 May 2012 14:59:21 -0500
 Subject: [PATCH] jail
 
 ---
- sql/All/characters_jail.sql                |   66 +++++++
- sql/All/world_command_Deutsch.sql          |    7 +
- sql/All/world_command_English.sql          |    7 +
- sql/All/world_command_Francais.sql         |    7 +
- sql/All/world_trinity_string.sql           |   41 ++++
+ sql/own/0028-characters_jail.sql                |   66 +++++++
+ sql/own/0028-world_command_English.sql          |    7 +
+ sql/own/0028-world_trinity_string.sql           |   41 ++++
  src/server/game/Chat/Chat.cpp              |    7 +-
  src/server/game/Chat/Chat.h                |    6 +
  src/server/game/Chat/Commands/Level0.cpp   |   55 +++++-
@@ -28,11 +26,11 @@ Subject: [PATCH] jail
  create mode 100644 sql/All/world_command_Francais.sql
  create mode 100644 sql/All/world_trinity_string.sql
 
-diff --git a/sql/All/characters_jail.sql b/sql/All/characters_jail.sql
+diff --git a/sql/own/0028-characters_jail.sql b/sql/own/0028-characters_jail.sql
 new file mode 100644
 index 0000000..8bd8e95
 --- /dev/null
-+++ b/sql/All/characters_jail.sql
++++ b/sql/own/0028-characters_jail.sql
 @@ -0,0 +1,66 @@
 +/*
 +MySQL Data Transfer
@@ -100,24 +98,11 @@ index 0000000..8bd8e95
 +INSERT INTO `jail_conf` VALUES ('15', 'm_jailconf_horde_m', '1', null, 'Teleport Horde  Mape\r\nStandart = 1', 'eleport Horde  Map\r\nStandart = 1');
 +INSERT INTO `jail_conf` VALUES ('16', 'm_jailconf_ban', '0', null, 'Nach wie vielen Jail soll der  Account Gebant werden\r\nStandart = 0  (aus)\r\n', 'After how many jails the account will be Banned\r\nDefault = 0 (off)');
 +INSERT INTO `jail_conf` VALUES ('17', 'm_jailconf_radius', '10', null, 'Legt den Bewegung Radius in Metern waren des Jails fest\r\nStandart = 10\r\n', 'Sets the range of motion in meters of the jail\r\nDefault = 10');
-diff --git a/sql/All/world_command_Deutsch.sql b/sql/All/world_command_Deutsch.sql
-new file mode 100644
-index 0000000..de6ac28
---- /dev/null
-+++ b/sql/All/world_command_Deutsch.sql
-@@ -0,0 +1,7 @@
-+/* World Command Deutsch */
-+DELETE FROM `command` WHERE name IN ('jail','jailinfo','unjail','jailreload');
-+INSERT INTO `command` (name, security, help) VALUES
-+('jail', 1, 'Syntax: .jail Charakter Stunden Grund\nBuchtet den \'Charakter\' für \'Stunden\' aus dem \'Grund\' ein.'),
-+('jailinfo', 0, 'Syntax: .jailinfo\nZeigt dir deinen Knast-Status an.'),
-+('unjail', 1, 'Syntax: .unjail Charakter\nEntläßt den \'Charakter\' aus dem Knast.'),
-+('jailreload', 3, 'Syntax: .jailreload\nLädt die Jail-Konfiguration neu.');
-diff --git a/sql/All/world_command_English.sql b/sql/All/world_command_English.sql
+diff --git a/sql/own/0028-world_command_English.sql b/sql/own/0028-world_command_English.sql
 new file mode 100644
 index 0000000..0176922
 --- /dev/null
-+++ b/sql/All/world_command_English.sql
++++ b/sql/own/0028-world_command_English.sql
 @@ -0,0 +1,7 @@
 +/* World Command English */
 +DELETE FROM `command` WHERE name IN ('jail','jailinfo','unjail','jailreload');
@@ -126,24 +111,11 @@ index 0000000..0176922
 +('jailinfo', 0, 'Syntax: .jailinfo\nShows your jail status.'),
 +('unjail', 1, 'Syntax: .unjail character\nRealeases the \'character\' out of the jail.'),
 +('jailreload', 3, 'Syntax: .jailreload\nLoads the jail config new.');
-diff --git a/sql/All/world_command_Francais.sql b/sql/All/world_command_Francais.sql
-new file mode 100644
-index 0000000..639bfc8
---- /dev/null
-+++ b/sql/All/world_command_Francais.sql
-@@ -0,0 +1,7 @@
-+/* World Command Francais */
-+DELETE FROM `command` WHERE name IN ('jail','jailinfo','unjail','jailreload');
-+INSERT INTO `command` (name, security, help) VALUES
-+('jail', 1, 'Syntaxe: .jail #personage #heures #raison\nEmprisonner un \'personnage\' pendant \'heures\' pour la \'raison\'.'),
-+('jailinfo', 0, 'Syntaxe: .jailinfo\nVoir le statut de vos emprisonnements.'),
-+('unjail', 1, 'Syntaxe: .unjail #personnages\nLibérer le \'personnage\' de la prison.'),
-+('jailreload', 3, 'Syntaxe: .jailreload\nRecharger la configuration du Jail.');
-diff --git a/sql/All/world_trinity_string.sql b/sql/All/world_trinity_string.sql
+diff --git a/sql/own/0028-world_trinity_string.sql b/sql/own/0028-world_trinity_string.sql
 new file mode 100644
 index 0000000..8d94f61
 --- /dev/null
-+++ b/sql/All/world_trinity_string.sql
++++ b/sql/own/0028-world_trinity_string.sql
 @@ -0,0 +1,41 @@
 +/* World trinity_string */
 +SET NAMES 'utf8';
