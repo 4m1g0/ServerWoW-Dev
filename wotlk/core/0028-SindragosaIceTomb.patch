@@ -1,7 +1,7 @@
-From 2e92a04673932e997f8d61a3cc9e5e0a9d38e8ec Mon Sep 17 00:00:00 2001
+From c1f6bf706717ed483d653da3157d40acf5a495c7 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Tue, 29 May 2012 20:03:10 +0200
-Subject: [PATCH] sindragosa ice tomb
+Date: Fri, 29 Jun 2012 18:40:26 +0200
+Subject: [PATCH 28/29] SindragosaIceTomb
 
 ---
  sql/own/0029-world_script_names.sql                |   12 ++++
@@ -28,10 +28,10 @@ index 0000000..921701b
 +(72530, 'spell_sindragosa_collision_filter');
 +
 diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
-index 6039ace..6c606cd 100644
+index fdc9a6a..149158c 100644
 --- a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
 +++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
-@@ -1251,6 +1251,63 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
+@@ -1257,6 +1257,63 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
          }
  };
  
@@ -95,7 +95,7 @@ index 6039ace..6c606cd 100644
  class spell_sindragosa_icy_grip : public SpellScriptLoader
  {
      public:
-@@ -1549,6 +1606,7 @@ void AddSC_boss_sindragosa()
+@@ -1555,6 +1612,7 @@ void AddSC_boss_sindragosa()
      new spell_sindragosa_instability();
      new spell_sindragosa_frost_beacon();
      new spell_sindragosa_ice_tomb();

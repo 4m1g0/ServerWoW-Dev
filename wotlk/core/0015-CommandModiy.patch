@@ -1,7 +1,7 @@
-From 159c02a30756cefd883d2443212c7ef2d04bf97d Mon Sep 17 00:00:00 2001
+From bcc6b9f44c11de7d2bc613566b584b3733813d79 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 21 May 2012 22:20:42 +0200
-Subject: [PATCH 15/25] CommandModiy
+Date: Fri, 29 Jun 2012 18:39:46 +0200
+Subject: [PATCH 15/29] CommandModiy
 
 ---
  src/server/scripts/Commands/cs_gm.cpp     |    4 +--
@@ -25,7 +25,7 @@ index d449b36..dc53cf0 100644
          WorldPacket data(12);
          if (strncmp(args, "on", 3) == 0)
 diff --git a/src/server/scripts/Commands/cs_modify.cpp b/src/server/scripts/Commands/cs_modify.cpp
-index b6feccc..2e9b52a 100644
+index 60c5e1c..c407cd7 100644
 --- a/src/server/scripts/Commands/cs_modify.cpp
 +++ b/src/server/scripts/Commands/cs_modify.cpp
 @@ -481,16 +481,8 @@ public:

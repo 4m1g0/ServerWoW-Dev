@@ -1,7 +1,7 @@
-From e0dc742e3d5eb89e5556c5fd452f92c09ace248c Mon Sep 17 00:00:00 2001
+From f04bd3d087af47d7e627c8f944bb86bbe1d707d0 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 21 May 2012 22:20:41 +0200
-Subject: [PATCH 05/25] MuteAnnounce
+Date: Fri, 29 Jun 2012 18:28:25 +0200
+Subject: [PATCH 05/29] MuteAnnounce
 
 ---
  sql/own/0005-world_GMAnnounceMute.sql    |    2 ++
@@ -18,7 +18,7 @@ index 0000000..e30fdc1
 +UPDATE trinity_string SET content_default= 'Player\'s: %s chat have been disabled %u minutes by %s. Reason: %s', content_loc6='El personaje: %s ha sido muteado %u minutos por %s. Razón: %s' WHERE entry= 301;
 +UPDATE trinity_string SET content_default= 'Player\'s: %s chat have been disabled %u minutes by %s, effective at the player\'s next login. Reason: %s.', content_loc6='El personaje: %s ha sido muteado %u minutos por %s. Se hará efectivo cuando el jugador entre en juego la próxima vez. Razón: %s' WHERE entry= 283;
 diff --git a/src/server/game/Chat/Commands/Level2.cpp b/src/server/game/Chat/Commands/Level2.cpp
-index 52bdcd1..e8eec0f 100755
+index 42a3797..3eb3e0b 100755
 --- a/src/server/game/Chat/Commands/Level2.cpp
 +++ b/src/server/game/Chat/Commands/Level2.cpp
 @@ -103,7 +103,7 @@ bool ChatHandler::HandleMuteCommand(const char* args)

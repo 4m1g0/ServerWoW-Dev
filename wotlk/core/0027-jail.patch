@@ -1,34 +1,32 @@
-From b150612f1e5e26701e1f210df92d4fb7c8e66713 Mon Sep 17 00:00:00 2001
+From dee43115d2ce6f07e14d68105e44b85f7d609aae Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Sat, 26 May 2012 14:59:21 -0500
-Subject: [PATCH] jail
+Date: Fri, 29 Jun 2012 18:40:26 +0200
+Subject: [PATCH 27/29] jail
 
 ---
- sql/own/0028-characters_jail.sql                |   66 +++++++
- sql/own/0028-world_command_English.sql          |    7 +
- sql/own/0028-world_trinity_string.sql           |   41 ++++
+ sql/own/0028-characters_jail.sql           |   66 +++++++
+ sql/own/0028-world_command_English.sql     |    7 +
+ sql/own/0028-world_trinity_string.sql      |   41 ++++
  src/server/game/Chat/Chat.cpp              |    7 +-
  src/server/game/Chat/Chat.h                |    6 +
  src/server/game/Chat/Commands/Level0.cpp   |   55 +++++-
  src/server/game/Chat/Commands/Level1.cpp   |  286 ++++++++++++++++++++++++++++
- src/server/game/Chat/Commands/Level2.cpp   |   90 +++++++++-
+ src/server/game/Chat/Commands/Level2.cpp   |   90 ++++++++-
  src/server/game/Chat/Commands/Level3.cpp   |    9 +
- src/server/game/Entities/Player/Player.cpp |  179 +++++++++++++++++-
+ src/server/game/Entities/Player/Player.cpp |  179 ++++++++++++++++-
  src/server/game/Entities/Player/Player.h   |   20 ++
  src/server/game/Globals/ObjectMgr.cpp      |  115 +++++++++++
  src/server/game/Globals/ObjectMgr.h        |   23 +++
  src/server/game/Miscellaneous/Language.h   |   40 ++++
  src/server/game/World/World.cpp            |    4 +
- 17 files changed, 955 insertions(+), 7 deletions(-)
- create mode 100644 sql/All/characters_jail.sql
- create mode 100644 sql/All/world_command_Deutsch.sql
- create mode 100644 sql/All/world_command_English.sql
- create mode 100644 sql/All/world_command_Francais.sql
- create mode 100644 sql/All/world_trinity_string.sql
+ 15 files changed, 941 insertions(+), 7 deletions(-)
+ create mode 100644 sql/own/0028-characters_jail.sql
+ create mode 100644 sql/own/0028-world_command_English.sql
+ create mode 100644 sql/own/0028-world_trinity_string.sql
 
 diff --git a/sql/own/0028-characters_jail.sql b/sql/own/0028-characters_jail.sql
 new file mode 100644
-index 0000000..8bd8e95
+index 0000000..fdea19d
 --- /dev/null
 +++ b/sql/own/0028-characters_jail.sql
 @@ -0,0 +1,66 @@
@@ -159,10 +157,10 @@ index 0000000..8d94f61
 +
 +
 diff --git a/src/server/game/Chat/Chat.cpp b/src/server/game/Chat/Chat.cpp
-index 4b762b0..e8919ce 100755
+index e8f375a..fc4b1a7 100755
 --- a/src/server/game/Chat/Chat.cpp
 +++ b/src/server/game/Chat/Chat.cpp
-@@ -346,7 +346,12 @@ ChatCommand* ChatHandler::getCommandTable()
+@@ -235,7 +235,12 @@ ChatCommand* ChatHandler::getCommandTable()
  
          { "pet",            SEC_GAMEMASTER,     false, NULL,                                           "", petCommandTable },
          { "ticket",         SEC_MODERATOR,      false,  NULL,                                          "", ticketCommandTable },
@@ -177,10 +175,10 @@ index 4b762b0..e8919ce 100755
          { "unaura",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleUnAuraCommand>,              "", NULL },
          { "nameannounce",   SEC_MODERATOR,      true,  OldHandler<&ChatHandler::HandleNameAnnounceCommand>,        "", NULL },
 diff --git a/src/server/game/Chat/Chat.h b/src/server/game/Chat/Chat.h
-index 44d6330..ce19840 100755
+index 1b5d7f3..e4f1186 100755
 --- a/src/server/game/Chat/Chat.h
 +++ b/src/server/game/Chat/Chat.h
-@@ -335,6 +335,12 @@ class ChatHandler
+@@ -290,6 +290,12 @@ class ChatHandler
          bool HandleSendMessageCommand(const char * args);*/
  
          bool HandleFlushArenaPointsCommand(const char *args);
@@ -194,7 +192,7 @@ index 44d6330..ce19840 100755
          bool HandleRepairitemsCommand(const char* args);
  
 diff --git a/src/server/game/Chat/Commands/Level0.cpp b/src/server/game/Chat/Commands/Level0.cpp
-index b2ac090..feacdbb 100755
+index b05ba9b..aa090ec 100755
 --- a/src/server/game/Chat/Commands/Level0.cpp
 +++ b/src/server/game/Chat/Commands/Level0.cpp
 @@ -26,6 +26,7 @@
@@ -230,7 +228,7 @@ index b2ac090..feacdbb 100755
      return true;
  }
  
-@@ -130,7 +140,14 @@ bool ChatHandler::HandleDismountCommand(const char* /*args*/)
+@@ -107,7 +117,14 @@ bool ChatHandler::HandleDismountCommand(const char* /*args*/)
  bool ChatHandler::HandleSaveCommand(const char* /*args*/)
  {
      Player* player = m_session->GetPlayer();
@@ -246,8 +244,8 @@ index b2ac090..feacdbb 100755
      // save GM account without delay and output message
      if (!AccountMgr::IsPlayerAccount(m_session->GetSecurity()))
      {
-@@ -156,4 +173,38 @@ bool ChatHandler::HandleServerMotdCommand(const char* /*args*/)
-     PSendSysMessage(LANG_MOTD_CURRENT, sWorld->GetMotd());
+@@ -126,4 +143,38 @@ bool ChatHandler::HandleSaveCommand(const char* /*args*/)
+ 
      return true;
  }
 +	//Trinity Jail Edited by spgm
@@ -583,7 +581,7 @@ index 978b55d..71ad30a 100755
  bool ChatHandler::HandleSendMailCommand(const char* args)
  {
 diff --git a/src/server/game/Chat/Commands/Level2.cpp b/src/server/game/Chat/Commands/Level2.cpp
-index 365876b..feb70d7 100755
+index 61cd2bd..c0d8d22 100755
 --- a/src/server/game/Chat/Commands/Level2.cpp
 +++ b/src/server/game/Chat/Commands/Level2.cpp
 @@ -33,6 +33,8 @@
@@ -719,7 +717,7 @@ index 365876b..feb70d7 100755
  }
  
 diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
-index 6d19355..4fc876b 100755
+index 091c5f3..6eaf953 100755
 --- a/src/server/game/Chat/Commands/Level3.cpp
 +++ b/src/server/game/Chat/Commands/Level3.cpp
 @@ -64,6 +64,15 @@
@@ -739,7 +737,7 @@ index 6d19355..4fc876b 100755
  {
      Player* SelectedPlayer = getSelectedPlayer();
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index f784a19..5360644 100755
+index 33a138a..c0da937 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
 @@ -643,6 +643,21 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
@@ -862,7 +860,7 @@ index f784a19..5360644 100755
      {
          if (p_time >= m_nextSave)
          {
-@@ -17396,10 +17490,77 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
+@@ -17411,10 +17505,77 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
      m_achievementMgr.CheckAllAchievementCriteria();
  
      _LoadEquipmentSets(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADEQUIPMENTSETS));
@@ -940,7 +938,7 @@ index f784a19..5360644 100755
  bool Player::isAllowedToLoot(const Creature* creature)
  {
      if (!creature->isDead() || !creature->IsDamageEnoughForLootingAndReward())
-@@ -18680,8 +18841,21 @@ bool Player::_LoadHomeBind(PreparedQueryResult result)
+@@ -18695,8 +18856,21 @@ bool Player::_LoadHomeBind(PreparedQueryResult result)
  /***                   SAVE SYSTEM                     ***/
  /*********************************************************/
  
@@ -962,7 +960,7 @@ index f784a19..5360644 100755
      // delay auto save at any saves (manual, in code, or autosave)
      m_nextSave = sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);
  
-@@ -24041,6 +24215,7 @@ void Player::_LoadSkills(PreparedQueryResult result)
+@@ -24089,6 +24263,7 @@ void Player::_LoadSkills(PreparedQueryResult result)
                  stmt->setUInt16(1, skill);
  
                  CharacterDatabase.Execute(stmt);
@@ -971,10 +969,10 @@ index f784a19..5360644 100755
                  continue;
              }
 diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
-index ba226b4..58e2e6f 100755
+index b0cbb5c..df768b0 100755
 --- a/src/server/game/Entities/Player/Player.h
 +++ b/src/server/game/Entities/Player/Player.h
-@@ -2255,6 +2255,26 @@ class Player : public Unit, public GridObject<Player>
+@@ -2256,6 +2256,26 @@ class Player : public Unit, public GridObject<Player>
          bool IsImmuneToEnvironmentalDamage();
          uint32 EnvironmentalDamage(EnviromentalDamage type, uint32 damage);
  
@@ -1002,10 +1000,10 @@ index ba226b4..58e2e6f 100755
          /***               FLOOD FILTER SYSTEM                 ***/
          /*********************************************************/
 diff --git a/src/server/game/Globals/ObjectMgr.cpp b/src/server/game/Globals/ObjectMgr.cpp
-index 9dea557..16fa435 100755
+index eedf84a..f514327 100755
 --- a/src/server/game/Globals/ObjectMgr.cpp
 +++ b/src/server/game/Globals/ObjectMgr.cpp
-@@ -6709,6 +6709,121 @@ uint32 ObjectMgr::GeneratePetNumber()
+@@ -6631,6 +6631,121 @@ uint32 ObjectMgr::GeneratePetNumber()
      return ++_hiPetNumber;
  }
  
@@ -1128,10 +1126,10 @@ index 9dea557..16fa435 100755
  {
      uint32 oldMSTime = getMSTime();
 diff --git a/src/server/game/Globals/ObjectMgr.h b/src/server/game/Globals/ObjectMgr.h
-index f81e7f1..f9c4f33 100755
+index fcc0315..7896804 100755
 --- a/src/server/game/Globals/ObjectMgr.h
 +++ b/src/server/game/Globals/ObjectMgr.h
-@@ -914,6 +914,29 @@ class ObjectMgr
+@@ -910,6 +910,29 @@ class ObjectMgr
          void LoadTrainerSpell();
          void AddSpellToTrainer(uint32 entry, uint32 spell, uint32 spellCost, uint32 reqSkill, uint32 reqSkillValue, uint32 reqLevel);
  
@@ -1160,7 +1158,7 @@ index f81e7f1..f9c4f33 100755
 +
          std::string GeneratePetName(uint32 entry);
          uint32 GetBaseXP(uint8 level);
-         uint32 GetXPForLevel(uint8 level);
+         uint32 GetXPForLevel(uint8 level) const;
 diff --git a/src/server/game/Miscellaneous/Language.h b/src/server/game/Miscellaneous/Language.h
 index 47a72ed..3c097ad 100755
 --- a/src/server/game/Miscellaneous/Language.h
@@ -1213,10 +1211,10 @@ index 47a72ed..3c097ad 100755
      LANG_SELECT_CHAR_OR_CREATURE        = 1,
      LANG_SELECT_CREATURE                = 2,
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 3b89b8a..1140515 100755
+index e13a599..1fc87b8 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -1623,6 +1623,10 @@ void World::SetInitialWorldSettings()
+@@ -1620,6 +1620,10 @@ void World::SetInitialWorldSettings()
      sLog->outString("Returning old mails...");
      sObjectMgr->ReturnOrDeleteOldMails(false);
  
@@ -1228,5 +1226,5 @@ index 3b89b8a..1140515 100755
      LoadAutobroadcasts();
  
 -- 
-1.7.1
+1.7.9.5
 

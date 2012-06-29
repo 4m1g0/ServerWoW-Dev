@@ -1,17 +1,17 @@
-From a62cb512f1636f3ed3a87cf45abf8232b18db1e6 Mon Sep 17 00:00:00 2001
+From 661774c3bd89107dd85bf10dc71b565876b67587 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 21 May 2012 22:20:41 +0200
-Subject: [PATCH 12/25] CommandDisableResetAll
+Date: Fri, 29 Jun 2012 18:28:25 +0200
+Subject: [PATCH 12/29] CommandDisableResetAll
 
 ---
  src/server/game/Chat/Commands/Level3.cpp |    2 ++
  1 file changed, 2 insertions(+)
 
 diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
-index 66e22b5..9efc407 100755
+index 51e2cf6..476df34 100755
 --- a/src/server/game/Chat/Commands/Level3.cpp
 +++ b/src/server/game/Chat/Commands/Level3.cpp
-@@ -2645,6 +2645,8 @@ bool ChatHandler::HandleResetTalentsCommand(const char* args)
+@@ -2207,6 +2207,8 @@ bool ChatHandler::HandleResetTalentsCommand(const char* args)
  
  bool ChatHandler::HandleResetAllCommand(const char * args)
  {

@@ -1,7 +1,7 @@
-From 9ff56c7290dcc9c81c709c6202536b885a58349d Mon Sep 17 00:00:00 2001
+From 7d21880dc6a5b31ba55e092bf687fa73fabc3fbe Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 21 May 2012 22:20:50 +0200
-Subject: [PATCH 21/25] CommandSetgmlevel
+Date: Fri, 29 Jun 2012 18:39:46 +0200
+Subject: [PATCH 20/29] CommandSetgmlevel
 
 ---
  src/server/scripts/Commands/cs_account.cpp |   48 ++++++----------------------

@@ -1,7 +1,7 @@
-From 3cc5ed199b96c2ff15d889f5514b88fd3d1c0a3e Mon Sep 17 00:00:00 2001
+From e72602e7aeb12d65e3dd618072e7db6fcd2efda1 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 21 May 2012 22:20:41 +0200
-Subject: [PATCH 10/25] Protectchannelpass
+Date: Fri, 29 Jun 2012 18:28:25 +0200
+Subject: [PATCH 10/29] Protectchannelpass
 
 ---
  src/server/game/Chat/Channels/Channel.cpp |    5 ++++-

@@ -15,7 +15,9 @@ int main() {
     const char* database_auth = "trinity_auth";
     const char* database_char = "trinity_characters";
     unsigned int i, j;
-    char* Account[10000][18];
+    printf("test");
+    char*** Account;
+    **Account = new char[20];
     
     
     conn = mysql_init(NULL);
@@ -24,12 +26,14 @@ int main() {
         fprintf(stderr, "%s\n", mysql_error(conn));
         return 1;
     }
-    
+    printf("test");
     if (mysql_query(conn, "SELECT * FROM account")) {fprintf(stderr, "%s\n", mysql_error(conn));return 1;}
     res = mysql_use_result(conn);
     i = 0;
+    printf("test");
     while ((row = mysql_fetch_row(res)) != NULL)
     {
+    printf("test");
         for(j = 0; j < 18; j++)
         {
             printf("%s, ", row[j]);
@@ -46,7 +50,7 @@ int main() {
     printf("\n\nImprimimos! \n");
     for (i = 0; i < 2; i++)
     {
-        for (j = 0; j < 18; j++)
+        for (j = 0; j <= 18; j++)
             printf("%s, ", Account[i][j]);
         printf("\n");   
     }

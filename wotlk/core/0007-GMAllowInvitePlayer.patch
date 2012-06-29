@@ -1,7 +1,7 @@
-From 73025816a7962e1f92b5097f461b9e776198919d Mon Sep 17 00:00:00 2001
+From da1f26f6b51d4a5236ca9a5783e2ce3483c35721 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 21 May 2012 22:20:41 +0200
-Subject: [PATCH 07/25] GMAllowInvitePlayer
+Date: Fri, 29 Jun 2012 18:28:25 +0200
+Subject: [PATCH 07/29] GMAllowInvitePlayer
 
 ---
  src/server/game/Chat/Commands/Level1.cpp     |    6 +++---
@@ -39,7 +39,7 @@ index 17cf506..978b55d 100755
  
          PSendSysMessage(LANG_SUMMONING, nameLink.c_str(), "");
 diff --git a/src/server/game/Handlers/GroupHandler.cpp b/src/server/game/Handlers/GroupHandler.cpp
-index de8dc2b..d152e51 100755
+index 1843526..879fa87 100755
 --- a/src/server/game/Handlers/GroupHandler.cpp
 +++ b/src/server/game/Handlers/GroupHandler.cpp
 @@ -83,7 +83,15 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
@@ -60,7 +60,7 @@ index de8dc2b..d152e51 100755
  
      // can't group with
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index f4b0851..ff6d994 100755
+index d8240ef..7d04237 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -870,6 +870,7 @@ void World::LoadConfigSettings(bool reload)
@@ -72,7 +72,7 @@ index f4b0851..ff6d994 100755
      m_bool_configs[CONFIG_GM_LOWER_SECURITY] = ConfigMgr::GetBoolDefault("GM.LowerSecurity", false);
      m_float_configs[CONFIG_CHANCE_OF_GM_SURVEY] = ConfigMgr::GetFloatDefault("GM.TicketSystem.ChanceOfGMSurvey", 50.0f);
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index 018ea57..f4b4366 100755
+index c1986f2..7f200da 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
 @@ -108,6 +108,7 @@ enum WorldBoolConfigs
@@ -84,10 +84,10 @@ index 018ea57..f4b4366 100755
      CONFIG_GM_LOWER_SECURITY,
      CONFIG_SKILL_PROSPECTING,
 diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
-index d6ef204..4dbcc0b 100644
+index d13b287..025578e 100644
 --- a/src/server/worldserver/worldserver.conf.dist
 +++ b/src/server/worldserver/worldserver.conf.dist
-@@ -1994,6 +1994,14 @@ GM.StartLevel = 1
+@@ -1995,6 +1995,14 @@ GM.StartLevel = 1
  GM.AllowInvite = 0
  
  #

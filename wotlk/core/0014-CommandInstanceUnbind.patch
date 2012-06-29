@@ -1,31 +1,29 @@
-From c937c0ec50cfe8037a4fe249786cfdc75918c4b6 Mon Sep 17 00:00:00 2001
+From cce6351172a63f19db8720473dd67c6ccac843d3 Mon Sep 17 00:00:00 2001
 From: 4m1g0 <casadelblanco@gmail.com>
-Date: Mon, 21 May 2012 22:20:41 +0200
-Subject: [PATCH 14/25] CommandInstanceUnbind
+Date: Fri, 29 Jun 2012 18:39:46 +0200
+Subject: [PATCH 14/29] CommandInstanceUnbind
 
 ---
- src/server/game/Chat/Commands/Level3.cpp |    8 +++++---
- 1 file changed, 5 insertions(+), 3 deletions(-)
+ src/server/scripts/Commands/cs_instance.cpp |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/src/server/game/Chat/Commands/Level3.cpp b/src/server/game/Chat/Commands/Level3.cpp
-index 18a0110..6d19355 100755
---- a/src/server/game/Chat/Commands/Level3.cpp
-+++ b/src/server/game/Chat/Commands/Level3.cpp
-@@ -4182,9 +4182,11 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char *args)
-     if (!*args)
-         return false;
+diff --git a/src/server/scripts/Commands/cs_instance.cpp b/src/server/scripts/Commands/cs_instance.cpp
+index 127a384..0fcf810 100644
+--- a/src/server/scripts/Commands/cs_instance.cpp
++++ b/src/server/scripts/Commands/cs_instance.cpp
+@@ -111,9 +111,9 @@ public:
+         if (!*args)
+             return false;
  
--    Player* player = getSelectedPlayer();
--    if (!player)
--        player = m_session->GetPlayer();
-+    Player* player = m_session->GetPlayer();
-+
-+    if (m_session->GetSecurity() > SEC_SUBADMIN && getSelectedPlayer())
-+         player = getSelectedPlayer();
-+
+-        Player* player = handler->getSelectedPlayer();
+-        if (!player)
+-            player = handler->GetSession()->GetPlayer();
++        Player* player = handler->GetSession()->GetPlayer();
++        if (handler->GetSession()->GetSecurity() > SEC_SUBADMIN && handler->getSelectedPlayer())
++         player = handler->getSelectedPlayer();
  
-     char* map = strtok((char*)args, " ");
-     char* pDiff = strtok(NULL, " ");
+         char* map = strtok((char*)args, " ");
+         char* pDiff = strtok(NULL, " ");
 -- 
 1.7.9.5
 

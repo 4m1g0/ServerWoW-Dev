@@ -1,3 +1,25 @@
+From 1e44ec4cb7542277bd13751f6ca931bc45e6ac78 Mon Sep 17 00:00:00 2001
+From: 4m1g0 <casadelblanco@gmail.com>
+Date: Fri, 29 Jun 2012 18:40:27 +0200
+Subject: [PATCH 29/29] SilvericeVisual
+
+---
+ src/server/game/Entities/Object/Object.cpp        |    2 +-
+ src/server/game/Entities/Object/Object.h          |   11 --
+ src/server/game/Entities/Player/Player.cpp        |   13 +--
+ src/server/game/Entities/Player/Player.h          |    1 -
+ src/server/game/Entities/Unit/Unit.cpp            |   61 +++++++++--
+ src/server/game/Entities/Unit/Unit.h              |    6 ++
+ src/server/game/Grids/NGrid.h                     |    8 +-
+ src/server/game/Grids/Notifiers/GridNotifiers.cpp |  114 +--------------------
+ src/server/game/Grids/Notifiers/GridNotifiers.h   |   31 ------
+ src/server/game/Maps/Map.cpp                      |  104 +------------------
+ src/server/game/Maps/Map.h                        |    6 --
+ src/server/game/World/World.cpp                   |   10 +-
+ src/server/game/World/World.h                     |   11 +-
+ src/server/worldserver/worldserver.conf.dist      |   19 ++--
+ 14 files changed, 86 insertions(+), 311 deletions(-)
+
 diff --git a/src/server/game/Entities/Object/Object.cpp b/src/server/game/Entities/Object/Object.cpp
 index fc1b56c..0605105 100755
 --- a/src/server/game/Entities/Object/Object.cpp
@@ -12,10 +34,10 @@ index fc1b56c..0605105 100755
      m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE | GHOST_VISIBILITY_GHOST);
      m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE);
 diff --git a/src/server/game/Entities/Object/Object.h b/src/server/game/Entities/Object/Object.h
-index 3693f68..41097be 100755
+index 7a91289..cd6ea35 100755
 --- a/src/server/game/Entities/Object/Object.h
 +++ b/src/server/game/Entities/Object/Object.h
-@@ -797,14 +797,6 @@ class WorldObject : public Object, public WorldLocation
+@@ -799,14 +799,6 @@ class WorldObject : public Object, public WorldLocation
          virtual void UpdateObjectVisibility(bool forced = true);
          void BuildUpdate(UpdateDataMapType&);
  
@@ -30,7 +52,7 @@ index 3693f68..41097be 100755
          bool isActiveObject() const { return m_isActive; }
          void setActive(bool isActiveObject);
          void SetWorldObject(bool apply);
-@@ -864,9 +856,6 @@ class WorldObject : public Object, public WorldLocation
+@@ -866,9 +858,6 @@ class WorldObject : public Object, public WorldLocation
          uint32 m_InstanceId;                                // in map copy with instance id
          uint32 m_phaseMask;                                 // in area phase state
  
@@ -41,10 +63,10 @@ index 3693f68..41097be 100755
  
          bool CanNeverSee(WorldObject const* obj) const { return GetMap() != obj->GetMap() || !InSamePhase(obj); }
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index 7c70fe9..5ac7461 100755
+index c0da937..ad0d054 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
-@@ -21736,7 +21736,7 @@ bool Player::IsNeverVisible() const
+@@ -21965,7 +21965,7 @@ bool Player::IsNeverVisible() const
      if (Unit::IsNeverVisible())
          return true;
  
@@ -53,7 +75,7 @@ index 7c70fe9..5ac7461 100755
          return true;
  
      return false;
-@@ -21939,17 +21939,6 @@ template void Player::UpdateVisibilityOf(Corpse*        target, UpdateData& data
+@@ -22168,17 +22168,6 @@ template void Player::UpdateVisibilityOf(Corpse*        target, UpdateData& data
  template void Player::UpdateVisibilityOf(GameObject*    target, UpdateData& data, std::set<Unit*>& visibleNow);
  template void Player::UpdateVisibilityOf(DynamicObject* target, UpdateData& data, std::set<Unit*>& visibleNow);
  
@@ -72,10 +94,10 @@ index 7c70fe9..5ac7461 100755
  {
      // updates visibility of all objects around point of view for current player
 diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
-index ed88799..ba226b4 100755
+index df768b0..edbdcc3 100755
 --- a/src/server/game/Entities/Player/Player.h
 +++ b/src/server/game/Entities/Player/Player.h
-@@ -2328,7 +2328,6 @@ class Player : public Unit, public GridObject<Player>
+@@ -2349,7 +2349,6 @@ class Player : public Unit, public GridObject<Player>
          bool IsVisibleGloballyFor(Player* player) const;
  
          void SendInitialVisiblePackets(Unit* target);
@@ -84,7 +106,7 @@ index ed88799..ba226b4 100755
          void UpdateVisibilityOf(WorldObject* target);
          void UpdateTriggerVisibility();
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-index fb91c3f..d8ada47 100755
+index 9f7882d..e491637 100755
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
 @@ -253,6 +253,7 @@ m_HostileRefManager(this)
@@ -95,7 +117,7 @@ index fb91c3f..d8ada47 100755
  }
  
  ////////////////////////////////////////////////////////////
-@@ -16600,17 +16601,61 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
+@@ -16496,17 +16497,61 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
                  summon->SetPhaseMask(newPhaseMask, true);
  }
  
@@ -166,10 +188,10 @@ index fb91c3f..d8ada47 100755
  
  void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
 diff --git a/src/server/game/Entities/Unit/Unit.h b/src/server/game/Entities/Unit/Unit.h
-index 5a6276d..5ba56af 100755
+index 2855b93..cbb2470 100755
 --- a/src/server/game/Entities/Unit/Unit.h
 +++ b/src/server/game/Entities/Unit/Unit.h
-@@ -2251,6 +2251,8 @@ class Unit : public WorldObject
+@@ -2244,6 +2244,8 @@ class Unit : public WorldObject
  
          // Movement info
          Movement::MoveSpline * movespline;
@@ -178,7 +200,7 @@ index 5a6276d..5ba56af 100755
  
      protected:
          explicit Unit (bool isWorldObject);
-@@ -2311,6 +2313,10 @@ class Unit : public WorldObject
+@@ -2304,6 +2306,10 @@ class Unit : public WorldObject
  
          MotionMaster i_motionMaster;
  
@@ -363,7 +385,7 @@ index a02c18c..71956fa 100755
  {
      for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
 diff --git a/src/server/game/Grids/Notifiers/GridNotifiers.h b/src/server/game/Grids/Notifiers/GridNotifiers.h
-index e81822e..10fa062 100755
+index 7bb4492..743ac11 100755
 --- a/src/server/game/Grids/Notifiers/GridNotifiers.h
 +++ b/src/server/game/Grids/Notifiers/GridNotifiers.h
 @@ -60,37 +60,6 @@ namespace Trinity
@@ -405,7 +427,7 @@ index e81822e..10fa062 100755
      {
          Unit &i_unit;
 diff --git a/src/server/game/Maps/Map.cpp b/src/server/game/Maps/Map.cpp
-index a1b3d91..a16a939 100755
+index 270c4c7..fa22bd2 100755
 --- a/src/server/game/Maps/Map.cpp
 +++ b/src/server/game/Maps/Map.cpp
 @@ -207,7 +207,6 @@ void Map::DeleteStateMachine()
@@ -579,10 +601,10 @@ index a1b3d91..a16a939 100755
  
  bool BattlegroundMap::CanEnter(Player* player)
 diff --git a/src/server/game/Maps/Map.h b/src/server/game/Maps/Map.h
-index 6ba0864..7f8e45f 100755
+index 6d526f2..bc9f193 100755
 --- a/src/server/game/Maps/Map.h
 +++ b/src/server/game/Maps/Map.h
-@@ -503,8 +503,6 @@ class Map : public GridRefManager<NGridType>
+@@ -536,8 +536,6 @@ class Map : public GridRefManager<NGridType>
          MapRefManager m_mapRefManager;
          MapRefManager::iterator m_mapRefIter;
  
@@ -591,7 +613,7 @@ index 6ba0864..7f8e45f 100755
          typedef std::set<WorldObject*> ActiveNonPlayers;
          ActiveNonPlayers m_activeNonPlayers;
          ActiveNonPlayers::iterator m_activeNonPlayersIter;
-@@ -529,10 +527,6 @@ class Map : public GridRefManager<NGridType>
+@@ -562,10 +560,6 @@ class Map : public GridRefManager<NGridType>
          GridMap* GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
          std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
  
@@ -603,7 +625,7 @@ index 6ba0864..7f8e45f 100755
          std::set<WorldObject*> i_objectsToRemove;
          std::map<WorldObject*, bool> i_objectsToSwitch;
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 6e32d33..994e706 100755
+index 1fc87b8..2bc9dc1 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -86,9 +86,8 @@ float World::m_MaxVisibleDistanceOnContinents = DEFAULT_VISIBILITY_DISTANCE;
@@ -618,7 +640,7 @@ index 6e32d33..994e706 100755
  
  /// World constructor
  World::World()
-@@ -1095,9 +1094,8 @@ void World::LoadConfigSettings(bool reload)
+@@ -1100,9 +1099,8 @@ void World::LoadConfigSettings(bool reload)
          m_MaxVisibleDistanceInBGArenas = MAX_VISIBILITY_DISTANCE;
      }
  
@@ -631,10 +653,10 @@ index 6e32d33..994e706 100755
      ///- Load the CharDelete related config options
      m_int_configs[CONFIG_CHARDELETE_METHOD] = ConfigMgr::GetIntDefault("CharDelete.Method", 0);
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index 95e9fbd..8420560 100755
+index f818ce2..2b222dc 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
-@@ -720,9 +720,10 @@ class World
+@@ -727,9 +727,10 @@ class World
          static float GetMaxVisibleDistanceInInstances()     { return m_MaxVisibleDistanceInInstances;  }
          static float GetMaxVisibleDistanceInBGArenas()      { return m_MaxVisibleDistanceInBGArenas;   }
  
@@ -648,7 +670,7 @@ index 95e9fbd..8420560 100755
  
          void ProcessCliCommands();
          void QueueCliCommand(CliCommandHolder* commandHolder) { cliCmdQueue.add(commandHolder); }
-@@ -817,10 +818,6 @@ class World
+@@ -824,10 +825,6 @@ class World
          static float m_MaxVisibleDistanceInInstances;
          static float m_MaxVisibleDistanceInBGArenas;
  
@@ -660,11 +682,11 @@ index 95e9fbd..8420560 100755
          ACE_Based::LockedQueue<CliCommandHolder*, ACE_Thread_Mutex> cliCmdQueue;
  
 diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
-index 5d83710..7818b7d 100644
+index 025578e..583cb51 100644
 --- a/src/server/worldserver/worldserver.conf.dist
 +++ b/src/server/worldserver/worldserver.conf.dist
-@@ -2037,18 +2037,17 @@ Visibility.Distance.Instances = 120
- Visibility.Distance.BGArenas = 180
+@@ -2060,18 +2060,17 @@ Visibility.Distance.Instances = 170
+ Visibility.Distance.BGArenas = 533
  
  #
 -#    Visibility.Notify.Period.OnContinents
@@ -691,3 +713,6 @@ index 5d83710..7818b7d 100644
  
  #
  ###################################################################################################
+-- 
+1.7.9.5
+
